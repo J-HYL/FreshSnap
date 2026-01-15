@@ -2,6 +2,7 @@ package com.marujho.freshsnap
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -35,7 +36,8 @@ fun LoginBox(
 
     Column(modifier = modifier
         .background(Grey)
-        .padding(16.dp)
+        .padding(16.dp),
+        verticalArrangement = Arrangement.Center
     ) {
         IconText()
         Spacer(modifier = Modifier.height(24.dp))
@@ -66,6 +68,7 @@ fun LoginBox(
                 .fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(32.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -143,7 +146,7 @@ fun EditTextField(
     )
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LoginPreview() {
     FreshSnapTheme {
