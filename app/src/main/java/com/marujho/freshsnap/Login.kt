@@ -1,6 +1,8 @@
 package com.marujho.freshsnap
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -8,6 +10,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -16,6 +20,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.marujho.freshsnap.ui.theme.FreshSnapTheme
+import com.marujho.freshsnap.ui.theme.Green
+import com.marujho.freshsnap.ui.theme.Grey
+import com.marujho.freshsnap.ui.theme.LightGreen
 
 @Composable
 fun LoginBox(
@@ -26,7 +33,10 @@ fun LoginBox(
     var emailInput by remember { mutableStateOf("") }
     var passwordInput by remember { mutableStateOf("") }
 
-    Column(modifier = modifier.padding(16.dp)) {
+    Column(modifier = modifier
+        .background(Grey)
+        .padding(16.dp)
+    ) {
         IconText()
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -62,6 +72,10 @@ fun LoginBox(
         ) {
             Button(
                 onClick = { onLoginClick() },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Green,
+                    contentColor = Color.White
+                ),
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Iniciar Sesión")
@@ -107,7 +121,7 @@ fun EditTextField(
     keyboardOptions: KeyboardOptions,
     icon: ImageVector? = null
 ) {
-    TextField(
+    OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier,
@@ -117,6 +131,12 @@ fun EditTextField(
                 contentDescription = null
             )
         },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = White,
+            unfocusedContainerColor = White,
+            disabledContainerColor = White,
+        ),
+        shape = RoundedCornerShape(24.dp),
         label = { Text(label) },
         singleLine = true,
         keyboardOptions = keyboardOptions
