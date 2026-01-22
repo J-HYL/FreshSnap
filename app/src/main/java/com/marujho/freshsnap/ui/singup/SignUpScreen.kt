@@ -41,9 +41,7 @@ fun SignUpScreen(
                 pass = pass,
                 confirmPass = confirmPass,
                 onSuccess = {
-                    // Si el registro es exitoso, vamos a la pantalla principal
                     navController.navigate("main_screen") {
-                        // Limpiamos la pila para que no pueda volver al registro
                         popUpTo("login_screen") { inclusive = true }
                     }
                 },
