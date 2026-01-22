@@ -58,4 +58,10 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    //El conjunto de CameraX
+    implementation(libs.bundles.camerax)
+    //MLKIT de google para Scanear Codigos de barras y texto
+    implementation(libs.play.services.mlkit.barcode)
+    implementation(libs.play.services.mlkit.text)
 }
