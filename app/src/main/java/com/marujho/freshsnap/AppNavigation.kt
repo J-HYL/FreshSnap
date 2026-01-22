@@ -18,7 +18,7 @@ fun AppNavigation() {
         composable("login_screen") {
             LoginBox(
                 onLoginClick = {
-                    navController.navigate("main_screen") {
+                    navController.navigate("scanner_screen") { //Cambiar a main era solo de prueba
                         popUpTo("login_screen") { inclusive = true }
                     }
                 },
@@ -41,6 +41,10 @@ fun AppNavigation() {
 
         composable("main_screen") {
             MainScreen()
+        }
+
+        composable("scanner_screen") {
+            BarCodeScanScreen()
         }
     }
 }

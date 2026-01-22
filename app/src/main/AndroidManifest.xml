@@ -18,7 +18,7 @@
         android:theme="@style/Theme.FreshSnap">
         <activity
             android:name=".ScannerScreen"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/title_activity_scanner_screen"
             android:theme="@style/Theme.FreshSnap" />
         <activity
