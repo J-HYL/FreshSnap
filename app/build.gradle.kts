@@ -58,4 +58,21 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    /*OPEN FOOD FACTS*/
+
+    // Retrofit
+    implementation(libs.retrofit.v290)
+
+    // Moshi
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
+
+    // Convertidor Moshi para Retrofit
+    implementation(libs.converter.moshi)
+
+    /*Logs JSON*/
+    implementation(libs.logging.interceptor)
+
+
 }
