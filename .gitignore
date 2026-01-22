@@ -16,7 +16,7 @@
 **/build
 
 # FIREBASE
-google-services.json
+app/google-services.json
 
 *.jks
 *.keystore
