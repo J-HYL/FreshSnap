@@ -1,34 +1,64 @@
-package com.marujho.freshsnap
+package com.marujho.freshsnap.ui.login
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.marujho.freshsnap.R
 import com.marujho.freshsnap.ui.theme.FreshSnapTheme
 import com.marujho.freshsnap.ui.theme.Green
 import com.marujho.freshsnap.ui.theme.Grey
-import com.marujho.freshsnap.ui.theme.LightGreen
+
+@Composable
+fun LoginScreen(
+    navController: NavController,
+    viewModel: LoginViewModel = hiltViewModel() // inyeccion hilt
+) {
+    val context = LocalContext.current
+
+    LoginBox(
+        onLoginClick = { email, password ->
+            // llamada al viwe model
+            viewModel.login(
+                email = email,
+                pass = password,
+                onSuccess = {
+                    navController.navigate("main_screen") {
+                        popUpTo("login_screen") { inclusive = true }
+                    }
+                },
+                onError = { mensajeError ->
+                    Toast.makeText(context, "Error: $mensajeError", Toast.LENGTH_SHORT).show()
+                }
+            )
+        },
+        onSignUpClick = {
+            navController.navigate("sign_up_screen")
+        }
+    )
+}
 
 @Composable
 fun LoginBox(
-    onLoginClick: () -> Unit,
+    onLoginClick: (String, String) -> Unit,
     onSignUpClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -75,10 +105,12 @@ fun LoginBox(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
-                onClick = { onLoginClick() },
+                onClick = {
+                    onLoginClick(emailInput, passwordInput)
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Green,
-                    contentColor = Color.White
+                    contentColor = White
                 ),
                 modifier = Modifier.weight(1f)
             ) {
@@ -145,12 +177,4 @@ fun EditTextField(
         singleLine = true,
         keyboardOptions = keyboardOptions
     )
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun LoginPreview() {
-    FreshSnapTheme {
-        LoginBox(onLoginClick = {}, onSignUpClick = {})
-    }
 }
