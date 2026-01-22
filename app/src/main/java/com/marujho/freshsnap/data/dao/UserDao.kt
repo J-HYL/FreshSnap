@@ -1,4 +1,4 @@
-package com.marujho.freshsnap.data.model
+package com.marujho.freshsnap.data.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -8,7 +8,7 @@ import com.marujho.freshsnap.data.model.User
 
 @Dao
 interface UserDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun insertUser(user: User): Long
 
     @Query("SELECT * FROM app_user LIMIT 1")
