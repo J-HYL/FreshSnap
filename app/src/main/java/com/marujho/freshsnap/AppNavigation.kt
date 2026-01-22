@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.marujho.freshsnap.ui.login.LoginScreen
 
 @Composable
 fun AppNavigation() {
@@ -16,35 +17,15 @@ fun AppNavigation() {
         }
 
         composable("login_screen") {
-            LoginBox(
-                onLoginClick = {
-                    navController.navigate("scanner_screen") { //Cambiar a main era solo de prueba
-                        popUpTo("login_screen") { inclusive = true }
-                    }
-                },
-                onSignUpClick = {
-                    navController.navigate("sign_up_screen")
-                }
-            )
+            LoginScreen(navController = navController)
         }
 
         composable("sign_up_screen") {
-            SignUpBox(
-                onRegisterClick = {
-                    navController.navigate("login_screen")
-                },
-                onBackClick = {
-                    navController.popBackStack()
-                }
-            )
+            SignUpScreen(navController = navController)
         }
 
         composable("main_screen") {
             MainScreen()
-        }
-
-        composable("scanner_screen") {
-            BarCodeScanScreen()
         }
     }
 }
