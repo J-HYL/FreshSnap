@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.marujho.freshsnap.ui.login.LoginScreen
+import com.marujho.freshsnap.ui.splash.SplashScreen
 
 @Composable
 fun AppNavigation() {
