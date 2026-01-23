@@ -27,5 +27,9 @@ fun AppNavigation() {
         composable("main_screen") {
             MainScreen()
         }
+
+        composable("scanner_screen") {
+            BarCodeScanScreen()
+        }
     }
 }

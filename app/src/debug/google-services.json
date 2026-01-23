@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "815040610002",
+    "project_id": "freshsnap-785fe",
+    "storage_bucket": "freshsnap-785fe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:815040610002:android:84207a7e13d10a5426770b",
+        "android_client_info": {
+          "package_name": "com.marujho.freshsnap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD33GVe5uicOdcjC0tvkV4Tc5TvhHfxiek"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
