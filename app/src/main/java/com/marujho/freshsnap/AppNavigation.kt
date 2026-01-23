@@ -26,7 +26,7 @@ fun AppNavigation() {
         }
 
         composable("main_screen") {
-            MainScreen()
+            MainScreen(navController = navController)
         }
 
         composable("scanner_screen") {

@@ -1,4 +1,4 @@
-package com.marujho.freshsnap
+package com.marujho.freshsnap.ui.main
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,9 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.marujho.freshsnap.AppNavigation
+import com.marujho.freshsnap.ui.openFoodFacts.OpenFoodViewModel
 import com.marujho.freshsnap.ui.theme.FreshSnapTheme
 import dagger.hilt.android.AndroidEntryPoint
-import com.marujho.freshsnap.ui.openFoodFacts.OpenFoodViewModel
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -21,7 +22,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             FreshSnapTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.Companion.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     AppNavigation()
