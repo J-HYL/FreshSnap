@@ -15,18 +15,17 @@ class OpenFoodViewModel @Inject constructor(
     private val api: OpenFoodFactsApi
 ) : ViewModel() {
 
-    fun testManualBarcode() {
+    fun onBarcodeScanned(barcode: String) {
         viewModelScope.launch {
-            Log.d("OFF_TEST", "Iniciando prueba manual")
+            Log.d("OFF_TEST", "Barcode recibido: $barcode")
 
             try {
-                val barcode = "7801610350355" // Coca-Cola
                 val response = api.getProductByBarcode(barcode)
 
                 Log.d("OFF_TEST", "Status: ${response.status}")
                 Log.d("OFF_TEST", "Producto: ${response.product}")
             } catch (e: Exception) {
-                Log.e("OFF_TEST", "Error en la llamada", e)
+                Log.e("OFF_TEST", "Error en OpenFoodFacts", e)
             }
         }
     }
