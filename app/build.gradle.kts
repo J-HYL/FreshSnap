@@ -64,6 +64,29 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+    //El conjunto de CameraX
+    implementation(libs.bundles.camerax)
+    //MLKIT de google para Scanear Codigos de barras y texto
+    implementation(libs.play.services.mlkit.barcode)
+    implementation(libs.play.services.mlkit.text)
+
+    /*OPEN FOOD FACTS*/
+
+    // Retrofit
+    implementation(libs.retrofit.v290)
+
+    // Moshi
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
+
+    // Convertidor Moshi para Retrofit
+    implementation(libs.converter.moshi)
+
+    /*Logs JSON*/
+    implementation(libs.logging.interceptor)
+
+
+
 
     // ROOM (BASE DE DATOS)
     implementation(libs.androidx.room.runtime)
