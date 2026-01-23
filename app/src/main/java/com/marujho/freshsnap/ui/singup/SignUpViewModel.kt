@@ -1,5 +1,6 @@
 package com.marujho.freshsnap.ui.singup
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.marujho.freshsnap.data.repository.AuthRepository
@@ -20,7 +21,7 @@ class SignUpViewModel @Inject constructor(
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
-        if (name.isEmpty() || email.isEmpty() || pass.isEmpty()) {
+        if (name.isBlank() || email.isBlank() || pass.isBlank()) {
             onError("Por favor, rellena todos los campos")
             return
         }
@@ -31,16 +32,25 @@ class SignUpViewModel @Inject constructor(
         }
 
         if (pass.length < 6) {
-            onError("La contraseña debe tener más 6 caracteres")
+            onError("La contraseña debe tener al menos 6 caracteres")
             return
         }
 
         viewModelScope.launch {
+            Log.d("SIGNUP_TEST", "Intentando registrar: $email")
+
             val result = repository.signUp(email, pass, name)
+
             if (result.isSuccess) {
+                Log.d("SIGNUP_TEST", "bien")
                 onSuccess()
             } else {
-                onError(result.exceptionOrNull()?.message ?: "Error")
+                val errorException = result.exceptionOrNull()
+                val errorMsg = errorException?.message ?: "Error "
+
+                Log.e("SIGNUP_TEST", "Fallo en el registro", errorException)
+
+                onError(errorMsg)
             }
         }
     }
