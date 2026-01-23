@@ -30,12 +30,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.marujho.freshsnap.ui.theme.LightGreen
 import java.util.concurrent.Executors
 import com.google.mlkit.vision.barcode.*
 import com.google.mlkit.vision.barcode.common.Barcode
-
+import com.marujho.freshsnap.ui.openFoodFacts.OpenFoodViewModel
 
 
 class ScannerScreen : ComponentActivity() {
@@ -84,24 +85,23 @@ fun BarCodeScanScreen() {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun CameraContent() {
+fun CameraContent(viewModel: OpenFoodViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val lifeCycleOwner = LocalLifecycleOwner.current
     val cameraController = remember { LifecycleCameraController(context) }
-    val cameraExecutor =
-        remember { Executors.newSingleThreadExecutor() } //Creamos el hilo para analizar el codigo de barras
-    val options =
-        BarcodeScannerOptions.Builder() //Vemos los codigos de barras que queremos captar, en este caso son 4 que se suelen usar para la comida
-            .setBarcodeFormats(
-                Barcode.FORMAT_EAN_13,
-                Barcode.FORMAT_EAN_8,
-                Barcode.FORMAT_UPC_A,
-                Barcode.FORMAT_UPC_E
-            )
-            .build()
-    var barcodeScanner = remember {
-        BarcodeScanning.getClient(options)
-    }
+    val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
+
+    val options = BarcodeScannerOptions.Builder()
+        .setBarcodeFormats(
+            Barcode.FORMAT_EAN_13,
+            Barcode.FORMAT_EAN_8,
+            Barcode.FORMAT_UPC_A,
+            Barcode.FORMAT_UPC_E
+        )
+        .build()
+
+    var barcodeScanner = remember { BarcodeScanning.getClient(options) }
+
     LaunchedEffect(cameraController, cameraExecutor) {
         cameraController.setImageAnalysisAnalyzer(
             cameraExecutor,
@@ -111,34 +111,87 @@ fun CameraContent() {
                 cameraExecutor
             ) { result: MlKitAnalyzer.Result? ->
                 val barcodeResults = result?.getValue(barcodeScanner)
-                if (barcodeResults?.isNotEmpty() == true) {
+                if (!barcodeResults.isNullOrEmpty()) {
                     val barcode = barcodeResults.first().rawValue
                     if (barcode != null) {
-                        Log.d("BARCODE", barcode)
+                        viewModel.onBarcodeScanned(barcode)
                     }
                 }
             })
     }
 
-
-                    Scaffold (modifier = Modifier.fillMaxSize()) { paddingValues: PaddingValues ->
-                AndroidView(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    factory = { context ->
-                        PreviewView(context).apply {
-                            layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-                            scaleType = PreviewView.ScaleType.FILL_START
-                        }.also { previewView ->
-                            previewView.controller = cameraController
-                            cameraController.bindToLifecycle(lifeCycleOwner)
-                        }
-
-                    }
-                )
+    Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
+        AndroidView(
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            factory = { context ->
+                PreviewView(context).apply {
+                    layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                    scaleType = PreviewView.ScaleType.FILL_START
+                }.also { previewView ->
+                    previewView.controller = cameraController
+                    cameraController.bindToLifecycle(lifeCycleOwner)
+                }
             }
+        )
     }
+}
+
+//@Composable
+//fun CameraContent() {
+//    val context = LocalContext.current
+//    val lifeCycleOwner = LocalLifecycleOwner.current
+//    val cameraController = remember { LifecycleCameraController(context) }
+//    val cameraExecutor =
+//        remember { Executors.newSingleThreadExecutor() } //Creamos el hilo para analizar el codigo de barras
+//    val options =
+//        BarcodeScannerOptions.Builder() //Vemos los codigos de barras que queremos captar, en este caso son 4 que se suelen usar para la comida
+//            .setBarcodeFormats(
+//                Barcode.FORMAT_EAN_13,
+//                Barcode.FORMAT_EAN_8,
+//                Barcode.FORMAT_UPC_A,
+//                Barcode.FORMAT_UPC_E
+//            )
+//            .build()
+//    var barcodeScanner = remember {
+//        BarcodeScanning.getClient(options)
+//    }
+//    LaunchedEffect(cameraController, cameraExecutor) {
+//        cameraController.setImageAnalysisAnalyzer(
+//            cameraExecutor,
+//            MlKitAnalyzer(
+//                listOf(barcodeScanner),
+//                ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED,
+//                cameraExecutor
+//            ) { result: MlKitAnalyzer.Result? ->
+//                val barcodeResults = result?.getValue(barcodeScanner)
+//                if (barcodeResults?.isNotEmpty() == true) {
+//                    val barcode = barcodeResults.first().rawValue
+//                    if (barcode != null) {
+//                        Log.d("BARCODE", barcode)
+//                    }
+//                }
+//            })
+//    }
+//
+//
+//                    Scaffold (modifier = Modifier.fillMaxSize()) { paddingValues: PaddingValues ->
+//                AndroidView(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .padding(paddingValues),
+//                    factory = { context ->
+//                        PreviewView(context).apply {
+//                            layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+//                            scaleType = PreviewView.ScaleType.FILL_START
+//                        }.also { previewView ->
+//                            previewView.controller = cameraController
+//                            cameraController.bindToLifecycle(lifeCycleOwner)
+//                        }
+//
+//                    }
+//                )
+//            }
+//    }
 
     @Preview(showBackground = true, showSystemUi = true)
     @Composable

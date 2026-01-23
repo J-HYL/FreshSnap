@@ -8,11 +8,12 @@ import com.marujho.freshsnap.data.remote.api.OpenFoodFactsApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.marujho.freshsnap.data.domain.BarcodeDomain
 
 
 @HiltViewModel
 class OpenFoodViewModel @Inject constructor(
-    private val api: OpenFoodFactsApi
+    private val barcodeDomain: BarcodeDomain
 ) : ViewModel() {
 
     fun onBarcodeScanned(barcode: String) {
@@ -20,13 +21,13 @@ class OpenFoodViewModel @Inject constructor(
             Log.d("OFF_TEST", "Barcode recibido: $barcode")
 
             try {
-                val response = api.getProductByBarcode(barcode)
-
+                val response = barcodeDomain.getProductByBarcode(barcode)
                 Log.d("OFF_TEST", "Status: ${response.status}")
                 Log.d("OFF_TEST", "Producto: ${response.product}")
             } catch (e: Exception) {
-                Log.e("OFF_TEST", "Error en OpenFoodFacts", e)
+                Log.e("OFF_TEST", "Error en dominio", e)
             }
         }
     }
 }
+

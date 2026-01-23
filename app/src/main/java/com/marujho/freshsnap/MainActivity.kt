@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: OpenFoodViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.testManualBarcode()
+        //.onBarcodeScanned("737628064502") manualmente meter el barcode funciona
         setContent {
             FreshSnapTheme {
                 Surface(
