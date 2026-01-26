@@ -30,12 +30,13 @@ import com.marujho.freshsnap.ui.theme.Grey
 @Composable
 fun LoginScreen(
     navController: NavController,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel() // inyeccion hilt
 ) {
     val context = LocalContext.current
 
     LoginBox(
         onLoginClick = { email, password ->
+            // llamada al viwe model
             viewModel.login(
                 email = email,
                 pass = password,
