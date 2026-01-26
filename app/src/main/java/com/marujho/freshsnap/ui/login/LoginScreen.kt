@@ -41,8 +41,8 @@ fun LoginScreen(
                 email = email,
                 pass = password,
                 onSuccess = {
-                    navController.navigate("scanner_screen") {
-                        popUpTo("login_screen") { inclusive = true }
+                    navController.navigate("main_screen") {
+                        popUpTo(0) { inclusive = true }
                     }
                 },
                 onError = { mensajeError ->

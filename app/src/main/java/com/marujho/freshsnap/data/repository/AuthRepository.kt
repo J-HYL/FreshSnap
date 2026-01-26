@@ -21,7 +21,7 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    // Sing up
+    // Sign up
     suspend fun signUp(email: String, pass: String, name: String): Result<String> {
         return try {
             val authResult = auth.createUserWithEmailAndPassword(email, pass).await()
@@ -37,4 +37,19 @@ class AuthRepository @Inject constructor(
     }
 
     fun isUserLoggedIn(): Boolean = auth.currentUser != null
+
+    suspend fun getUserName(): Result<String> {
+        return try {
+            val uid = auth.currentUser?.uid ?: throw Exception("No user logged in")
+            val document = db.collection("users").document(uid).get().await()
+            val name = document.getString("name") ?: "Usuario"
+            Result.success(name)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun logout() {
+        auth.signOut()
+    }
 }
