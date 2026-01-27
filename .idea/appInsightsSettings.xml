@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.marujho.freshsnap" />
+                  <option name="mobileSdkAppId" value="1:815040610002:android:84207a7e13d10a5426770b" />
+                  <option name="projectId" value="freshsnap-785fe" />
+                  <option name="projectNumber" value="815040610002" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
