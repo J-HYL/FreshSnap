@@ -39,6 +39,10 @@ import java.util.concurrent.Executors
 import android.Manifest
 import android.annotation.SuppressLint
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.marujho.freshsnap.data.model.ScanType
+import java.util.regex.Pattern
 
 class ScannerScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,54 +87,87 @@ fun BarCodeScanScreen() {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun CameraContent(viewModel: OpenFoodViewModel = hiltViewModel()) {
+fun CameraContent(
+    viewModel: OpenFoodViewModel = hiltViewModel(),
+    scanType: ScanType = ScanType.BARCODE,
+    onResultScanned: (String) -> Unit = {}
+) {
     val context = LocalContext.current
     val lifeCycleOwner = LocalLifecycleOwner.current
     val cameraController = remember { LifecycleCameraController(context) }
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
 
-    val options = BarcodeScannerOptions.Builder()
-        .setBarcodeFormats(
-            com.google.mlkit.vision.barcode.common.Barcode.FORMAT_EAN_13,
-            com.google.mlkit.vision.barcode.common.Barcode.FORMAT_EAN_8,
-            com.google.mlkit.vision.barcode.common.Barcode.FORMAT_UPC_A,
-            com.google.mlkit.vision.barcode.common.Barcode.FORMAT_UPC_E
-        )
-        .build()
+    val barcodeScanner by lazy {
+        val options = BarcodeScannerOptions.Builder()
+            .setBarcodeFormats(
+                com.google.mlkit.vision.barcode.common.Barcode.FORMAT_EAN_13,
+                com.google.mlkit.vision.barcode.common.Barcode.FORMAT_EAN_8,
+                com.google.mlkit.vision.barcode.common.Barcode.FORMAT_UPC_A,
+                com.google.mlkit.vision.barcode.common.Barcode.FORMAT_UPC_E
+            )
+            .build()
+        BarcodeScanning.getClient(options)
+    }
 
-    val barcodeScanner = remember { BarcodeScanning.getClient(options) }
+    val textScanner by lazy {
+        TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+    }
 
-    LaunchedEffect(cameraController, cameraExecutor) {
-        cameraController.setImageAnalysisAnalyzer(
-            cameraExecutor,
-            MlKitAnalyzer(
-                listOf(barcodeScanner),
-                ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED,
-                cameraExecutor
-            ) { result: MlKitAnalyzer.Result? ->
-                val barcodeResults = result?.getValue(barcodeScanner)
-                if (!barcodeResults.isNullOrEmpty()) {
-                    val barcode = barcodeResults.first().rawValue
-                    if (barcode != null) {
-                        viewModel.onBarcodeScanned(barcode)
+    LaunchedEffect(scanType) {
+        val analyzer = when (scanType) {
+            ScanType.BARCODE -> {
+                MlKitAnalyzer(
+                    listOf(barcodeScanner),
+                    ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED,
+                    cameraExecutor
+                ) { result: MlKitAnalyzer.Result? ->
+                    val barcodeResults = result?.getValue(barcodeScanner)
+                    if (!barcodeResults.isNullOrEmpty()) {
+                        val barcode = barcodeResults.first().rawValue
+                        if (barcode != null) {
+                            viewModel.onBarcodeScanned(barcode)
+                        }
                     }
                 }
-            })
+
+            }
+
+            ScanType.EX_DATE -> {
+                MlKitAnalyzer(
+                    listOf(textScanner),
+                    ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED,
+                    cameraExecutor
+                ) { result: MlKitAnalyzer.Result? ->
+                    val textResults = result?.getValue(textScanner)
+                    if (textResults != null) {
+                        val dateFound = findExpirationDate(textResults.text)
+                        if (dateFound != null) {
+                            onResultScanned(dateFound)
+                        }
+                    }
+            }
+        }
+        }
+        cameraController.setImageAnalysisAnalyzer(cameraExecutor, analyzer)
+
     }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
             // Cámara
             AndroidView(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
                 factory = { context ->
                     PreviewView(context).apply {
                         layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
                         scaleType = PreviewView.ScaleType.FILL_START
-                    }.also { previewView ->
-                        previewView.controller = cameraController
-                        cameraController.bindToLifecycle(lifeCycleOwner)
+                        controller = cameraController
                     }
+                    },
+                update = {
+                    cameraController.bindToLifecycle(lifeCycleOwner)
                 }
             )
 
@@ -158,7 +195,10 @@ fun CameraContent(viewModel: OpenFoodViewModel = hiltViewModel()) {
                     color = Color.Transparent,
                     topLeft = Offset(left, top),
                     size = Size(rectWidth, rectHeight),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerRadius, cornerRadius),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(
+                        cornerRadius,
+                        cornerRadius
+                    ),
                     blendMode = BlendMode.Clear
                 )
 
@@ -168,7 +208,10 @@ fun CameraContent(viewModel: OpenFoodViewModel = hiltViewModel()) {
                     topLeft = Offset(left, top),
                     size = Size(rectWidth, rectHeight),
                     style = Stroke(width = 4f),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerRadius, cornerRadius)
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(
+                        cornerRadius,
+                        cornerRadius
+                    )
                 )
             }
 
@@ -176,6 +219,29 @@ fun CameraContent(viewModel: OpenFoodViewModel = hiltViewModel()) {
     }
 }
 
+fun findExpirationDate(text : String) : String ?{
+
+    val patterns = listOf(
+        "\\b\\d{1,2}[/.-]\\d{1,2}[/.-]\\d{2,4}\\b",
+        "\\b\\d{1,2}[\\s.-]+(?:ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC|JAN|APR|AUG|DEC)[a-z]*[\\s.-]+\\d{2,4}\\b",
+        "\\b\\d{4}[/.-]\\d{1,2}[/.-]\\d{1,2}\\b",
+        "\\b(0[1-9]|1[0-2])[/.-]\\d{4}\\b"
+    )
+
+    for (pattern in patterns) {
+        try {
+            val compiledPattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
+            val matcher = compiledPattern.matcher(text)
+
+            if (matcher.find()) {
+                return matcher.group()
+            }
+        } catch (e: Exception) {
+            continue
+        }
+    }
+    return null
+}
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun BarCodeScanScreenPreview() {
