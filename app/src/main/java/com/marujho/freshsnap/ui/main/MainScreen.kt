@@ -1,4 +1,4 @@
-package com.marujho.freshsnap
+package com.marujho.freshsnap.ui.main
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -8,12 +8,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.marujho.freshsnap.ui.main.MainViewModel
 
 @Composable
 fun MainScreen(
     navController: NavController,
-    viewModel: MainViewModel = hiltViewModel()
+    viewModel: MainViewModel = hiltViewModel(),
+    onLogoutClick: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -36,8 +36,12 @@ fun MainScreen(
             Button(
                 onClick = {
                     viewModel.logout(onLogoutSuccess = {
-                        navController.navigate("login_screen") {
-                            popUpTo("main_screen") { inclusive = true }
+                        if (onLogoutClick != {}) {
+                            onLogoutClick()
+                        } else {
+                            navController.navigate("login_screen") {
+                                popUpTo("main_screen") { inclusive = true }
+                            }
                         }
                     })
                 }
