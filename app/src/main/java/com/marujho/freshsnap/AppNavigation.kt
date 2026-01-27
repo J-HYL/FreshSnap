@@ -5,6 +5,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.marujho.freshsnap.ui.login.LoginScreen
+import com.marujho.freshsnap.ui.main.MainAppScreen
+import com.marujho.freshsnap.ui.main.MainScreen
 import com.marujho.freshsnap.ui.splash.SplashScreen
 
 @Composable
@@ -26,11 +28,13 @@ fun AppNavigation() {
         }
 
         composable("main_screen") {
-            MainScreen(navController = navController)
-        }
-
-        composable("scanner_screen") {
-            BarCodeScanScreen()
+            MainAppScreen(
+                onLogout = {
+                    navController.navigate("login_screen") {
+                        popUpTo("main_screen") { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable("scanner_screen") {
