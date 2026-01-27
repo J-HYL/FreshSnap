@@ -42,7 +42,7 @@ fun LoginScreen(
                 pass = password,
                 onSuccess = {
                     navController.navigate("main_screen") {
-                        popUpTo("login_screen") { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 },
                 onError = { mensajeError ->
