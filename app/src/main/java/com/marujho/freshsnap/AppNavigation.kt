@@ -36,5 +36,9 @@ fun AppNavigation() {
                 }
             )
         }
+
+        composable("scanner_screen") {
+            BarCodeScanScreen()
+        }
     }
 }
