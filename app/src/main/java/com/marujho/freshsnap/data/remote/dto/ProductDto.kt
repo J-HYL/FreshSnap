@@ -1,5 +1,6 @@
 package com.marujho.freshsnap.data.remote.dto
 //representa el objeto product dentro de la respuesta
+import NutrimentsDto
 import com.squareup.moshi.Json
 
 data class ProductDto(
@@ -26,7 +27,9 @@ data class ProductDto(
     val novaGroup: Int?,
 
     @Json(name = "ecoscore_grade")
-    val greenScore: String?
+    val greenScore: String?,
 
+    //Nutriments
+    val nutriments: NutrimentsDto?
 
 )
