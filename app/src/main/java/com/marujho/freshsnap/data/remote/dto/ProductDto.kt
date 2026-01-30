@@ -1,5 +1,6 @@
 package com.marujho.freshsnap.data.remote.dto
 //representa el objeto product dentro de la respuesta
+import NutrimentsDto
 import com.squareup.moshi.Json
 
 data class ProductDto(
@@ -9,5 +10,26 @@ data class ProductDto(
     val brands: String?,
 
     @Json(name = "image_front_url")
-    val imageUrl: String?
+    val imageUrl: String?,
+
+    val quantity: String?,
+
+    val categories: String?,
+
+    val packaging: String?,
+
+    val countries: String?,
+
+    @Json(name = "nutriscore_grade")
+    val nutriScore: String?,
+
+    @Json(name = "nova_group")
+    val novaGroup: Int?,
+
+    @Json(name = "ecoscore_grade")
+    val greenScore: String?,
+
+    //Nutriments
+    val nutriments: NutrimentsDto?
+
 )
