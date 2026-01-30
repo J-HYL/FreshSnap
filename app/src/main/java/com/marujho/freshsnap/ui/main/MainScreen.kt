@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.marujho.freshsnap.ui.theme.Green
@@ -41,6 +42,7 @@ data class ProductUiModel(
     val imageUrl: String?,
     val expiryDays: Int,
     val expiryDate: String,
+    val scannedDate: String,
     val quantity: String,
     val ean: String,
     val nutriScore: String = "A"
@@ -49,18 +51,10 @@ data class ProductUiModel(
 @Composable
 fun MainScreen(
     navController: NavController,
-    onLogoutClick: () -> Unit = {},
-    bottomBarPadding: Dp = 0.dp
+    bottomBarPadding: Dp = 0.dp,
+    viewModel: MainViewModel = hiltViewModel()
 ) {
-    // Datos de prueba
-    val sampleProducts = listOf(
-        ProductUiModel("1", "Digestive Avena Choco", "Gullón", null, 1, "15/12/2025", "400g", "84100001"),
-        ProductUiModel("2", "Tomate frito", "Hacendado", null, 3, "17/12/2025", "3 packs", "84800002"),
-        ProductUiModel("3", "Kéfir natural", "Hacendado", null, 5, "19/12/2025", "500g", "84800003"),
-        ProductUiModel("4", "Macarrones", "Coviran", null, 5, "19/12/2025", "425 g", "8480000142139"),
-        ProductUiModel("5", "Macarrones", "Hacendado", null, 7, "21/12/2025", "1 kg", "84800005"),
-        ProductUiModel("6", "Pizza Roma", "Hacendado", null, 10, "24/12/2025", "350 g", "84800006"),
-        )
+    val products by viewModel.products.collectAsState() // datos de prueba
 
     val backgroundColor = Color(0xFFF5F5F5)
 
@@ -96,7 +90,7 @@ fun MainScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(bottom = bottomBarPadding + 80.dp)
             ) {
-                items(sampleProducts) { product ->
+                items(products) { product ->
                     ProductCardItem(product)
                 }
             }
@@ -111,7 +105,7 @@ fun SearchBar() {
         onValueChange = {},
         placeholder = { Text("Search") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
-        trailingIcon = { Icon(Icons.Default.Notifications, contentDescription = null, tint = Color.Gray) },
+        trailingIcon = { Icon(painter = painterResource(id = R.drawable.ic_camera), contentDescription = null, tint = Color.Gray) },
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(30.dp))
@@ -236,13 +230,13 @@ fun ProductCardItem(product: ProductUiModel) {
                         Column(modifier = Modifier.weight(1f)) {
                             TextDetail("Cantidad:", product.quantity)
                             TextDetail("Marca:", product.brand)
-                            TextDetail("Escaneado:", "10/12/2025")
+                            TextDetail("Escaneado:", product.scannedDate)
                             TextDetail("EAN:", product.ean)
                         }
 
                         Column(horizontalAlignment = Alignment.End) {
                             // aqui poner imagen de nutriscore
-                            Text("Green Score: B", color = Green, fontWeight = FontWeight.Bold)
+                            Text("Green Score: B", fontWeight = FontWeight.Bold) // mirar como devulve green score
                             Spacer(modifier = Modifier.height(4.dp))
                             Text("Nutri-Score: ${product.nutriScore}", fontWeight = FontWeight.Bold)
                         }

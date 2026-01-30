@@ -28,13 +28,7 @@ fun AppNavigation() {
         }
 
         composable("main_screen") {
-            MainAppScreen(
-                onLogout = {
-                    navController.navigate("login_screen") {
-                        popUpTo("main_screen") { inclusive = true }
-                    }
-                }
-            )
+            MainAppScreen()
         }
 
         composable("scanner_screen") {

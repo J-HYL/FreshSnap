@@ -16,9 +16,7 @@ import com.marujho.freshsnap.BarCodeScanScreen
 import com.marujho.freshsnap.ui.navigation.BottomNavItem
 
 @Composable
-fun MainAppScreen(
-    onLogout: () -> Unit
-) {
+fun MainAppScreen() {
     val navController = rememberNavController()
 
     Scaffold(
@@ -63,7 +61,6 @@ fun MainAppScreen(
             composable(BottomNavItem.Home.route) {
                 MainScreen(
                     navController = navController,
-                    onLogoutClick = onLogout,
                     bottomBarPadding = innerPadding.calculateBottomPadding()
                 )
             }
