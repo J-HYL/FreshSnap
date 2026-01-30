@@ -38,26 +38,21 @@ import com.marujho.freshsnap.ui.theme.FreshSnapTheme
 import java.util.concurrent.Executors
 import android.Manifest
 import android.annotation.SuppressLint
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.marujho.freshsnap.data.model.ScanType
 import java.util.regex.Pattern
 
-class ScannerScreen : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            FreshSnapTheme {
-                BarCodeScanScreen()
-            }
-        }
-    }
-}
-
 @Composable
-fun BarCodeScanScreen() {
+fun BarCodeScanScreen(
+    onNavigateToDetail: (String) -> Unit = {}
+) {
+    Log.d("OFF_TEST2", "Entro")
+
     val context = LocalContext.current
 
     //Hay Permiso??
@@ -77,7 +72,7 @@ fun BarCodeScanScreen() {
     )
 
     if (hasCameraPermission) {
-        CameraContent()
+        CameraContent(onNavigateToDetail = onNavigateToDetail)
     } else {
         LaunchedEffect(key1 = true) {
             launcher.launch(Manifest.permission.CAMERA)
@@ -88,14 +83,23 @@ fun BarCodeScanScreen() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CameraContent(
-    viewModel: OpenFoodViewModel = hiltViewModel(),
     scanType: ScanType = ScanType.BARCODE,
-    onResultScanned: (String) -> Unit = {}
+    onResultScanned: (String) -> Unit = {},
+    onNavigateToDetail: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val lifeCycleOwner = LocalLifecycleOwner.current
     val cameraController = remember { LifecycleCameraController(context) }
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
+
+    var scannedBarcode by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(scannedBarcode) {
+        if (scannedBarcode != null) {
+            Log.d("OFF_TEST2", "Código detectado en estado: $scannedBarcode")
+            onNavigateToDetail(scannedBarcode!!)
+        }
+    }
 
     val barcodeScanner by lazy {
         val options = BarcodeScannerOptions.Builder()
@@ -121,17 +125,18 @@ fun CameraContent(
                     ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED,
                     cameraExecutor
                 ) { result: MlKitAnalyzer.Result? ->
+                    if (scannedBarcode != null) return@MlKitAnalyzer
+
                     val barcodeResults = result?.getValue(barcodeScanner)
                     if (!barcodeResults.isNullOrEmpty()) {
                         val barcode = barcodeResults.first().rawValue
                         if (barcode != null) {
-                            viewModel.onBarcodeScanned(barcode)
+                            Log.e("BARCODE", "Leído hardware: $barcode")
+                            scannedBarcode = barcode
                         }
                     }
                 }
-
             }
-
             ScanType.EX_DATE -> {
                 MlKitAnalyzer(
                     listOf(textScanner),
@@ -145,33 +150,29 @@ fun CameraContent(
                             onResultScanned(dateFound)
                         }
                     }
+                }
             }
         }
-        }
         cameraController.setImageAnalysisAnalyzer(cameraExecutor, analyzer)
-
     }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Cámara
             AndroidView(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                factory = { context ->
-                    PreviewView(context).apply {
+                factory = { ctx ->
+                    PreviewView(ctx).apply {
                         layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
                         scaleType = PreviewView.ScaleType.FILL_START
                         controller = cameraController
                     }
-                    },
+                },
                 update = {
                     cameraController.bindToLifecycle(lifeCycleOwner)
                 }
             )
-
-            // Capa visual con rectángulo central
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val width = size.width
                 val height = size.height
@@ -182,15 +183,13 @@ fun CameraContent(
                 val left = (width - rectWidth) / 2
                 val top = (height - rectHeight) / 2
 
-                val cornerRadius = 20f // Ajusta este valor a tu gusto
+                val cornerRadius = 20f
 
-                // Fondo oscuro
                 drawRect(
                     color = Color.Black.copy(alpha = 0.6f),
                     size = size
                 )
 
-                // Agujero transparente con esquinas redondeadas
                 drawRoundRect(
                     color = Color.Transparent,
                     topLeft = Offset(left, top),
@@ -202,7 +201,6 @@ fun CameraContent(
                     blendMode = BlendMode.Clear
                 )
 
-                // Borde del rectángulo con esquinas redondeadas
                 drawRoundRect(
                     color = Color.White,
                     topLeft = Offset(left, top),
@@ -214,7 +212,6 @@ fun CameraContent(
                     )
                 )
             }
-
         }
     }
 }
