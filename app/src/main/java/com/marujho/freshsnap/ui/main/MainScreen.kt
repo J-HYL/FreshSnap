@@ -1,53 +1,280 @@
 package com.marujho.freshsnap.ui.main
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.marujho.freshsnap.ui.theme.Green
+import com.marujho.freshsnap.ui.theme.Grey
+import com.marujho.freshsnap.R
+
+data class ProductUiModel(
+    val id: String,
+    val name: String,
+    val brand: String,
+    val imageUrl: String?,
+    val expiryDays: Int,
+    val expiryDate: String,
+    val quantity: String,
+    val ean: String,
+    val nutriScore: String = "A"
+)
 
 @Composable
 fun MainScreen(
     navController: NavController,
-    viewModel: MainViewModel = hiltViewModel(),
-    onLogoutClick: () -> Unit = {}
+    onLogoutClick: () -> Unit = {},
+    bottomBarPadding: Dp = 0.dp
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
+    // Datos de prueba
+    val sampleProducts = listOf(
+        ProductUiModel("1", "Digestive Avena Choco", "Gullón", null, 1, "15/12/2025", "400g", "84100001"),
+        ProductUiModel("2", "Tomate frito", "Hacendado", null, 3, "17/12/2025", "3 packs", "84800002"),
+        ProductUiModel("3", "Kéfir natural", "Hacendado", null, 5, "19/12/2025", "500g", "84800003"),
+        ProductUiModel("4", "Macarrones", "Coviran", null, 5, "19/12/2025", "425 g", "8480000142139"),
+        ProductUiModel("5", "Macarrones", "Hacendado", null, 7, "21/12/2025", "1 kg", "84800005"),
+        ProductUiModel("6", "Pizza Roma", "Hacendado", null, 10, "24/12/2025", "350 g", "84800006"),
+        )
+
+    val backgroundColor = Color(0xFFF5F5F5)
+
+    Scaffold(
+        containerColor = backgroundColor,
+        contentWindowInsets = WindowInsets(0.dp),
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { /* metodo añadir nuevo producto */ },
+                containerColor = Green,
+                contentColor = Color.White,
+                shape = CircleShape,
+                modifier = Modifier.padding(bottom = bottomBarPadding)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Añadir")
+            }
+        }
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(padding)
+                .padding(horizontal = 16.dp)
         ) {
-            Text(
-                text = "Hola, ${viewModel.userName}!",
-                style = MaterialTheme.typography.headlineMedium
-            )
+            Spacer(modifier = Modifier.statusBarsPadding())
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(32.dp))
+            SearchBar()
 
-            Button(
-                onClick = {
-                    viewModel.logout(onLogoutSuccess = {
-                        if (onLogoutClick != {}) {
-                            onLogoutClick()
-                        } else {
-                            navController.navigate("login_screen") {
-                                popUpTo("main_screen") { inclusive = true }
-                            }
-                        }
-                    })
-                }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(bottom = bottomBarPadding + 80.dp)
             ) {
-                Text("Cerrar Sesión")
+                items(sampleProducts) { product ->
+                    ProductCardItem(product)
+                }
             }
         }
     }
+}
+
+@Composable
+fun SearchBar() {
+    TextField(
+        value = "",
+        onValueChange = {},
+        placeholder = { Text("Search") },
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
+        trailingIcon = { Icon(Icons.Default.Notifications, contentDescription = null, tint = Color.Gray) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(30.dp))
+            .background(Color.White),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            disabledIndicatorColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        ),
+        singleLine = true
+    )
+}
+
+@Composable
+fun ProductCardItem(product: ProductUiModel) {
+    var expanded by remember { mutableStateOf(false) }
+    val rotationState by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "rotation")
+
+    val statusColor = when {
+        product.expiryDays <= 2 -> Color(0xFFFF5252)
+        product.expiryDays <= 5 -> Color(0xFFFFC107)
+        else -> Color(0xFF69F0AE)
+    }
+
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                expanded = !expanded
+            },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(6.dp)
+                        .fillMaxHeight()
+                        .background(statusColor)
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                // Imagen del producto (Placeholder)
+                Icon(
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .align(Alignment.CenterVertically),
+                    tint = Color.Gray
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 12.dp)
+                ) {
+                    Text(
+                        text = product.name,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = Color.Black
+                    )
+                    Text(
+                        text = product.brand,
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "${product.expiryDays} - days",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Expand",
+                            modifier = Modifier.rotate(rotationState)
+                        )
+                    }
+                    Text(
+                        text = product.expiryDate,
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                }
+            }
+
+            AnimatedVisibility(visible = expanded) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 18.dp, end = 16.dp, bottom = 16.dp)
+                ) {
+                    Divider(color = Color.LightGray, thickness = 0.5.dp)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            TextDetail("Cantidad:", product.quantity)
+                            TextDetail("Marca:", product.brand)
+                            TextDetail("Escaneado:", "10/12/2025")
+                            TextDetail("EAN:", product.ean)
+                        }
+
+                        Column(horizontalAlignment = Alignment.End) {
+                            // aqui poner imagen de nutriscore
+                            Text("Green Score: B", color = Green, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("Nutri-Score: ${product.nutriScore}", fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Button(
+                        onClick = { /* ir a pantalla detalle */ },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Green),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("Ver más", color = Color.White)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TextDetail(label: String, value: String) {
+    Row(modifier = Modifier.padding(vertical = 2.dp)) {
+        Text(text = "$label ", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+        Text(text = value, fontSize = 13.sp, color = Color.DarkGray)
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun MainScreenPreview() {
+    val navController = rememberNavController()
+    MainScreen(navController = navController)
 }

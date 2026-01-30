@@ -1,10 +1,11 @@
 package com.marujho.freshsnap.ui.main
 
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -21,8 +22,11 @@ fun MainAppScreen(
     val navController = rememberNavController()
 
     Scaffold(
+        containerColor = Color.Transparent,
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                containerColor = Color.White,
+            ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
 
@@ -50,15 +54,17 @@ fun MainAppScreen(
             }
         }
     ) { innerPadding ->
+
         NavHost(
             navController = navController,
             startDestination = BottomNavItem.Home.route,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.fillMaxSize()
         ) {
             composable(BottomNavItem.Home.route) {
                 MainScreen(
                     navController = navController,
-                    onLogoutClick = onLogout
+                    onLogoutClick = onLogout,
+                    bottomBarPadding = innerPadding.calculateBottomPadding()
                 )
             }
             composable(BottomNavItem.Scanner.route) {
