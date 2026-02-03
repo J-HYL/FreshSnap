@@ -16,7 +16,9 @@ import com.marujho.freshsnap.BarCodeScanScreen
 import com.marujho.freshsnap.ui.navigation.BottomNavItem
 
 @Composable
-fun MainAppScreen() {
+fun MainAppScreen(
+    onNavigateToDetail: (String) -> Unit
+) {
     val navController = rememberNavController()
 
     Scaffold(
@@ -65,7 +67,7 @@ fun MainAppScreen() {
                 )
             }
             composable(BottomNavItem.Scanner.route) {
-                BarCodeScanScreen()
+                BarCodeScanScreen(onNavigateToDetail = onNavigateToDetail)
             }
         }
     }

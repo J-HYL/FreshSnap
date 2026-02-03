@@ -30,6 +30,11 @@ data class ProductDto(
     val greenScore: String?,
 
     //Nutriments
-    val nutriments: NutrimentsDto?
+    val nutriments: NutrimentsDto?,
 
+    @Json(name = "nutrient_levels")
+    val nutrimentsLevels : NutrimentsLevelDto?
 )
+
+
+
