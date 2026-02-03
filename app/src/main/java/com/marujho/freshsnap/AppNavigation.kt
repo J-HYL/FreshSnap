@@ -1,9 +1,13 @@
 package com.marujho.freshsnap
 
+import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.marujho.freshsnap.ui.detail.detailScreen
 import com.marujho.freshsnap.ui.login.LoginScreen
 import com.marujho.freshsnap.ui.main.MainAppScreen
 import com.marujho.freshsnap.ui.main.MainScreen
@@ -33,12 +37,31 @@ fun AppNavigation() {
                     navController.navigate("login_screen") {
                         popUpTo("main_screen") { inclusive = true }
                     }
+                },
+                onNavigateToDetail = {barcode ->
+                    navController.navigate("detail_screen/$barcode")
                 }
             )
         }
 
         composable("scanner_screen") {
-            BarCodeScanScreen()
+            BarCodeScanScreen(
+                onNavigateToDetail = { barcode ->
+                    Log.d("OFF_TEST2","Quiere navegar")
+                    navController.navigate("detail_screen/$barcode")
+                }
+            )
+        }
+
+        composable (route = "detail_screen/{barcode}",
+            arguments = listOf(navArgument("barcode"){type = NavType.StringType})){
+            detailScreen(
+                onNavigateMain = {
+                    navController.navigate("main_screen"){
+                        popUpTo("main_screen"){inclusive = true}
+                    }
+                }
+            )
         }
     }
 }

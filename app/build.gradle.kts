@@ -70,6 +70,8 @@ dependencies {
     implementation(libs.play.services.mlkit.barcode)
     implementation(libs.play.services.mlkit.text)
 
+    //Para imagen URL
+    implementation("io.coil-kt:coil-compose:2.5.0")
     /*OPEN FOOD FACTS*/
 
     // Retrofit
