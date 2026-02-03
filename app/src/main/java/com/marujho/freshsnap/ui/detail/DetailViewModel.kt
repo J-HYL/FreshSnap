@@ -35,6 +35,7 @@ class DetailViewModel @Inject constructor(
                 if (response.status == 1 && response.product != null) {
                     uiState = DetailUiState.Success(response.product)
                     Log.d("OFF_TEST2", "Status: ${response.status},ENCONTRADO")
+                    Log.d("OFF_TEST2", "Grasas: ${response.product.nutrimentsLevels?.fat} Nutri: ${response.product.nutriScore}")
 
                 } else {
                     uiState = DetailUiState.Error("Producto no encontrado")

@@ -55,7 +55,13 @@ fun AppNavigation() {
 
         composable (route = "detail_screen/{barcode}",
             arguments = listOf(navArgument("barcode"){type = NavType.StringType})){
-            detailScreen()
+            detailScreen(
+                onNavigateMain = {
+                    navController.navigate("main_screen"){
+                        popUpTo("main_screen"){inclusive = true}
+                    }
+                }
+            )
         }
     }
 }

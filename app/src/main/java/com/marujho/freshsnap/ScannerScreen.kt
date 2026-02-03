@@ -93,7 +93,7 @@ fun CameraContent(
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
 
     var scannedBarcode by remember { mutableStateOf<String?>(null) }
-
+    scannedBarcode = "8480000101617" //Para probar sin camara
     LaunchedEffect(scannedBarcode) {
         if (scannedBarcode != null) {
             Log.d("OFF_TEST2", "Código detectado en estado: $scannedBarcode")

@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,47 +28,57 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.marujho.freshsnap.data.remote.dto.NutrientLevel
 import com.marujho.freshsnap.data.remote.dto.ProductDto
+import com.marujho.freshsnap.R
 
 @Composable
 fun detailScreen(
-    viewModel: DetailViewModel = hiltViewModel()
+    viewModel: DetailViewModel = hiltViewModel(),
+    onNavigateMain: () -> Unit
 ) {
 
     val state = viewModel.uiState
 
-    when(state) {
+    when (state) {
         is DetailUiState.Loading -> {}//Imagen cargando
         is DetailUiState.Error -> {}//Imagen Error
         is DetailUiState.Success -> {
             val product = state.product
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Gray),
-                contentPadding = PaddingValues(8.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                item {
-                    detailImage(product.imageUrl ?: "")
+            Scaffold(
+                bottomBar = {
+                    detailBottomBar(
+                        onCancel = { onNavigateMain() },
+                        onConfirm = {}
+                    )
                 }
-                item {
-                    detailGeneralInformation(product = product)
-                }
-                item {
-                    detailHealth(product = product)
-                }
-                item {
-                    detailNutriments(product = product)
+            ) { innerPadding ->
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Gray)
+                        .padding(innerPadding),
+                    contentPadding = PaddingValues(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    item {
+                        detailImage(product.imageUrl ?: "")
+                    }
+                    item {
+                        detailGeneralInformation(product = product)
+                    }
+                    item {
+                        detailHealth(product = product)
+                    }
+                    item {
+                        detailNutriments(product = product)
+                    }
                 }
             }
         }
     }
-
-
 
 
 }
@@ -73,7 +87,7 @@ fun detailScreen(
 fun detailImage(url: String) { //Conectar para tener la url
     Card(
         modifier = Modifier
-            .padding (16.dp)
+            .padding(16.dp)
     ) {
         AsyncImage(
             model = url,
@@ -85,9 +99,15 @@ fun detailImage(url: String) { //Conectar para tener la url
         )
     }
 }
+
 @Composable
-fun detectNullText(label : String, text : String?,padd : Int,style : TextStyle = MaterialTheme.typography.bodyMedium){
-    if (!text.isNullOrBlank()){
+fun detectNullText(
+    label: String,
+    text: String?,
+    padd: Int,
+    style: TextStyle = MaterialTheme.typography.bodyMedium
+) {
+    if (!text.isNullOrBlank()) {
         Text(
             text = "$label: $text",
             style = style,
@@ -96,9 +116,10 @@ fun detectNullText(label : String, text : String?,padd : Int,style : TextStyle =
 
     }
 }
+
 @Composable
-fun detailGeneralInformation(product : ProductDto) { //Connectar con viewmodel para conseguir los datos
-    val paddingMod : Int = 4
+fun detailGeneralInformation(product: ProductDto) { //Connectar con viewmodel para conseguir los datos
+    val paddingMod: Int = 4
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -106,26 +127,30 @@ fun detailGeneralInformation(product : ProductDto) { //Connectar con viewmodel p
         Column(
             modifier = Modifier
                 .padding(16.dp)
-        ){
+        ) {
             Text(
                 text = "INFORMACION GENERAL",
                 style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.padding(bottom = paddingMod.dp)
             )
-            detectNullText("Nombre",product.productName,paddingMod)
-            detectNullText("Fecha Escaner","",paddingMod) //Añadir fecha actual
-            detectNullText("Cantidad",product.quantity,paddingMod)
-            detectNullText("Denominacion general",product.categories,paddingMod)
-            detectNullText("Envase",product.packaging,paddingMod)
-            detectNullText("Tienda",product.quantity,paddingMod) //Falta añadir la variable de tiendas
-            detectNullText("Paises de venta",product.countries,paddingMod)
+            detectNullText("Nombre", product.productName, paddingMod)
+            detectNullText("Fecha Escaner", "", paddingMod) //Añadir fecha actual
+            detectNullText("Cantidad", product.quantity, paddingMod)
+            detectNullText("Denominacion general", product.categories, paddingMod)
+            detectNullText("Envase", product.packaging, paddingMod)
+            detectNullText(
+                "Tienda",
+                product.quantity,
+                paddingMod
+            ) //Falta añadir la variable de tiendas
+            detectNullText("Paises de venta", product.countries, paddingMod)
         }
     }
 }
 
 @Composable
-fun detailHealth(product : ProductDto){
-    val paddingMod : Int = 4
+fun detailHealth(product: ProductDto) {
+    val paddingMod: Int = 4
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -133,44 +158,72 @@ fun detailHealth(product : ProductDto){
         Column(
             modifier = Modifier
                 .padding(16.dp)
-        ){
+        ) {
             Text(
                 text = "SALUD",
                 style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.padding(bottom = paddingMod.dp)
             )
 
-            Text(
-                text = "NutriScore, Cambiar a imagen",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
-            )
-            Text(
-                text = "Grasas",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
-            )
-            Text(
-                text = "Grasas saturadas",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
-            )
-            Text(
-                text = "Azucares",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
-            )
-            Text(
-                text = "Sal",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
-            )
+            if (product.nutriScore != null){
+                Image(
+                    painter = painterResource(id = getNutriScoreResource(product.nutriScore)!!),
+                    contentDescription = "NutriScore",
+                    modifier = Modifier.size(100.dp),
+                    contentScale = ContentScale.Fit
+                )
+            }
+            detailNutrimentsLevels("Grasas", product.nutrimentsLevels?.fat)
+            detailNutrimentsLevels("Grasas saturadas", product.nutrimentsLevels?.saturatedFat)
+            detailNutrimentsLevels("Azucares", product.nutrimentsLevels?.sugars)
+            detailNutrimentsLevels("Sal", product.nutrimentsLevels?.salt)
         }
     }
 }
+
+fun getNutriScoreResource(nutriScore: String?): Int?{
+    return when(nutriScore?.lowercase()){
+        "a" -> R.drawable.ic_nutriscore_a
+        "b" -> R.drawable.ic_nutriscore_b
+        "c" -> R.drawable.ic_nutriscore_c
+        "d" -> R.drawable.ic_nutriscore_d
+        "e" -> R.drawable.ic_nutriscore_e
+        else -> null
+    }
+}
+
 @Composable
-fun detailNutriments(product : ProductDto){
-    val paddingMod : Int = 4
+fun detailNutrimentsLevels(label: String, level: NutrientLevel?) {
+    if (level != null) {
+        var color: Color
+        var text: String
+        when (level) {
+            NutrientLevel.LOW -> {
+                color = Color.Green
+                text = "Bajo en $label"
+            }
+
+            NutrientLevel.MODERATE -> {
+                color = Color.Yellow
+                text = "Moderado en $label"
+            }
+
+            NutrientLevel.HIGH -> {
+                color = Color.Red
+                text = "Alto en $label"
+            }
+        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = color
+        )
+    }
+} //Cambiar Colores para que se vean mejor
+
+@Composable
+fun detailNutriments(product: ProductDto) {
+    val paddingMod: Int = 4
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -178,54 +231,75 @@ fun detailNutriments(product : ProductDto){
         Column(
             modifier = Modifier
                 .padding(16.dp)
-        ){
+        ) {
             Text(
                 text = "VALOR NUTRICIONAL",
                 style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.padding(bottom = paddingMod.dp)
             )
-            Text(
-                text = "Nombre",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
-            )
-            Text(
-                text = "Fecha Escaner",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
-            )
-            Text(
-                text = "Cantidad",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
-            )
-            Text(
-                text = "Denominacion general",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
-            )
-            Text(
-                text = "Envase",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
-            )
-            Text(
-                text = "Tienda",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
-            )
-            Text(
-                text = "Paises de venta",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
-            )
-
+            detailRowNutriments("Energia Kcal", product.nutriments?.energyKcal100g)
+            detailRowNutriments("Energia Kj", product.nutriments?.energyKj100g)
+            detailRowNutriments("Grasas", product.nutriments?.fat100g)
+            detailRowNutriments("Grasas saturadas", product.nutriments?.saturatedFat100g)
+            detailRowNutriments("Carbohidratos", product.nutriments?.carbohydrates100g)
+            detailRowNutriments("Azúcares", product.nutriments?.sugars100g)
+            detailRowNutriments("Proteínas", product.nutriments?.proteins100g)
+            detailRowNutriments("Sal", product.nutriments?.salt100g)
+            detailRowNutriments("Fibra", product.nutriments?.fiber100g)
+            detailRowNutriments("Sodio", product.nutriments?.sodium100g)
         }
     }
 
 }
+
+@Composable
+fun detailRowNutriments(label: String, data: Double?) {
+    if (data != null) {
+        Row() {
+            Text(
+                text = "$label: ",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = data.toString(),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+fun detailBottomBar(
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit
+){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Button(
+            onClick = onCancel,
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(text = "Cancelar")
+        }
+
+        Button(
+            onClick = onConfirm,
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(text = "Confirmar")
+        }
+    }
+}
+
 @Preview
 @Composable
 fun detailScreenPreview() {
-    detailScreen()
+    detailScreen(onNavigateMain = {})
 }
