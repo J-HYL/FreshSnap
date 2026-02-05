@@ -49,7 +49,9 @@ import java.util.regex.Pattern
 
 @Composable
 fun BarCodeScanScreen(
-    onNavigateToDetail: (String) -> Unit = {}
+    onNavigateToDetail: (String) -> Unit = {},
+    onDateScanned: (String) -> Unit = {},
+    scanType: ScanType = ScanType.BARCODE
 ) {
     Log.d("OFF_TEST2", "Entro")
 
@@ -72,7 +74,15 @@ fun BarCodeScanScreen(
     )
 
     if (hasCameraPermission) {
-        CameraContent(onNavigateToDetail = onNavigateToDetail)
+        CameraContent(scanType,
+            onResultScanned = { result ->
+                if (scanType == ScanType.BARCODE) {
+                    onNavigateToDetail(result)
+                }else{
+                    onDateScanned(result)
+                }
+            },
+            onNavigateToDetail = onNavigateToDetail)
     } else {
         LaunchedEffect(key1 = true) {
             launcher.launch(Manifest.permission.CAMERA)
@@ -93,7 +103,7 @@ fun CameraContent(
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
 
     var scannedBarcode by remember { mutableStateOf<String?>(null) }
-    scannedBarcode = "8480000101617" //Para probar sin camara
+    scannedBarcode = "8480000101617" //Para probar sin camara *******************************************************************
     LaunchedEffect(scannedBarcode) {
         if (scannedBarcode != null) {
             Log.d("OFF_TEST2", "Código detectado en estado: $scannedBarcode")

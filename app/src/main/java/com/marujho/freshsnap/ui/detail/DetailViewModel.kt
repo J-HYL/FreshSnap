@@ -11,6 +11,9 @@ import com.marujho.freshsnap.data.domain.BarcodeDomain
 import com.marujho.freshsnap.data.remote.dto.ProductDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,6 +49,19 @@ class DetailViewModel @Inject constructor(
                 Log.e("OFF_TEST2", "Error en dominio", e)
             }
         }
+    }
+
+    var expirationDate by mutableStateOf<String?>(null)
+        private set
+
+    fun setExpirationDatefromCal(cal: Long?) {
+        if (cal != null) {
+            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            expirationDate = formatter.format(Date(cal))
+        }
+    }
+    fun setExpirationFromScan(date: String) {
+        expirationDate = date
     }
 }
 

@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.marujho.freshsnap.data.model.ScanType
 import com.marujho.freshsnap.ui.detail.detailScreen
 import com.marujho.freshsnap.ui.login.LoginScreen
 import com.marujho.freshsnap.ui.main.MainAppScreen
@@ -38,28 +39,53 @@ fun AppNavigation() {
                         popUpTo("main_screen") { inclusive = true }
                     }
                 },
-                onNavigateToDetail = {barcode ->
-                    navController.navigate("detail_screen/$barcode")
-                }
-            )
-        }
-
-        composable("scanner_screen") {
-            BarCodeScanScreen(
                 onNavigateToDetail = { barcode ->
-                    Log.d("OFF_TEST2","Quiere navegar")
                     navController.navigate("detail_screen/$barcode")
                 }
             )
         }
 
-        composable (route = "detail_screen/{barcode}",
-            arguments = listOf(navArgument("barcode"){type = NavType.StringType})){
+        composable( //Cojemos para saber si es en modo barcode que va a ser el pordefecto siempre o el de fecha de caducidad
+            "scanner_screen?type={type}",
+            arguments = listOf(
+                navArgument("type") { defaultValue = ScanType.BARCODE.name }
+            )) { backStackEntry ->
+            val scanType = backStackEntry.arguments?.getString("type") ?: ScanType.BARCODE.name
+            val currentScantype = try {
+                ScanType.valueOf(scanType)
+            } catch (e: IllegalArgumentException) {
+                ScanType.BARCODE
+            }
+
+            BarCodeScanScreen(
+                scanType = currentScantype,
+                onNavigateToDetail = { barcode ->
+                    Log.d("OFF_TEST2", "Quiere navegar")
+                    navController.navigate("detail_screen/$barcode")
+                },
+                onDateScanned = { date ->
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("scanned_date", date)
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(
+            route = "detail_screen/{barcode}",
+            arguments = listOf(navArgument("barcode") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val scannedDate = backStackEntry.savedStateHandle.get<String>("scanned_date")
+
             detailScreen(
                 onNavigateMain = {
-                    navController.navigate("main_screen"){
-                        popUpTo("main_screen"){inclusive = true}
+                    navController.navigate("main_screen") {
+                        popUpTo("main_screen") { inclusive = true }
                     }
+                },
+                onNavigationToScanDate = {
+                    navController.navigate("scanner_screen?type=${ScanType.EX_DATE.name}")
                 }
             )
         }
