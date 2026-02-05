@@ -6,7 +6,7 @@
   </picture>
 </p>
 
-<h1 align="center">FreshSnap (FreshApp)</h1>
+<h1 align="center">FreshSnap</h1>
 
 <p align="center">
   <strong>Tu despensa online</strong>
