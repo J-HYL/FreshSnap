@@ -127,4 +127,6 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)      // Para Login
     implementation(libs.firebase.firestore) // Base de datos en la nube
+
+    implementation(libs.kotlinx.coroutines.play.services)
 }
