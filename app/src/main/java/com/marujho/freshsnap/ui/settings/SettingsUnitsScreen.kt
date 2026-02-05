@@ -4,6 +4,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 
 @Composable
-fun SettingsAccountScreen() {
-    Text("Ajustes de la cuenta")
+fun SettingsUnitsScreen() {
+    Text("Unidades de medida")
 }
