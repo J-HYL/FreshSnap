@@ -1,6 +1,7 @@
 package com.marujho.freshsnap.ui.detail
 
 import android.content.ClipData
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,6 +43,20 @@ fun detailScreen(
 ) {
 
     val state = viewModel.uiState
+    val context = LocalContext.current
+
+    // ESTO HAY QUE CAMBIARLO CUANDO SE META EL DIALOG DE LA FECHA DE CADUCIDAD
+    fun onConfirmPressed() {
+        viewModel.saveProduct(
+            onSuccess = {
+                Toast.makeText(context, "Producto guardado", Toast.LENGTH_SHORT).show()
+                onNavigateMain()
+            },
+            onError = { error ->
+                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            }
+        )
+    }
 
     when (state) {
         is DetailUiState.Loading -> {}//Imagen cargando
@@ -51,7 +67,7 @@ fun detailScreen(
                 bottomBar = {
                     detailBottomBar(
                         onCancel = { onNavigateMain() },
-                        onConfirm = {}
+                        onConfirm = { onConfirmPressed() }
                     )
                 }
             ) { innerPadding ->
