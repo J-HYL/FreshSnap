@@ -67,7 +67,7 @@ class DetailViewModel @Inject constructor(
                 greenScore = dto.greenScore?.uppercase(),
 
                 scanDate = System.currentTimeMillis(),
-                expirationDate = System.currentTimeMillis() + (7L * 24 * 60 * 60 * 1000),
+                expirationDate = System.currentTimeMillis() + (7L * 24 * 60 * 60 * 1000), // ESTO HAY QUE CAMBIARLO CUANDO ESTE LISTO EL ESCANEO DE FECHA DE CADUCIDAD
 
                 energyKcal = dto.nutriments?.energyKcal100g,
                 energyKj = dto.nutriments?.energyKj100g,

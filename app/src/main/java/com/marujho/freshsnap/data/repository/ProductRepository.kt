@@ -33,4 +33,20 @@ class ProductRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    suspend fun getAllProducts(): Result<List<UserProduct>> {
+        return try {
+            val collection = getUserProductsCollection() ?: throw Exception("Usuario no logueado")
+
+            // obteber todos los documentos de la coleccion despensa (pantry) de firebase
+            val snapshot = collection.get().await()
+
+            // convertir los documentos a objetos
+            val products = snapshot.toObjects(UserProduct::class.java)
+
+            Result.success(products)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
