@@ -1,5 +1,6 @@
 package com.marujho.freshsnap.ui.main
 
+import android.net.http.SslCertificate.saveState
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import com.marujho.freshsnap.ui.theme.Green
 import com.marujho.freshsnap.ui.theme.Grey
@@ -52,7 +54,8 @@ data class ProductUiModel(
 fun MainScreen(
     navController: NavController,
     bottomBarPadding: Dp = 0.dp,
-    viewModel: MainViewModel = hiltViewModel()
+    viewModel: MainViewModel = hiltViewModel(),
+    onNavigateToDetail: (String) -> Unit
 ) {
     val products by viewModel.products.collectAsState() // datos de prueba
 
@@ -63,7 +66,15 @@ fun MainScreen(
         contentWindowInsets = WindowInsets(0.dp),
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* metodo añadir nuevo producto */ },
+                onClick = {
+                    navController.navigate("scanner_screen") {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
                 containerColor = Green,
                 contentColor = Color.White,
                 shape = CircleShape,
@@ -91,7 +102,7 @@ fun MainScreen(
                 contentPadding = PaddingValues(bottom = bottomBarPadding + 80.dp)
             ) {
                 items(products) { product ->
-                    ProductCardItem(product)
+                    ProductCardItem(product, onNavigateToDetail)
                 }
             }
         }
@@ -122,7 +133,9 @@ fun SearchBar() {
 }
 
 @Composable
-fun ProductCardItem(product: ProductUiModel) {
+fun ProductCardItem(
+    product: ProductUiModel,
+    onNavigateToDetail: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "rotation")
 
@@ -245,7 +258,7 @@ fun ProductCardItem(product: ProductUiModel) {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Button(
-                        onClick = { /* ir a pantalla detalle */ },
+                        onClick = { onNavigateToDetail(product.ean) },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = Green),
                         shape = RoundedCornerShape(8.dp)
@@ -264,11 +277,4 @@ fun TextDetail(label: String, value: String) {
         Text(text = "$label ", fontWeight = FontWeight.Bold, fontSize = 13.sp)
         Text(text = value, fontSize = 13.sp, color = Color.DarkGray)
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun MainScreenPreview() {
-    val navController = rememberNavController()
-    MainScreen(navController = navController)
 }

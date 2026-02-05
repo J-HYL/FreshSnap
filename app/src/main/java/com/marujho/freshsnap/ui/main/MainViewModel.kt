@@ -81,7 +81,7 @@ class MainViewModel @Inject constructor() : ViewModel() {
                 "19/12/2025",
                 "10/12/2025",
                 "425 g",
-                "8480000142139"
+                "8480000101617"
             ),
             ProductUiModel(
                 "5",

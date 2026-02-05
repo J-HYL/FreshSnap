@@ -63,7 +63,8 @@ fun MainAppScreen(
             composable(BottomNavItem.Home.route) {
                 MainScreen(
                     navController = navController,
-                    bottomBarPadding = innerPadding.calculateBottomPadding()
+                    bottomBarPadding = innerPadding.calculateBottomPadding(),
+                    onNavigateToDetail = onNavigateToDetail
                 )
             }
             composable(BottomNavItem.Scanner.route) {
