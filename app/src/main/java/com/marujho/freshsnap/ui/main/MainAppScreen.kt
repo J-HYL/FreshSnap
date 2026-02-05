@@ -14,6 +14,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.marujho.freshsnap.BarCodeScanScreen
 import com.marujho.freshsnap.ui.navigation.BottomNavItem
+import com.marujho.freshsnap.ui.settings.SettingsAccountScreen
+import com.marujho.freshsnap.ui.settings.SettingsAlertScreen
+import com.marujho.freshsnap.ui.settings.SettingsPermitsScreen
+import com.marujho.freshsnap.ui.settings.SettingsScreen
 
 @Composable
 fun MainAppScreen(
@@ -32,7 +36,8 @@ fun MainAppScreen(
 
                 val items = listOf(
                     BottomNavItem.Home,
-                    BottomNavItem.Scanner
+                    BottomNavItem.Scanner,
+                    BottomNavItem.Settings
                 )
 
                 items.forEach { screen ->
@@ -69,6 +74,21 @@ fun MainAppScreen(
             }
             composable(BottomNavItem.Scanner.route) {
                 BarCodeScanScreen(onNavigateToDetail = onNavigateToDetail)
+            }
+            composable(BottomNavItem.Settings.route) {
+                SettingsScreen(navController)
+            }
+
+            composable("settings_account") {
+                SettingsAccountScreen()
+            }
+
+            composable("settings_permissions") {
+                SettingsPermitsScreen()
+            }
+
+            composable("settings_notifications") {
+                SettingsAlertScreen()
             }
         }
     }
