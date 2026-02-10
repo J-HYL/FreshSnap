@@ -13,6 +13,9 @@ import com.marujho.freshsnap.data.remote.dto.ProductDto
 import com.marujho.freshsnap.data.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -51,6 +54,14 @@ class DetailViewModel @Inject constructor(
         if (currentState is DetailUiState.Success) {
             val dto = currentState.product
 
+            val expirationMillis = expirationDate?.let { dateString ->
+                try {
+                    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(dateString)?.time
+                } catch (e: Exception) {
+                    null
+                }
+            } ?: (System.currentTimeMillis() + (7L * 24 * 60 * 60 * 1000))
+
             // API -> Firebase
             val userProduct = UserProduct(
                 ean = barcode,
@@ -67,7 +78,7 @@ class DetailViewModel @Inject constructor(
                 greenScore = dto.greenScore?.uppercase(),
 
                 scanDate = System.currentTimeMillis(),
-                expirationDate = System.currentTimeMillis() + (7L * 24 * 60 * 60 * 1000), // ESTO HAY QUE CAMBIARLO CUANDO ESTE LISTO EL ESCANEO DE FECHA DE CADUCIDAD
+                expirationDate = expirationMillis,
 
                 energyKcal = dto.nutriments?.energyKcal100g,
                 energyKj = dto.nutriments?.energyKj100g,
@@ -95,6 +106,19 @@ class DetailViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    var expirationDate by mutableStateOf<String?>(null)
+        private set
+
+    fun setExpirationDatefromCal(cal: Long?) {
+        if (cal != null) {
+            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            expirationDate = formatter.format(Date(cal))
+        }
+    }
+    fun setExpirationFromScan(date: String) {
+        expirationDate = date
     }
 }
 

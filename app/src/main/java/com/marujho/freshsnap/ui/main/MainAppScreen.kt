@@ -80,6 +80,7 @@ fun MainAppScreen(
             }
             composable(BottomNavItem.Scanner.route) {
                 BarCodeScanScreen(onNavigateToDetail = onNavigateToDetail)
+                BarCodeScanScreen(onNavigateToDetail = onNavigateToDetail)
             }
             composable(BottomNavItem.Settings.route) {
                 SettingsScreen(navController)
