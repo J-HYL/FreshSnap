@@ -16,6 +16,7 @@ import com.marujho.freshsnap.BarCodeScanScreen
 import com.marujho.freshsnap.ui.navigation.BottomNavItem
 import com.marujho.freshsnap.ui.settings.SettingsAccountScreen
 import com.marujho.freshsnap.ui.settings.SettingsAlertScreen
+import com.marujho.freshsnap.ui.settings.SettingsAllergyScreen
 import com.marujho.freshsnap.ui.settings.SettingsPermitsScreen
 import com.marujho.freshsnap.ui.settings.SettingsScreen
 
@@ -44,14 +45,17 @@ fun MainAppScreen(
                     NavigationBarItem(
                         icon = { Icon(screen.icon, contentDescription = null) },
                         label = { Text(screen.title) },
-                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                        selected =
+                            currentDestination?.route == screen.route ||
+                                    (screen == BottomNavItem.Settings &&
+                                            currentDestination?.route?.startsWith("settings_") == true),
                         onClick = {
                             navController.navigate(screen.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
                                 launchSingleTop = true
-                                restoreState = true
+                                restoreState = false
                             }
                         }
                     )
@@ -89,6 +93,10 @@ fun MainAppScreen(
 
             composable("settings_notifications") {
                 SettingsAlertScreen()
+            }
+
+            composable("settings_allergy") {
+                SettingsAllergyScreen()
             }
         }
     }
