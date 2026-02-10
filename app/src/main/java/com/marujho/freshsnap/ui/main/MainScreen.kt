@@ -33,6 +33,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
 import com.marujho.freshsnap.ui.theme.Green
 import com.marujho.freshsnap.ui.theme.Grey
 import com.marujho.freshsnap.R
@@ -47,7 +48,8 @@ data class ProductUiModel(
     val scannedDate: String,
     val quantity: String,
     val ean: String,
-    val nutriScore: String = "A"
+    val nutriScore: String = "A",
+    val greenScore: String = "?"
 )
 
 @Composable
@@ -175,15 +177,21 @@ fun ProductCardItem(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                // Imagen del producto (Placeholder)
-                Icon(
-                    imageVector = Icons.Default.ShoppingCart,
-                    contentDescription = null,
+                Box(
                     modifier = Modifier
-                        .size(60.dp)
-                        .align(Alignment.CenterVertically),
-                    tint = Color.Gray
-                )
+                        .size(70.dp)
+                        .padding(vertical = 8.dp)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    AsyncImage(
+                        model = product.imageUrl,
+                        contentDescription = "Foto producto",
+                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(R.drawable.ic_freshsnap_logo),
+                        error = painterResource(android.R.drawable.ic_menu_gallery)
+                    )
+                }
 
                 Spacer(modifier = Modifier.width(12.dp))
 
@@ -248,10 +256,33 @@ fun ProductCardItem(
                         }
 
                         Column(horizontalAlignment = Alignment.End) {
-                            // aqui poner imagen de nutriscore
-                            Text("Green Score: B", fontWeight = FontWeight.Bold) // mirar como devulve green score
+                            // NutriScore Image
+                            val nutriRes = getNutriScoreIcon(product.nutriScore)
+                            if (nutriRes != null) {
+                                Image(
+                                    painter = painterResource(id = nutriRes),
+                                    contentDescription = "NutriScore ${product.nutriScore}",
+                                    modifier = Modifier.height(32.dp),
+                                    contentScale = ContentScale.Fit
+                                )
+                            } else {
+                                Text("Nutri-Score: ${product.nutriScore}", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            }
+
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text("Nutri-Score: ${product.nutriScore}", fontWeight = FontWeight.Bold)
+
+                            // EcoScore Image
+                            val ecoRes = getEcoScoreIcon(product.greenScore)
+                            if (ecoRes != null) {
+                                Image(
+                                    painter = painterResource(id = ecoRes),
+                                    contentDescription = "EcoScore ${product.greenScore}",
+                                    modifier = Modifier.height(32.dp),
+                                    contentScale = ContentScale.Fit
+                                )
+                            } else {
+                                Text("Eco-Score: ${product.greenScore}", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Color.Gray)
+                            }
                         }
                     }
 
@@ -276,5 +307,28 @@ fun TextDetail(label: String, value: String) {
     Row(modifier = Modifier.padding(vertical = 2.dp)) {
         Text(text = "$label ", fontWeight = FontWeight.Bold, fontSize = 13.sp)
         Text(text = value, fontSize = 13.sp, color = Color.DarkGray)
+    }
+}
+
+fun getNutriScoreIcon(score: String?): Int? {
+    return when (score?.lowercase()) {
+        "a" -> R.drawable.ic_nutriscore_a
+        "b" -> R.drawable.ic_nutriscore_b
+        "c" -> R.drawable.ic_nutriscore_c
+        "d" -> R.drawable.ic_nutriscore_d
+        "e" -> R.drawable.ic_nutriscore_e
+        else -> null
+    }
+}
+
+fun getEcoScoreIcon(score: String?): Int? {
+    return when (score?.lowercase()) {
+        "a" -> R.drawable.ic_ecoscore_a
+        "b" -> R.drawable.ic_ecoscore_b
+        "c" -> R.drawable.ic_ecoscore_c
+        "d" -> R.drawable.ic_ecoscore_d
+        "e" -> R.drawable.ic_ecoscore_e
+        "f" -> R.drawable.ic_ecoscore_f
+        else -> null
     }
 }

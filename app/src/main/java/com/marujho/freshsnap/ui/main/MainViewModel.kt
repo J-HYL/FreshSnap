@@ -13,13 +13,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
+import com.marujho.freshsnap.data.model.UserProduct
+import com.marujho.freshsnap.data.repository.ProductRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 @HiltViewModel
-class MainViewModel @Inject constructor() : ViewModel() {
+class MainViewModel @Inject constructor(
+    private val repository: ProductRepository
+) : ViewModel() {
     private val _products = MutableStateFlow<List<ProductUiModel>>(emptyList())
     val products: StateFlow<List<ProductUiModel>> = _products.asStateFlow()
 
@@ -27,95 +35,47 @@ class MainViewModel @Inject constructor() : ViewModel() {
         loadProducts()
     }
 
-    private fun loadProducts() {
+    fun loadProducts() {
         viewModelScope.launch {
-            val rawList = getSampleProducts()
-            val sortedList = rawList.sortedBy { it.expiryDays }
+            val result = repository.getAllProducts()
 
-            _products.value = sortedList
+            if (result.isSuccess) {
+                val userProducts = result.getOrDefault(emptyList())
+
+                val uiList = userProducts.map { it.toUiModel() }
+
+                val sortedList = uiList.sortedBy { it.expiryDays }
+
+                _products.value = sortedList
+            } else {
+                _products.value = emptyList()
+            }
         }
     }
 
-    // datos de prueba
-    private fun getSampleProducts(): List<ProductUiModel> {
-        return listOf(
-            ProductUiModel(
-                "1",
-                "Digestive Avena Choco",
-                "Gullón",
-                null,
-                1,
-                "15/12/2025",
-                "10/12/2025",
-                "400g",
-                "84100001"
-            ),
-            ProductUiModel(
-                "2",
-                "Tomate frito",
-                "Hacendado",
-                null,
-                3,
-                "17/12/2025",
-                "10/12/2025",
-                "3 packs",
-                "84800002"
-            ),
-            ProductUiModel(
-                "3",
-                "Kéfir natural",
-                "Hacendado",
-                null,
-                5,
-                "19/12/2025",
-                "10/12/2025",
-                "500g",
-                "84800003"
-            ),
-            ProductUiModel(
-                "4",
-                "Macarrones",
-                "Coviran",
-                null,
-                5,
-                "19/12/2025",
-                "10/12/2025",
-                "425 g",
-                "8480000101617"
-            ),
-            ProductUiModel(
-                "5",
-                "Macarrones",
-                "Hacendado",
-                null,
-                7,
-                "21/12/2025",
-                "10/12/2025",
-                "1 kg",
-                "84800005"
-            ),
-            ProductUiModel(
-                "6",
-                "Pizza Roma",
-                "Hacendado",
-                null,
-                10,
-                "24/12/2025",
-                "10/12/2025",
-                "350 g",
-                "84800006"
-            ),
-            ProductUiModel(
-                "3",
-                "Kéfir natural",
-                "Hacendado",
-                null,
-                5,
-                "19/12/2025",
-                "10/12/2025",
-                "500g",
-                "84800003"
-            ),
+    private fun UserProduct.toUiModel(): ProductUiModel {
+        val today = System.currentTimeMillis()
+        val expDate = this.expirationDate ?: today // si es null ponemos que es hoy
+        val diffInMillis = expDate - today
+        val daysRemaining = TimeUnit.MILLISECONDS.toDays(diffInMillis).toInt()
+
+        // formatesr fecha
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val expDateString = dateFormat.format(Date(expDate))
+        val scanDateString = dateFormat.format(Date(this.scanDate))
+
+        return ProductUiModel(
+            id = this.id,
+            name = this.name.ifBlank { "Sin nombre" },
+            brand = this.brand.ifBlank { "Sin marca" },
+            imageUrl = this.imageUrl,
+            expiryDays = daysRemaining,
+            expiryDate = expDateString,
+            scannedDate = scanDateString,
+            quantity = this.quantity ?: "-",
+            ean = this.ean,
+            nutriScore = this.nutriScore ?: "?",
+            greenScore = this.greenScore ?: "?"
         )
     }
 }
