@@ -5,53 +5,71 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun SettingsScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 64.dp)
     ) {
 
-        Text(
-            text = "Ajustes",
-            style = MaterialTheme.typography.headlineMedium
-        )
+        UserHeader()
 
         Spacer(Modifier.height(24.dp))
 
-        SettingsItem("Mi cuenta") {
-            navController.navigate("settings_account")
-        }
+        Text(
+            text = "Ajustes",
+            style = MaterialTheme.typography.titleLarge
+        )
 
-        SettingsItem("Unidades de medida") {
-            navController.navigate("settings_units")
-        }
+        Spacer(Modifier.height(16.dp))
 
-        SettingsItem("Permisos") {
-            navController.navigate("settings_permissions")
-        }
+        SettingsItem(
+            title = "Dark Theme / Light Theme",
+            onClick = { /* toggle */ },
+            trailing = {
+                Switch(checked = true, onCheckedChange = {})
+            }
+        )
 
-        SettingsItem("Alergias") {
-            navController.navigate("settings_allergy")
-        }
+        SettingsItem(
+            title = "Mi Cuenta",
+            subtitle = "Usuario, contraseña, productos.",
+            onClick = { navController.navigate("settings_account") }
+        )
 
-        SettingsItem("Alertas de caducidad") {
-            navController.navigate("settings_alert")
-        }
+        SettingsItem(
+            title = "Unidades de medida",
+            subtitle = "Gramos, Miligramos, Kilogramos.",
+            onClick = { navController.navigate("settings_units") }
+        )
 
-        SettingsItem("Copia de seguridad") {
-            navController.navigate("settings_backup")
-        }
+        SettingsItem(
+            title = "Permisos",
+            subtitle = "Cámara, notificaciones, almacenamiento.",
+            onClick = { navController.navigate("settings_permissions") }
+        )
 
+        SettingsItem(
+            title = "Alergias",
+            subtitle = "Leche, gluten, huevos.",
+            onClick = { navController.navigate("settings_allergy") }
+        )
 
-
+        SettingsItem(
+            title = "Alertas caducidad",
+            subtitle = "3 dias, 5 dias, 1 semana.",
+            onClick = { navController.navigate("settings_alert") }
+        )
 
     }
 }
+
 
 @Composable
 fun SettingsItem(
@@ -62,4 +80,14 @@ fun SettingsItem(
         headlineContent = { Text(title) },
         modifier = Modifier.clickable { onClick() }
     )
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun SettingsScreenPreview() {
+    MaterialTheme {
+        SettingsScreen(
+            navController = rememberNavController()
+        )
+    }
 }
