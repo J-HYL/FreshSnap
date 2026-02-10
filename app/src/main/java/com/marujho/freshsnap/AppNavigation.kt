@@ -10,6 +10,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.marujho.freshsnap.ui.detail.detailScreen
+import androidx.navigation.navArgument
 import com.marujho.freshsnap.data.model.ScanType
 import com.marujho.freshsnap.ui.detail.DetailViewModel
 import com.marujho.freshsnap.ui.detail.detailScreen
@@ -38,16 +40,12 @@ fun AppNavigation() {
 
         composable("main_screen") {
             MainAppScreen(
-                onLogout = {
-                    navController.navigate("login_screen") {
-                        popUpTo("main_screen") { inclusive = true }
-                    }
-                },
-                onNavigateToDetail = { barcode ->
+                onNavigateToDetail = {barcode ->
                     navController.navigate("detail_screen/$barcode")
                 }
             )
         }
+
 
         composable( //Cojemos para saber si es en modo barcode que va a ser el pordefecto siempre o el de fecha de caducidad
             "scanner_screen?type={type}",

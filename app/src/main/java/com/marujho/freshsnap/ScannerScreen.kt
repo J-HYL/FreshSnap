@@ -49,6 +49,7 @@ import java.util.regex.Pattern
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 
+
 @Composable
 fun BarCodeScanScreen(
     onNavigateToDetail: (String) -> Unit = {},

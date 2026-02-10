@@ -338,7 +338,6 @@ fun detailBottomBar(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
-            .navigationBarsPadding()
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
