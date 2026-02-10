@@ -74,7 +74,8 @@ class MainViewModel @Inject constructor(
             scannedDate = scanDateString,
             quantity = this.quantity ?: "-",
             ean = this.ean,
-            nutriScore = this.nutriScore ?: "?"
+            nutriScore = this.nutriScore ?: "?",
+            greenScore = this.greenScore ?: "?"
         )
     }
 }
