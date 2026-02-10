@@ -39,15 +39,6 @@ fun AppNavigation() {
             )
         }
 
-        composable("scanner_screen") {
-            BarCodeScanScreen(
-                onNavigateToDetail = { barcode ->
-                    Log.d("OFF_TEST2","Quiere navegar")
-                    navController.navigate("detail_screen/$barcode")
-                }
-            )
-        }
-
         composable (route = "detail_screen/{barcode}",
             arguments = listOf(navArgument("barcode"){type = NavType.StringType})){
             detailScreen(
