@@ -47,7 +47,7 @@ import com.marujho.freshsnap.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun detailScreen(
-    viewModel: DetailViewModel = hiltViewModel(),
+    viewModel: DetailViewModel,
     onNavigateMain: () -> Unit,
     onNavigationToScanDate: () -> Unit ={}
 ) {

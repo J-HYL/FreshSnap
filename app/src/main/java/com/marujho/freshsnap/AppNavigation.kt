@@ -2,12 +2,16 @@ package com.marujho.freshsnap
 
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.marujho.freshsnap.data.model.ScanType
+import com.marujho.freshsnap.ui.detail.DetailViewModel
 import com.marujho.freshsnap.ui.detail.detailScreen
 import com.marujho.freshsnap.ui.login.LoginScreen
 import com.marujho.freshsnap.ui.main.MainAppScreen
@@ -76,9 +80,17 @@ fun AppNavigation() {
             route = "detail_screen/{barcode}",
             arguments = listOf(navArgument("barcode") { type = NavType.StringType })
         ) { backStackEntry ->
-            val scannedDate = backStackEntry.savedStateHandle.get<String>("scanned_date")
+            val viewModel: DetailViewModel = hiltViewModel()
+            val scannedDate = backStackEntry.savedStateHandle.getLiveData<String>("scanned_date")
 
+            LaunchedEffect(scannedDate.value) {
+                scannedDate.value?.let { date ->
+                    viewModel.setExpirationFromScan(date)
+                    backStackEntry.savedStateHandle.remove<String>("scanned_date")
+                }
+            }
             detailScreen(
+                viewModel = viewModel,
                 onNavigateMain = {
                     navController.navigate("main_screen") {
                         popUpTo("main_screen") { inclusive = true }

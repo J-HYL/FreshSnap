@@ -46,6 +46,8 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.marujho.freshsnap.data.model.ScanType
 import java.util.regex.Pattern
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun BarCodeScanScreen(
@@ -102,8 +104,11 @@ fun CameraContent(
     val cameraController = remember { LifecycleCameraController(context) }
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
 
+    val scope = rememberCoroutineScope()
+
     var scannedBarcode by remember { mutableStateOf<String?>(null) }
-    scannedBarcode = "8480000101617" //Para probar sin camara *******************************************************************
+    var dateFoundFlag by remember { mutableStateOf(false) }
+    //scannedBarcode = "8480000101617" //Para probar sin camara *******************************************************************
     LaunchedEffect(scannedBarcode) {
         if (scannedBarcode != null) {
             Log.d("OFF_TEST2", "Código detectado en estado: $scannedBarcode")
@@ -154,10 +159,13 @@ fun CameraContent(
                     cameraExecutor
                 ) { result: MlKitAnalyzer.Result? ->
                     val textResults = result?.getValue(textScanner)
-                    if (textResults != null) {
+                    if (textResults != null && !dateFoundFlag) {
                         val dateFound = findExpirationDate(textResults.text)
                         if (dateFound != null) {
-                            onResultScanned(dateFound)
+                            dateFoundFlag = true
+                            scope.launch {
+                                onResultScanned(dateFound)
+                            }
                         }
                     }
                 }
