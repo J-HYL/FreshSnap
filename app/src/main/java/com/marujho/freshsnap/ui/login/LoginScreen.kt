@@ -22,7 +22,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.marujho.freshsnap.R
+import com.marujho.freshsnap.SignUpBox
 import com.marujho.freshsnap.ui.theme.FreshSnapTheme
 import com.marujho.freshsnap.ui.theme.Green
 import com.marujho.freshsnap.ui.theme.Grey
@@ -65,10 +67,13 @@ fun LoginBox(
     var emailInput by remember { mutableStateOf("") }
     var passwordInput by remember { mutableStateOf("") }
 
-    Column(modifier = modifier
-        .background(Grey)
-        .padding(16.dp),
-        verticalArrangement = Arrangement.Center
+    Column(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.background)
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         IconText()
         Spacer(modifier = Modifier.height(24.dp))
@@ -109,8 +114,8 @@ fun LoginBox(
                     onLoginClick(emailInput, passwordInput)
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Green,
-                    contentColor = White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 modifier = Modifier.weight(1f)
             ) {
@@ -118,7 +123,10 @@ fun LoginBox(
             }
             OutlinedButton(
                 onClick = { onSignUpClick() },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
             ) {
                 Text("Crear Cuenta")
             }
@@ -138,12 +146,14 @@ fun IconText(modifier: Modifier = Modifier) {
         Icon(
             painter = painterResource(R.drawable.ic_freshsnap_logo),
             contentDescription = null,
-            modifier = Modifier.size(64.dp)
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = stringResource(R.string.app_name),
-            style = MaterialTheme.typography.displayMedium
+            style = MaterialTheme.typography.displayMedium,
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
@@ -164,13 +174,23 @@ fun EditTextField(
         leadingIcon = {
             Icon(
                 imageVector = icon ?: Icons.Default.Lock,
-                contentDescription = null
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
             )
         },
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = White,
-            unfocusedContainerColor = White,
-            disabledContainerColor = White,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            disabledContainerColor = MaterialTheme.colorScheme.surface,
+
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
         shape = RoundedCornerShape(24.dp),
         label = { Text(label) },
