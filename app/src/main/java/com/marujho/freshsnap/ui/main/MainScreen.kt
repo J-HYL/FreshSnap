@@ -61,10 +61,8 @@ fun MainScreen(
 ) {
     val products by viewModel.products.collectAsState() // datos de prueba
 
-    val backgroundColor = Color(0xFFF5F5F5)
-
     Scaffold(
-        containerColor = backgroundColor,
+        containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0.dp),
         floatingActionButton = {
             FloatingActionButton(
@@ -77,8 +75,8 @@ fun MainScreen(
                         restoreState = true
                     }
                 },
-                containerColor = Green,
-                contentColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = CircleShape,
                 modifier = Modifier.padding(bottom = bottomBarPadding)
             ) {
@@ -117,18 +115,33 @@ fun SearchBar() {
         value = "",
         onValueChange = {},
         placeholder = { Text("Search") },
-        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
-        trailingIcon = { Icon(painter = painterResource(id = R.drawable.ic_camera), contentDescription = null, tint = Color.Gray) },
+        leadingIcon = {
+            Icon(
+                Icons.Default.Search,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        trailingIcon = {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_camera),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(30.dp))
-            .background(Color.White),
+            .clip(RoundedCornerShape(30.dp)),
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
             disabledIndicatorColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+            unfocusedIndicatorColor = Color.Transparent,
+
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            cursorColor = MaterialTheme.colorScheme.primary
         ),
         singleLine = true
     )
@@ -137,9 +150,13 @@ fun SearchBar() {
 @Composable
 fun ProductCardItem(
     product: ProductUiModel,
-    onNavigateToDetail: (String) -> Unit) {
+    onNavigateToDetail: (String) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
-    val rotationState by animateFloatAsState(targetValue = if (expanded) 180f else 0f, label = "rotation")
+    val rotationState by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        label = "rotation"
+    )
 
     val statusColor = when {
         product.expiryDays <= 2 -> Color(0xFFFF5252)
@@ -159,7 +176,7 @@ fun ProductCardItem(
                 expanded = !expanded
             },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
@@ -186,7 +203,9 @@ fun ProductCardItem(
                     AsyncImage(
                         model = product.imageUrl,
                         contentDescription = "Foto producto",
-                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(8.dp)),
                         contentScale = ContentScale.Crop,
                         placeholder = painterResource(R.drawable.ic_freshsnap_logo),
                         error = painterResource(android.R.drawable.ic_menu_gallery)
@@ -204,12 +223,12 @@ fun ProductCardItem(
                         text = product.name,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
-                        color = Color.Black
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = product.brand,
                         fontSize = 14.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
 
@@ -221,19 +240,21 @@ fun ProductCardItem(
                         Text(
                             text = "${product.expiryDays} - days",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowDown,
                             contentDescription = "Expand",
-                            modifier = Modifier.rotate(rotationState)
+                            modifier = Modifier.rotate(rotationState),
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                     Text(
                         text = product.expiryDate,
                         fontSize = 12.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
             }
@@ -244,7 +265,10 @@ fun ProductCardItem(
                         .fillMaxWidth()
                         .padding(start = 18.dp, end = 16.dp, bottom = 16.dp)
                 ) {
-                    Divider(color = Color.LightGray, thickness = 0.5.dp)
+                    Divider(
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        thickness = 0.5.dp
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Row(modifier = Modifier.fillMaxWidth()) {
@@ -266,7 +290,12 @@ fun ProductCardItem(
                                     contentScale = ContentScale.Fit
                                 )
                             } else {
-                                Text("Nutri-Score: ${product.nutriScore}", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                Text(
+                                    "Nutri-Score: ${product.nutriScore}",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
                             }
 
                             Spacer(modifier = Modifier.height(4.dp))
@@ -281,7 +310,12 @@ fun ProductCardItem(
                                     contentScale = ContentScale.Fit
                                 )
                             } else {
-                                Text("Eco-Score: ${product.greenScore}", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Color.Gray)
+                                Text(
+                                    "Eco-Score: ${product.greenScore}",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                )
                             }
                         }
                     }
@@ -291,7 +325,10 @@ fun ProductCardItem(
                     Button(
                         onClick = { onNavigateToDetail(product.ean) },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Green),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text("Ver más", color = Color.White)
@@ -305,8 +342,17 @@ fun ProductCardItem(
 @Composable
 fun TextDetail(label: String, value: String) {
     Row(modifier = Modifier.padding(vertical = 2.dp)) {
-        Text(text = "$label ", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-        Text(text = value, fontSize = 13.sp, color = Color.DarkGray)
+        Text(
+            text = "$label ",
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.sp,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = value,
+            fontSize = 13.sp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
     }
 }
 
