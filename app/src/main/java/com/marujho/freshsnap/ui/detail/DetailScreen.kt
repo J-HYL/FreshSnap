@@ -15,15 +15,21 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +44,7 @@ import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,6 +54,9 @@ import com.marujho.freshsnap.data.remote.dto.ProductDto
 import com.marujho.freshsnap.R
 import java.text.SimpleDateFormat
 import java.util.Locale
+import com.marujho.freshsnap.ui.theme.Green
+import com.marujho.freshsnap.ui.theme.SoftRed
+import com.marujho.freshsnap.ui.theme.Yellow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,18 +94,18 @@ fun detailScreen(
 
 
             Scaffold(
+                containerColor = MaterialTheme.colorScheme.background,
                 bottomBar = {
                     detailBottomBar(
                         onCancel = { onNavigateMain() },
-                        onConfirm = { onConfirmPressed()},
-                        onDate = {showSelectDialog = true}
+                        onConfirm = { onConfirmPressed() },
+                        onDate = { showSelectDialog = true }
                     )
                 }
             ) { innerPadding ->
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Gray)
                         .padding(innerPadding),
                     contentPadding = PaddingValues(8.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -123,23 +133,24 @@ fun detailScreen(
                 AlertDialog( //Dialog para añadir fecha de caducidad
                     onDismissRequest = { showSelectDialog = false },
                     title = { Text("Añadir fecha de caducidad") },
-                    text = { Text("¿Como quieres añadirla?") },
+                    text = { Text("¿Cómo quieres añadirla?") },
                     confirmButton = {
-                        Button(
+                        TextButton(
                             onClick = {
                                 showSelectDialog = false
-                                val currentBarCode = product.code ?: ""
                                 onNavigationToScanDate()
                             }
-                        ) { Text(text = "Escanear") }
+                        ) { Text("Escanear") }
                     },
                     dismissButton = { //Boton para añadir manualmente
-
-                        Button(onClick = {
+                        TextButton(onClick = {
                             showSelectDialog = false
                             showDatePick = true
-                        }) { Text(text = "Manual") }
-                    }
+                        }) { Text("Manual") }
+                    },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    textContentColor = MaterialTheme.colorScheme.onSurface
                 )
             }
             if (showDatePick) { //Dialog para el calendario
@@ -150,7 +161,10 @@ fun detailScreen(
                             showDatePick = false
                             viewModel.setExpirationDatefromCal(datePickerState.selectedDateMillis)
                         }) { Text("Guardar") }
-                    }
+                    },
+                    colors = DatePickerDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                    )
                 ) {
                     DatePicker(state = datePickerState)
                 }
@@ -162,19 +176,27 @@ fun detailScreen(
 }
 
 @Composable
-fun detailImage(url: String) { //Conectar para tener la url
+fun detailImage(url: String) {
     Card(
-        modifier = Modifier
-            .padding(16.dp)
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        AsyncImage(
-            model = url,
-            contentDescription = "Imagen del producto",
-            placeholder = painterResource(android.R.drawable.ic_menu_gallery),
-            error = painterResource(android.R.drawable.ic_dialog_alert),
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            contentAlignment = androidx.compose.ui.Alignment.Center
+        ) {
+            AsyncImage(
+                model = url,
+                contentDescription = "Imagen del producto",
+                placeholder = painterResource(android.R.drawable.ic_menu_gallery),
+                error = painterResource(android.R.drawable.ic_dialog_alert),
+                modifier = Modifier.size(200.dp),
+                contentScale = ContentScale.Fit
+            )
+        }
     }
 }
 
@@ -189,9 +211,9 @@ fun detectNullText(
         Text(
             text = "$label: $text",
             style = style,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(bottom = padd.dp)
         )
-
     }
 }
 
@@ -200,16 +222,18 @@ fun detailGeneralInformation(product: ProductDto) { //Connectar con viewmodel pa
     val paddingMod: Int = 4
     Card(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
         ) {
             Text(
-                text = "INFORMACION GENERAL",
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
+                text = "INFORMACIÓN GENERAL",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 12.dp)
             )
             detectNullText("Nombre", product.productName, paddingMod)
             detectNullText("Fecha Escaner", "", paddingMod) //Añadir fecha actual
@@ -228,26 +252,25 @@ fun detailGeneralInformation(product: ProductDto) { //Connectar con viewmodel pa
 
 @Composable
 fun detailHealth(product: ProductDto) {
-    val paddingMod: Int = 4
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = "SALUD",
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 12.dp)
             )
 
             if (product.nutriScore != null) {
                 Image(
                     painter = painterResource(id = getNutriScoreResource(product.nutriScore)!!),
                     contentDescription = "NutriScore",
-                    modifier = Modifier.size(100.dp),
+                    modifier = Modifier
+                        .size(100.dp)
+                        .padding(bottom = 8.dp),
                     contentScale = ContentScale.Fit
                 )
             }
@@ -273,75 +296,74 @@ fun getNutriScoreResource(nutriScore: String?): Int? {
 @Composable
 fun detailNutrimentsLevels(label: String, level: NutrientLevel?) {
     if (level != null) {
-        var color: Color
-        var text: String
-        when (level) {
-            NutrientLevel.LOW -> {
-                color = Color.Green
-                text = "Bajo en $label"
-            }
-
-            NutrientLevel.MODERATE -> {
-                color = Color.Yellow
-                text = "Moderado en $label"
-            }
-
-            NutrientLevel.HIGH -> {
-                color = Color.Red
-                text = "Alto en $label"
-            }
+        val (color, textPrefix) = when (level) {
+            NutrientLevel.LOW -> Pair(Green, "Bajo en")
+            NutrientLevel.MODERATE -> Pair(Yellow, "Moderado en")
+            NutrientLevel.HIGH -> Pair(SoftRed, "Alto en")
         }
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = color
-        )
-    }
-} //Cambiar Colores para que se vean mejor
 
-@Composable
-fun detailNutriments(product: ProductDto) {
-    val paddingMod: Int = 4
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "VALOR NUTRICIONAL",
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier.padding(bottom = paddingMod.dp)
+        Row(modifier = Modifier.padding(vertical = 2.dp)) {
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .background(color, shape = CircleShape)
+                    .align(androidx.compose.ui.Alignment.CenterVertically)
             )
-            detailRowNutriments("Energia Kcal", product.nutriments?.energyKcal100g)
-            detailRowNutriments("Energia Kj", product.nutriments?.energyKj100g)
-            detailRowNutriments("Grasas", product.nutriments?.fat100g)
-            detailRowNutriments("Grasas saturadas", product.nutriments?.saturatedFat100g)
-            detailRowNutriments("Carbohidratos", product.nutriments?.carbohydrates100g)
-            detailRowNutriments("Azúcares", product.nutriments?.sugars100g)
-            detailRowNutriments("Proteínas", product.nutriments?.proteins100g)
-            detailRowNutriments("Sal", product.nutriments?.salt100g)
-            detailRowNutriments("Fibra", product.nutriments?.fiber100g)
-            detailRowNutriments("Sodio", product.nutriments?.sodium100g)
+            Text(
+                text = "  $textPrefix $label",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
-
 }
 
 @Composable
-fun detailRowNutriments(label: String, data: Double?) {
+fun detailNutriments(product: ProductDto) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "VALOR NUTRICIONAL (100g)",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+            detailRowNutriments("Energia", product.nutriments?.energyKcal100g, "Kcal")
+            detailRowNutriments("Grasas", product.nutriments?.fat100g, "g")
+            detailRowNutriments("Grasas sat.", product.nutriments?.saturatedFat100g, "g")
+            detailRowNutriments("Carbohidratos", product.nutriments?.carbohydrates100g, "g")
+            detailRowNutriments("Azúcares", product.nutriments?.sugars100g, "g")
+            detailRowNutriments("Proteínas", product.nutriments?.proteins100g, "g")
+            detailRowNutriments("Sal", product.nutriments?.salt100g, "g")
+            detailRowNutriments("Sodio", product.nutriments?.sodium100g, "g")
+            detailRowNutriments("Fibra", product.nutriments?.fiber100g, "g")
+        }
+    }
+}
+
+@Composable
+fun detailRowNutriments(label: String, data: Double?, unit: String) {
     if (data != null) {
-        Row() {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Text(
                 text = "$label: ",
                 style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
             )
             Text(
-                text = data.toString(),
+                text = "$data $unit",
                 style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -352,32 +374,44 @@ fun detailRowNutriments(label: String, data: Double?) {
 fun detailBottomBar(
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
-    onDate : () -> Unit
+    onDate: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Button(
+        OutlinedButton(
             onClick = onCancel,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.error
+            )
         ) {
-            Text(text = "Cancelar")
+            Text("Cancelar")
         }
-    Button(
-        onClick = onDate,
-        modifier = Modifier.weight(1f)
-    ) {
-        Text(text = "Fecha caducidad")
-    }
+
+        OutlinedButton(
+            onClick = onDate,
+            modifier = Modifier.weight(1f),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Text("Caducidad")
+        }
+
         Button(
             onClick = onConfirm,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            )
         ) {
-            Text(text = "Confirmar")
+            Text("Guardar")
         }
     }
 }

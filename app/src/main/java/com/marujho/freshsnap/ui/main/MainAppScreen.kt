@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -29,10 +30,12 @@ fun MainAppScreen(
     val navController = rememberNavController()
 
     Scaffold(
-        containerColor = Color.Transparent,
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+//                tonalElevation = 8.dp
             ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
@@ -44,13 +47,27 @@ fun MainAppScreen(
                 )
 
                 items.forEach { screen ->
+                    val isSelected = currentDestination?.route == screen.route ||
+                            (screen == BottomNavItem.Settings &&
+                                    currentDestination?.route?.startsWith("settings_") == true)
+
                     NavigationBarItem(
-                        icon = { Icon(screen.icon, contentDescription = null) },
-                        label = { Text(screen.title) },
-                        selected =
-                            currentDestination?.route == screen.route ||
-                                    (screen == BottomNavItem.Settings &&
-                                            currentDestination?.route?.startsWith("settings_") == true),
+                        icon = {
+                            Icon(
+                                imageVector = screen.icon,
+                                contentDescription = screen.title
+                            )
+                        },
+                        label = null, // PREGUNTAR SI DEJAR LAS LABEL O QUITARLAS COMO EN EL DISEÑO ORIGINAL
+                        alwaysShowLabel = false,
+                        selected = isSelected,
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            indicatorColor = MaterialTheme.colorScheme.primary,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
                         onClick = {
                             navController.navigate(screen.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -80,7 +97,6 @@ fun MainAppScreen(
             }
             composable(BottomNavItem.Scanner.route) {
                 BarCodeScanScreen(onNavigateToDetail = onNavigateToDetail)
-                BarCodeScanScreen(onNavigateToDetail = onNavigateToDetail)
             }
             composable(BottomNavItem.Settings.route) {
                 SettingsScreen(navController)
@@ -90,7 +106,7 @@ fun MainAppScreen(
                 SettingsAccountScreen()
             }
 
-            composable ("settings_units"){
+            composable("settings_units") {
                 SettingsUnitsScreen()
             }
 

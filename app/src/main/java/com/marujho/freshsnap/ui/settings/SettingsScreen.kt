@@ -12,61 +12,75 @@ import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun SettingsScreen(navController: NavController) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 16.dp, end = 16.dp, top = 64.dp)
-    ) {
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp, vertical = 16.dp)
+        ) {
 
-        UserHeader()
+            UserHeader()
 
-        Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(24.dp))
 
-        Text(
-            text = "Ajustes",
-            style = MaterialTheme.typography.titleLarge
-        )
+            Text(
+                text = "Ajustes",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
 
-        Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
-        SettingsItem(
-            title = "Dark Theme / Light Theme",
-            onClick = { /* toggle */ },
-            trailing = {
-                Switch(checked = true, onCheckedChange = {})
-            }
-        )
+            SettingsItem(
+                title = "Dark Theme / Light Theme",
+                onClick = {  },
+                trailing = {
+                    Switch(
+                        checked = true,
+                        onCheckedChange = {},
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary,
+                            uncheckedBorderColor = MaterialTheme.colorScheme.outline,
+                            uncheckedThumbColor = MaterialTheme.colorScheme.outline
+                        )
+                    )
+                }
+            )
 
-        SettingsItem(
-            title = "Mi Cuenta",
-            subtitle = "Usuario, contraseña, productos.",
-            onClick = { navController.navigate("settings_account") }
-        )
+            SettingsItem(
+                title = "Mi Cuenta",
+                subtitle = "Usuario, contraseña, productos.",
+                onClick = { navController.navigate("settings_account") }
+            )
 
-        SettingsItem(
-            title = "Unidades de medida",
-            subtitle = "Gramos, Miligramos, Kilogramos.",
-            onClick = { navController.navigate("settings_units") }
-        )
+            SettingsItem(
+                title = "Unidades de medida",
+                subtitle = "Gramos, Miligramos, Kilogramos.",
+                onClick = { navController.navigate("settings_units") }
+            )
 
-        SettingsItem(
-            title = "Permisos",
-            subtitle = "Cámara, notificaciones, almacenamiento.",
-            onClick = { navController.navigate("settings_permissions") }
-        )
+            SettingsItem(
+                title = "Permisos",
+                subtitle = "Cámara, notificaciones, almacenamiento.",
+                onClick = { navController.navigate("settings_permissions") }
+            )
 
-        SettingsItem(
-            title = "Alergias",
-            subtitle = "Leche, gluten, huevos.",
-            onClick = { navController.navigate("settings_allergy") }
-        )
+            SettingsItem(
+                title = "Alergias",
+                subtitle = "Leche, gluten, huevos.",
+                onClick = { navController.navigate("settings_allergy") }
+            )
 
-        SettingsItem(
-            title = "Alertas caducidad",
-            subtitle = "3 dias, 5 dias, 1 semana.",
-            onClick = { navController.navigate("settings_alert") }
-        )
-
+            SettingsItem(
+                title = "Alertas caducidad",
+                subtitle = "3 dias, 5 dias, 1 semana.",
+                onClick = { navController.navigate("settings_alert") }
+            )
+        }
     }
 }
 
