@@ -130,4 +130,6 @@ dependencies {
     implementation(libs.firebase.firestore) // Base de datos en la nube
 
     implementation(libs.kotlinx.coroutines.play.services)
+
+    implementation(libs.androidx.datastore.preferences)
 }
