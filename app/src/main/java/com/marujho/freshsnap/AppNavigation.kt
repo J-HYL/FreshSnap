@@ -21,15 +21,10 @@ import com.marujho.freshsnap.ui.main.MainScreen
 import com.marujho.freshsnap.ui.splash.SplashScreen
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(startDestination: String) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "splash_screen") {
-
-        composable("splash_screen") {
-            SplashScreen(navController)
-        }
-
+    NavHost(navController = navController, startDestination = startDestination) {
         composable("login_screen") {
             LoginScreen(navController = navController)
         }
@@ -47,7 +42,7 @@ fun AppNavigation() {
         }
 
 
-        composable( //Cojemos para saber si es en modo barcode que va a ser el pordefecto siempre o el de fecha de caducidad
+        composable( //Cogemos para saber si es en modo barcode que va a ser el pordefecto siempre o el de fecha de caducidad
             "scanner_screen?type={type}",
             arguments = listOf(
                 navArgument("type") { defaultValue = ScanType.BARCODE.name }
