@@ -2,4 +2,15 @@
 <resources>
 
     <style name="Theme.FreshSnap" parent="android:Theme.Material.Light.NoActionBar" />
+
+
+        <style name="Theme.FreshSnap.Starting" parent="Theme.SplashScreen">
+            <item name="windowSplashScreenBackground">#D5F5E3</item>
+
+            <item name="windowSplashScreenAnimatedIcon">@drawable/ic_freshsnap_logo_splash</item>
+
+            <item name="windowSplashScreenAnimationDuration">200</item>
+
+            <item name="postSplashScreenTheme">@style/Theme.FreshSnap</item>
+        </style>
 </resources>
