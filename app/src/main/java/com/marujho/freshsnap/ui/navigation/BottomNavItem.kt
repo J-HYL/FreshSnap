@@ -11,3 +11,5 @@ sealed class BottomNavItem(val route: String, val title: String, val icon: Image
     object Scanner : BottomNavItem("scanner_screen", "Escanear", Icons.Default.Search)
     object Settings : BottomNavItem("settings_screen", "Ajustes", Icons.Default.Settings)
 }
+
+// VER COMO METES ICONO DE LA CAMARA
