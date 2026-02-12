@@ -42,7 +42,7 @@ fun AppNavigation(startDestination: String) {
         }
 
 
-        composable( //Cojemos para saber si es en modo barcode que va a ser el pordefecto siempre o el de fecha de caducidad
+        composable( //Cogemos para saber si es en modo barcode que va a ser el pordefecto siempre o el de fecha de caducidad
             "scanner_screen?type={type}",
             arguments = listOf(
                 navArgument("type") { defaultValue = ScanType.BARCODE.name }

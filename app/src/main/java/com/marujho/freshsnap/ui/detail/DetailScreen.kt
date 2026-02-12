@@ -263,8 +263,9 @@ fun detailHealth(product: ProductDto) {
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
+            val nutriScoreResource = getNutriScoreResource(product.nutriScore)
 
-            if (product.nutriScore != null) {
+            if (nutriScoreResource != null) {
                 Image(
                     painter = painterResource(id = getNutriScoreResource(product.nutriScore)!!),
                     contentDescription = "NutriScore",

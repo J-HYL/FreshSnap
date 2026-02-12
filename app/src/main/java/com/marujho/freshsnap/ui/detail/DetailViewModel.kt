@@ -1,9 +1,11 @@
 package com.marujho.freshsnap.ui.detail
 
+import NutrimentsDto
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,6 +19,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+import com.marujho.freshsnap.data.remote.*
+import com.marujho.freshsnap.data.remote.dto.NutrientLevel
+import com.marujho.freshsnap.data.remote.dto.NutrimentsLevelDto
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
@@ -33,19 +38,39 @@ class DetailViewModel @Inject constructor(
     init {
         loadProduct()
     }
-
+    private var currentFirestoreId : String? = null
     private fun loadProduct() {
         viewModelScope.launch {
-            try {
-                val response = barcodeDomain.getProductByBarcode(barcode)
-                if (response.status == 1 && response.product != null) {
-                    uiState = DetailUiState.Success(response.product)
-                } else {
-                    uiState = DetailUiState.Error("Producto no encontrado")
-                }
-            } catch (e: Exception) {
-                uiState = DetailUiState.Error(e.message ?: "Error de conexión")
+            uiState = DetailUiState.Loading
+
+            val firebaseResult = productRepository.getProductByEan(barcode)
+            val localProduct = firebaseResult.getOrNull()
+
+            if (localProduct != null) {
+                currentFirestoreId = localProduct.id
+                localProduct.expirationDate?.let { millis ->
+                    setExpirationDatefromCal(millis) }
+                Log.d("SOURCE","FIREBASE")
+                uiState = DetailUiState.Success(localProduct.toDto())
             }
+            else{
+                currentFirestoreId = null
+                Log.d("SOURCE","API")
+                loadFromApi()
+            }
+
+        }
+    }
+    private suspend fun loadFromApi(){
+        try {
+            val response = barcodeDomain.getProductByBarcode(barcode)
+            if (response.status == 1 && response.product != null) {
+                uiState = DetailUiState.Success(response.product)
+            } else {
+                uiState = DetailUiState.Error("Producto no encontrado")
+            }
+        } catch (e: Exception) {
+            uiState = DetailUiState.Error(e.message ?: "Error de conexión")
         }
     }
 
@@ -64,6 +89,7 @@ class DetailViewModel @Inject constructor(
 
             // API -> Firebase
             val userProduct = UserProduct(
+                id = currentFirestoreId ?: "",
                 ean = barcode,
                 name = dto.productName ?: "Producto sin nombre",
                 brand = dto.brands ?: "Marca desconocida",
@@ -119,6 +145,49 @@ class DetailViewModel @Inject constructor(
     }
     fun setExpirationFromScan(date: String) {
         expirationDate = date
+    }
+
+    fun UserProduct.toDto() : ProductDto{
+        return ProductDto(
+            code = this.ean,
+            productName = this.name,
+            brands = this.brand,
+            imageUrl = this.imageUrl,
+            quantity = this.quantity,
+            categories = this.categories,
+            packaging = this.packaging,
+            countries = this.countries,
+            nutriScore = this.nutriScore,
+            novaGroup = this.novaGroup,
+            greenScore = this.greenScore,
+            nutriments = NutrimentsDto(
+                energyKcal100g = this.energyKcal,
+                energyKj100g = this.energyKj,
+                fat100g = this.fat,
+                saturatedFat100g = this.saturatedFat,
+                carbohydrates100g = this.carbohydrates,
+                sugars100g = this.sugars,
+                proteins100g = this.proteins,
+                salt100g = this.salt,
+                fiber100g = this.fiber,
+                sodium100g = this.sodium
+            ),
+            nutrimentsLevels = NutrimentsLevelDto(
+                fat = getNutrientLevel(this.fatLevel),
+                saturatedFat = getNutrientLevel(this.saturatedFatLevel),
+                sugars = getNutrientLevel(this.sugarLevel),
+                salt = getNutrientLevel(this.saltLevel)
+            )
+        )
+    }
+}
+
+private fun getNutrientLevel(level : String?) : NutrientLevel?{
+    if (level == null) return  null
+    return  try{
+        NutrientLevel.valueOf(level)
+    }catch (e : IllegalArgumentException){
+        null
     }
 }
 
