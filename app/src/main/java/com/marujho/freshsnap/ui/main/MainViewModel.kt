@@ -28,8 +28,12 @@ import java.util.concurrent.TimeUnit
 class MainViewModel @Inject constructor(
     private val repository: ProductRepository
 ) : ViewModel() {
-    private val _products = MutableStateFlow<List<ProductUiModel>>(emptyList())
-    val products: StateFlow<List<ProductUiModel>> = _products.asStateFlow()
+    private val _allProducts = MutableStateFlow<List<ProductUiModel>>(emptyList())
+    private val _filteredProducts = MutableStateFlow<List<ProductUiModel>>(emptyList())
+    val products: StateFlow<List<ProductUiModel>> = _filteredProducts.asStateFlow()
+
+    var selectedTab by mutableStateOf(0)
+        private set
 
     init {
         loadProducts()
@@ -38,28 +42,65 @@ class MainViewModel @Inject constructor(
     fun loadProducts() {
         viewModelScope.launch {
             val result = repository.getAllProducts()
-
             if (result.isSuccess) {
-                val userProducts = result.getOrDefault(emptyList())
-
-                val uiList = userProducts.map { it.toUiModel() }
-
-                val sortedList = uiList.sortedBy { it.expiryDays }
-
-                _products.value = sortedList
-            } else {
-                _products.value = emptyList()
+                val rawList = result.getOrThrow().map { it.toUiModel() }
+                _allProducts.value = rawList
+                filterProducts()
             }
         }
     }
 
+    fun onTabSelected(index: Int) {
+        selectedTab = index
+        filterProducts()
+    }
+
+    private fun filterProducts() {
+        val today = System.currentTimeMillis()
+        val fullList = _allProducts.value
+
+        _filteredProducts.value = when (selectedTab) {
+            0 -> { // no consumidos y no caducados
+                fullList.filter { !it.isConsumed && it.expirationTimestamp >= today }
+                    .sortedBy { it.expiryDays }
+            }
+            1 -> { // no consumidos + fecha > hoy
+                fullList.filter { !it.isConsumed && it.expirationTimestamp < today }
+                    .sortedByDescending { it.expirationTimestamp }
+            }
+            2 -> { // consumidos
+                fullList.filter { it.isConsumed }
+                    .sortedByDescending { it.scannedTimestamp }
+            }
+            else -> emptyList()
+        }
+    }
+
+    // funciones del swipe
+    fun deleteProduct(productId: String) {
+        viewModelScope.launch {
+            repository.deleteProduct(productId)
+            loadProducts()
+        }
+    }
+
+    fun consumeProduct(productId: String) {
+        viewModelScope.launch {
+            repository.consumeProduct(productId)
+            loadProducts()
+        }
+    }
+
+    private fun ProductUiModel.isExpired(today: Long): Boolean {
+        return this.expirationTimestamp < today
+    }
+
     private fun UserProduct.toUiModel(): ProductUiModel {
         val today = System.currentTimeMillis()
-        val expDate = this.expirationDate ?: today // si es null ponemos que es hoy
+        val expDate = this.expirationDate ?: today
         val diffInMillis = expDate - today
         val daysRemaining = TimeUnit.MILLISECONDS.toDays(diffInMillis).toInt()
 
-        // formatesr fecha
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val expDateString = dateFormat.format(Date(expDate))
         val scanDateString = dateFormat.format(Date(this.scanDate))
@@ -71,11 +112,14 @@ class MainViewModel @Inject constructor(
             imageUrl = this.imageUrl,
             expiryDays = daysRemaining,
             expiryDate = expDateString,
+            expirationTimestamp = expDate,
             scannedDate = scanDateString,
+            scannedTimestamp = this.scanDate,
             quantity = this.quantity ?: "-",
             ean = this.ean,
             nutriScore = this.nutriScore ?: "?",
-            greenScore = this.greenScore ?: "?"
+            greenScore = this.greenScore ?: "?",
+            isConsumed = this.isConsumed
         )
     }
 }

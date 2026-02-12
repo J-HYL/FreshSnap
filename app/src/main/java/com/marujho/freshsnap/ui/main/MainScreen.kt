@@ -1,8 +1,10 @@
 package com.marujho.freshsnap.ui.main
 
+import android.R.id.tabs
 import android.net.http.SslCertificate.saveState
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,13 +47,17 @@ data class ProductUiModel(
     val imageUrl: String?,
     val expiryDays: Int,
     val expiryDate: String,
+    val expirationTimestamp: Long,
     val scannedDate: String,
+    val scannedTimestamp: Long,
     val quantity: String,
     val ean: String,
     val nutriScore: String = "A",
-    val greenScore: String = "?"
+    val greenScore: String = "?",
+    val isConsumed: Boolean = false
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     navController: NavController,
@@ -60,6 +66,8 @@ fun MainScreen(
     onNavigateToDetail: (String) -> Unit
 ) {
     val products by viewModel.products.collectAsState() // datos de prueba
+    val selectedTab = viewModel.selectedTab
+    val tabs = listOf("Despensa", "Caducados", "Consumidos")
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -95,17 +103,116 @@ fun MainScreen(
 
             SearchBar()
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    CategoryButton(
+                        text = title,
+                        isSelected = selectedTab == index,
+                        onClick = { viewModel.onTabSelected(index) }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(bottom = bottomBarPadding + 80.dp)
             ) {
-                items(products) { product ->
-                    ProductCardItem(product, onNavigateToDetail)
+                items(
+                    items = products,
+                    key = { it.id }
+                ) { product ->
+
+                    val dismissState = rememberSwipeToDismissBoxState(
+                        confirmValueChange = { dismissValue ->
+                            when (dismissValue) {
+                                SwipeToDismissBoxValue.StartToEnd -> {
+                                    viewModel.consumeProduct(product.id)
+                                    true
+                                }
+                                SwipeToDismissBoxValue.EndToStart -> {
+                                    viewModel.deleteProduct(product.id)
+                                    true
+                                }
+                                else -> false
+                            }
+                        }
+                    )
+
+                    SwipeToDismissBox(
+                        state = dismissState,
+                        backgroundContent = {
+                            val color = when (dismissState.targetValue) {
+                                SwipeToDismissBoxValue.StartToEnd -> Color(0xFF4CAF50)
+                                SwipeToDismissBoxValue.EndToStart -> Color(0xFFE57373)
+                                else -> Color.Transparent
+                            }
+
+                            val icon = when (dismissState.targetValue) {
+                                SwipeToDismissBoxValue.StartToEnd -> Icons.Default.Check
+                                SwipeToDismissBoxValue.EndToStart -> Icons.Default.Delete
+                                else -> null
+                            }
+
+                            val alignment = if (dismissState.targetValue == SwipeToDismissBoxValue.StartToEnd)
+                                Alignment.CenterStart else Alignment.CenterEnd
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(color, RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 20.dp),
+                                contentAlignment = alignment
+                            ) {
+                                if (icon != null) {
+                                    Icon(icon, contentDescription = null, tint = Color.White)
+                                }
+                            }
+                        },
+                        content = {
+                            ProductCardItem(product, onNavigateToDetail)
+                        }
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+fun CategoryButton(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val containerColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+    val contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val borderColor = if (isSelected) Color.Transparent else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+
+    OutlinedButton(
+        onClick = onClick,
+        shape = CircleShape,
+        border = BorderStroke(1.dp, borderColor),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = containerColor,
+            contentColor = contentColor
+        ),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
+        modifier = Modifier.height(36.dp)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+        )
     }
 }
 
@@ -207,7 +314,7 @@ fun ProductCardItem(
                             .fillMaxSize()
                             .clip(RoundedCornerShape(8.dp)),
                         contentScale = ContentScale.Crop,
-                        placeholder = painterResource(R.drawable.ic_freshsnap_logo),
+                        placeholder = painterResource(R.drawable.ic_freshsnap_logo_splash),
                         error = painterResource(android.R.drawable.ic_menu_gallery)
                     )
                 }
