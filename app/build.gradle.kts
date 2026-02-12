@@ -126,8 +126,10 @@ dependencies {
 
     // firebase
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)      // Para Login
-    implementation(libs.firebase.firestore) // Base de datos en la nube
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
 
     implementation(libs.kotlinx.coroutines.play.services)
+
+    implementation(libs.androidx.core.splashscreen)
 }

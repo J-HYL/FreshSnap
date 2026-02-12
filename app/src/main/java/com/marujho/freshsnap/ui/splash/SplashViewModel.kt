@@ -27,7 +27,7 @@ class SplashViewModel @Inject constructor(
 
     private fun checkSession() {
         viewModelScope.launch {
-            delay(2000)
+            //delay(2000)
 
             if (repository.isUserLoggedIn()) {
                 _startDestination.value = "main_screen"

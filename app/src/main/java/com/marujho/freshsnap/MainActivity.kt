@@ -8,17 +8,27 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.marujho.freshsnap.ui.openFoodFacts.OpenFoodViewModel
+import com.marujho.freshsnap.ui.splash.SplashViewModel
 import com.marujho.freshsnap.ui.theme.FreshSnapTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel: OpenFoodViewModel by viewModels()
+    private val splashViewModel: SplashViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
+
         super.onCreate(savedInstanceState)
-        //.onBarcodeScanned("737628064502") manualmente meter el barcode funciona
+
+        splashScreen.setKeepOnScreenCondition {
+            splashViewModel.isLoading.value
+        }
 
         enableEdgeToEdge()
 
@@ -28,7 +38,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.Companion.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation()
+                    val startDest by splashViewModel.startDestination.collectAsState()
+
+                    if (startDest != null) {
+                        AppNavigation(startDestination = startDest!!)
+                    }
                 }
             }
         }
