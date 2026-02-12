@@ -21,15 +21,10 @@ import com.marujho.freshsnap.ui.main.MainScreen
 import com.marujho.freshsnap.ui.splash.SplashScreen
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(startDestination: String) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "splash_screen") {
-
-        composable("splash_screen") {
-            SplashScreen(navController)
-        }
-
+    NavHost(navController = navController, startDestination = startDestination) {
         composable("login_screen") {
             LoginScreen(navController = navController)
         }
