@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -104,6 +105,7 @@ fun SignUpBox(
                 imeAction = ImeAction.Next
             ),
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            icon = Icons.Default.Email
         )
 
         EditTextField(
@@ -115,7 +117,8 @@ fun SignUpBox(
                 imeAction = ImeAction.Next
             ),
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-            icon = Icons.Default.Lock
+            icon = Icons.Default.Lock,
+            isPasswordField = true
         )
 
         EditTextField(
@@ -127,7 +130,8 @@ fun SignUpBox(
                 imeAction = ImeAction.Done
             ),
             modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp),
-            icon = Icons.Default.Lock
+            icon = Icons.Default.Lock,
+            isPasswordField = true
         )
 
         Row(

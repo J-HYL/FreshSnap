@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -88,7 +91,8 @@ fun LoginBox(
             onValueChange = { emailInput = it },
             modifier = Modifier
                 .padding(bottom = 16.dp)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            icon = Icons.Default.Email
         )
 
         EditTextField(
@@ -101,7 +105,8 @@ fun LoginBox(
             onValueChange = { passwordInput = it },
             modifier = Modifier
                 .padding(bottom = 32.dp)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            isPasswordField = true,
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -165,8 +170,12 @@ fun EditTextField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions,
-    icon: ImageVector? = null
+    icon: ImageVector? = null,
+    isPasswordField : Boolean = false,
 ) {
+    var isPasswordVisible by remember { mutableStateOf(false) }
+
+
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -178,6 +187,20 @@ fun EditTextField(
                 tint = MaterialTheme.colorScheme.primary
             )
         },
+        trailingIcon = if (isPasswordField) {
+            {
+                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                    Icon(
+                        painter = painterResource(
+                            id = if (isPasswordVisible) R.drawable.ic_visibility else R.drawable.ic_visibility_off
+                        ),
+                        contentDescription = if (isPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        } else null,
+        visualTransformation = if (isPasswordField && !isPasswordVisible) PasswordVisualTransformation() else VisualTransformation.None,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surface,
             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -197,4 +220,12 @@ fun EditTextField(
         singleLine = true,
         keyboardOptions = keyboardOptions
     )
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun SignUpPreview() {
+    FreshSnapTheme {
+        LoginBox(onLoginClick = {_, _ -> }, onSignUpClick = {})
+    }
 }
