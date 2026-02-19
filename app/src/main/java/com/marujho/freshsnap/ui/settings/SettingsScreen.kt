@@ -65,7 +65,7 @@ fun SettingsScreen(
 
             SettingsItem(
                 title = "Mi Cuenta",
-                subtitle = "Usuario, contraseña, productos.",
+                subtitle = "Nombre, edad, sexo, idioma.",
                 onClick = { navController.navigate("settings_account") }
             )
 
