@@ -103,6 +103,14 @@ dependencies {
     // HILT + NAVIGATION
     implementation(libs.androidx.hilt.navigation.compose)
 
+    //HILT + WORKMANAGER
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+
+    //KTS
+    ksp(libs.androidx.hilt.compiler)
+
+
     //El conjunto de CameraX
     implementation(libs.bundles.camerax)
     //MLKIT de google para Scanear Codigos de barras y texto
