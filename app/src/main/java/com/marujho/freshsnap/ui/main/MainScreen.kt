@@ -57,6 +57,14 @@ data class ProductUiModel(
     val isConsumed: Boolean = false
 )
 
+
+/*
+* COSAS POR HACER:
+* CAMBIAR TEXTOS DE CADUCIDAD PARA CONSUMIDO Y CADUCADO
+* DESACTIVAR EL SWIPE DE CONSUMIDO EN CONSUMIDO
+* ARREGLAR BARRA DE BUSQUEDA
+* */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
@@ -128,7 +136,7 @@ fun MainScreen(
             ) {
                 items(
                     items = products,
-                    key = { it.id }
+                    key = { product -> "${product.id}_$selectedTab" }
                 ) { product ->
 
                     val dismissState = rememberSwipeToDismissBoxState(
@@ -144,11 +152,18 @@ fun MainScreen(
                                 }
                                 else -> false
                             }
-                        }
+                        },
+                        positionalThreshold = { totalDistance -> totalDistance * 0.12f }
                     )
+
+                    LaunchedEffect(selectedTab) {
+                        dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+                    }
 
                     SwipeToDismissBox(
                         state = dismissState,
+                        enableDismissFromStartToEnd = selectedTab == 0,
+                        enableDismissFromEndToStart = true,
                         backgroundContent = {
                             val color = when (dismissState.targetValue) {
                                 SwipeToDismissBoxValue.StartToEnd -> Color(0xFF4CAF50)
@@ -162,23 +177,25 @@ fun MainScreen(
                                 else -> null
                             }
 
-                            val alignment = if (dismissState.targetValue == SwipeToDismissBoxValue.StartToEnd)
+                            val alignment = if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd)
                                 Alignment.CenterStart else Alignment.CenterEnd
 
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(color, RoundedCornerShape(12.dp))
-                                    .padding(horizontal = 20.dp),
-                                contentAlignment = alignment
-                            ) {
-                                if (icon != null) {
-                                    Icon(icon, contentDescription = null, tint = Color.White)
+                            if (dismissState.dismissDirection != SwipeToDismissBoxValue.Settled) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(color, RoundedCornerShape(12.dp))
+                                        .padding(horizontal = 20.dp),
+                                    contentAlignment = alignment
+                                ) {
+                                    if (icon != null) {
+                                        Icon(icon, contentDescription = null, tint = Color.White)
+                                    }
                                 }
                             }
                         },
                         content = {
-                            ProductCardItem(product, onNavigateToDetail)
+                            ProductCardItem(product, selectedTab, onNavigateToDetail)
                         }
                     )
                 }
@@ -257,6 +274,7 @@ fun SearchBar() {
 @Composable
 fun ProductCardItem(
     product: ProductUiModel,
+    selectedTab: Int,
     onNavigateToDetail: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -266,9 +284,10 @@ fun ProductCardItem(
     )
 
     val statusColor = when {
-        product.expiryDays <= 2 -> Color(0xFFFF5252)
-        product.expiryDays <= 5 -> Color(0xFFFFC107)
-        else -> Color(0xFF69F0AE)
+        selectedTab == 2 -> Color(0xFF42A5F5) // Azul
+        product.expiryDays <= 2 -> Color(0xFFFF5252) // Rojo
+        product.expiryDays <= 5 -> Color(0xFFFFC107) // Amarillo
+        else -> Color(0xFF69F0AE) // Verde
     }
 
     val interactionSource = remember { MutableInteractionSource() }
@@ -314,7 +333,7 @@ fun ProductCardItem(
                             .fillMaxSize()
                             .clip(RoundedCornerShape(8.dp)),
                         contentScale = ContentScale.Crop,
-                        placeholder = painterResource(R.drawable.ic_freshsnap_logo_splash),
+                        placeholder = painterResource(R.drawable.ic_freshsnap_logo),
                         error = painterResource(android.R.drawable.ic_menu_gallery)
                     )
                 }
@@ -344,12 +363,26 @@ fun ProductCardItem(
                     modifier = Modifier.padding(12.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "${product.expiryDays} - days",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                        if (selectedTab == 0) {
+                            Text(
+                                text = "${product.expiryDays} días",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        } else if (selectedTab == 1) {
+                            Text(
+                                text = "Caducado",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                        } else if (selectedTab == 2) {
+                            Text(
+                                text = "Consumido",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                        }
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowDown,
