@@ -51,11 +51,8 @@ class MainViewModel @Inject constructor(
     }
     private fun scheduleExpirationWorker() {
 
-        val testWorkRequest = OneTimeWorkRequestBuilder<ExpirationWorker>()
-            .setInitialDelay(60, TimeUnit.SECONDS).build()
 
-        WorkManager.getInstance(context).enqueue(testWorkRequest)
-/*        val expirationWorkRequest = PeriodicWorkRequestBuilder<ExpirationWorker>(24, TimeUnit.HOURS)
+        val expirationWorkRequest = PeriodicWorkRequestBuilder<ExpirationWorker>(24, TimeUnit.HOURS)
             .setInitialDelay(15, TimeUnit.SECONDS)//Cambiar a minutos
             .build()
 
@@ -63,7 +60,7 @@ class MainViewModel @Inject constructor(
             "ChecExpiration",
             ExistingPeriodicWorkPolicy.KEEP,
             expirationWorkRequest
-        )*/
+        )
     }
 
     fun onSearchQueryChanged(query: String) {
