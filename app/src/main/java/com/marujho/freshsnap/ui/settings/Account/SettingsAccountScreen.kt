@@ -31,7 +31,6 @@ fun SettingsAccountScreen(
     val gender by viewModel.userGender.collectAsState()
     val language by viewModel.userLanguage.collectAsState()
 
-    // Estados locales para editar
     var editedName by remember { mutableStateOf("") }
     var tempName by remember { mutableStateOf("") }
     var isEditingName by remember { mutableStateOf(false) }
@@ -43,7 +42,6 @@ fun SettingsAccountScreen(
     var editedGender by remember { mutableStateOf("") }
     var editedLanguage by remember { mutableStateOf("") }
 
-    // Inicializar valores actuales al entrar
     LaunchedEffect(name) { editedName = name; tempName = name }
     LaunchedEffect(age) { editedAge = age.toString(); tempAge = age.toString() }
     LaunchedEffect(gender) { editedGender = gender }

@@ -20,9 +20,21 @@ class UserPreferences(private val context: Context) {
         private val AGE_KEY = intPreferencesKey("user_age")
         private val GENDER_KEY = stringPreferencesKey("user_gender")
         private val LANGUAGE_KEY = stringPreferencesKey("user_language")
-
         private val ALLERGIES_KEY = stringSetPreferencesKey("user_allergies")
+
+        private val EXPIRY_ALERT_DAYS_KEY = intPreferencesKey("expiry_alert_days")
+
     }
+
+    //Alertas de caducidad
+    val expiryAlertDays: Flow<Int> = context.dataStore.data
+        .map { it[EXPIRY_ALERT_DAYS_KEY] ?: 3 }
+    suspend fun setExpiryAlertDays(days: Int) {
+        context.dataStore.edit {
+            it[EXPIRY_ALERT_DAYS_KEY] = days
+        }
+    }
+
 
     //Alergias
     val userAllergies: Flow<Set<String>> = context.dataStore.data

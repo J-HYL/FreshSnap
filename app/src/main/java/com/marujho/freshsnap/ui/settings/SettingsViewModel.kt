@@ -7,6 +7,7 @@ import com.marujho.freshsnap.data.repository.UserPreferences
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -24,4 +25,25 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             userPreferences.setDarkMode(enabled)
         }
     }
+    fun logout(onLoggedOut: () -> Unit) {
+        viewModelScope.launch {
+
+            FirebaseAuth.getInstance().signOut()
+
+            //userPreferences.clearAll()
+
+            onLoggedOut()
+        }
+    }
+
+    //Para los checkboxes de los dias de caducidad
+    val expiryAlertDays = userPreferences.expiryAlertDays
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 3)
+
+    fun setExpiryDays(days: Int) {
+        viewModelScope.launch {
+            userPreferences.setExpiryAlertDays(days)
+        }
+    }
+
 }
