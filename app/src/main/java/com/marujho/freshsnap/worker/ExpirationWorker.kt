@@ -4,6 +4,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
@@ -16,6 +17,7 @@ import com.marujho.freshsnap.data.model.UserProduct
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.tasks.await
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
 
@@ -28,7 +30,7 @@ class ExpirationWorker @AssistedInject constructor(
 ) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
         return try{
-            val userId = auth.currentUser?.uid ?: return Result.failure()
+            val userId = auth.currentUser?.uid ?: return Result.success()
 
             val userSnapshot = firestore.collection("users").document(userId).get().await()
             val user = userSnapshot.toObject(FirestoreUser::class.java)
@@ -36,16 +38,22 @@ class ExpirationWorker @AssistedInject constructor(
 
             val productSnapshot = firestore.collection("users")
                 .document(userId)
-                .collection("products")
+                .collection("pantry")
                 .get()
                 .await()
             val products = productSnapshot.toObjects(UserProduct::class.java)
             val productsAboutToExpire = mutableListOf<String>()
-
-            val now = System.currentTimeMillis()
+            val calendar = Calendar.getInstance()
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            val now = calendar.timeInMillis
+            Log.d("EXPIRATIONWORKER",products.toString())
             products.forEach{product ->
                 product.expirationDate?.let{expDate ->
                     val diffInMillis = expDate - now
+                    Log.d("EXPIRATIONWORKER",diffInMillis.toString())
                     val daysRemaining = TimeUnit.MILLISECONDS.toDays(diffInMillis)
                     if(daysRemaining in 0..daysToNotify.toLong()){
                         productsAboutToExpire.add(product.name)
