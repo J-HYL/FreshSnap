@@ -143,7 +143,9 @@ fun SettingsScreen(
             Spacer(Modifier.height(24.dp))
             Button(
                 onClick = {
-                    FirebaseAuth.getInstance().signOut()
+                    viewModel.logout {
+
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()

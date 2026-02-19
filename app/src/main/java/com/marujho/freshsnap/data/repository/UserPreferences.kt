@@ -26,6 +26,13 @@ class UserPreferences(private val context: Context) {
 
     }
 
+    suspend fun clearAll() {
+        context.dataStore.edit { preferences ->
+            preferences.clear()
+        }
+    }
+
+
     //Alertas de caducidad
     val expiryAlertDays: Flow<Int> = context.dataStore.data
         .map { it[EXPIRY_ALERT_DAYS_KEY] ?: 3 }

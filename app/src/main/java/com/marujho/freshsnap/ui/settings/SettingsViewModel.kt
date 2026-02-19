@@ -30,7 +30,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
             FirebaseAuth.getInstance().signOut()
 
-            //userPreferences.clearAll()
+            userPreferences.clearAll()
 
             onLoggedOut()
         }
