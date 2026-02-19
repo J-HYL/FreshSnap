@@ -1,4 +1,4 @@
-package com.marujho.freshsnap.ui.settings
+package com.marujho.freshsnap.ui.settings.Account
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
