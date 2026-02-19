@@ -30,6 +30,8 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
     private val _allProducts = MutableStateFlow<List<ProductUiModel>>(emptyList())
     private val _filteredProducts = MutableStateFlow<List<ProductUiModel>>(emptyList())
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
     val products: StateFlow<List<ProductUiModel>> = _filteredProducts.asStateFlow()
 
     var selectedTab by mutableStateOf(0)
@@ -37,6 +39,11 @@ class MainViewModel @Inject constructor(
 
     init {
         loadProducts()
+    }
+
+    fun onSearchQueryChanged(query: String) {
+        _searchQuery.value = query
+        filterProducts()
     }
 
     fun loadProducts() {
@@ -58,8 +65,9 @@ class MainViewModel @Inject constructor(
     private fun filterProducts() {
         val today = System.currentTimeMillis()
         val fullList = _allProducts.value
+        val query = _searchQuery.value.trim().lowercase()
 
-        _filteredProducts.value = when (selectedTab) {
+        val tabFilteredList = when (selectedTab) {
             0 -> { // no consumidos y no caducados
                 fullList.filter { !it.isConsumed && it.expirationTimestamp >= today }
                     .sortedBy { it.expiryDays }
@@ -73,6 +81,14 @@ class MainViewModel @Inject constructor(
                     .sortedByDescending { it.scannedTimestamp }
             }
             else -> emptyList()
+        }
+
+        _filteredProducts.value = if (query.isBlank()) {
+            tabFilteredList
+        } else {
+            tabFilteredList.filter { product ->
+                product.name.lowercase().contains(query) || product.ean.contains(query)
+            }
         }
     }
 

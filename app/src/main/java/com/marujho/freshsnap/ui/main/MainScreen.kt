@@ -74,6 +74,7 @@ fun MainScreen(
     onNavigateToDetail: (String) -> Unit
 ) {
     val products by viewModel.products.collectAsState() // datos de prueba
+    val searchQuery by viewModel.searchQuery.collectAsState()
     val selectedTab = viewModel.selectedTab
     val tabs = listOf("Despensa", "Caducados", "Consumidos")
 
@@ -109,7 +110,10 @@ fun MainScreen(
             Spacer(modifier = Modifier.statusBarsPadding())
             Spacer(modifier = Modifier.height(16.dp))
 
-            SearchBar()
+            SearchBar(
+                query = searchQuery,
+                onQueryChange = { viewModel.onSearchQueryChanged(it) }
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -234,21 +238,17 @@ fun CategoryButton(
 }
 
 @Composable
-fun SearchBar() {
+fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit
+) {
     TextField(
-        value = "",
-        onValueChange = {},
-        placeholder = { Text("Search") },
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = { Text("Buscar producto o EAN") },
         leadingIcon = {
             Icon(
                 Icons.Default.Search,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        },
-        trailingIcon = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_camera),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
