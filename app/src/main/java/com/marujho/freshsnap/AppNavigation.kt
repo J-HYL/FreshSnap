@@ -70,8 +70,15 @@ fun AppNavigation(startDestination: String) {
         }
 
         composable(
-            route = "detail_screen/{barcode}",
-            arguments = listOf(navArgument("barcode") { type = NavType.StringType })
+            route = "detail_screen/{barcode}?productId={productId}",
+            arguments = listOf(
+                navArgument("barcode") { type = NavType.StringType },
+                navArgument("productId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
         ) { backStackEntry ->
             val viewModel: DetailViewModel = hiltViewModel()
             val scannedDate = backStackEntry.savedStateHandle.getLiveData<String>("scanned_date")
