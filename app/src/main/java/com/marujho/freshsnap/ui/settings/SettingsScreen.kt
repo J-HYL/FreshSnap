@@ -70,18 +70,6 @@ fun SettingsScreen(
             )
 
             SettingsItem(
-                title = "Unidades de medida",
-                subtitle = "Gramos, Miligramos, Kilogramos.",
-                onClick = { navController.navigate("settings_units") }
-            )
-
-            SettingsItem(
-                title = "Permisos",
-                subtitle = "Cámara, notificaciones, almacenamiento.",
-                onClick = { navController.navigate("settings_permissions") }
-            )
-
-            SettingsItem(
                 title = "Alergias",
                 subtitle = "Leche, gluten, huevos.",
                 onClick = { navController.navigate("settings_allergy") }

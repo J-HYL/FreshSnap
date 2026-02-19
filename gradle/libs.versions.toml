@@ -30,6 +30,7 @@ retrofit = "2.9.0"
 googleServices = "4.4.0"
 firebaseBom = "32.7.0"
 runtime = "1.10.2"
+runtimeVersion = "1.10.3"
 
 [libraries]
 androidx-core-splashscreen = {module = "androidx.core:core-splashscreen", version.ref="coreSplashscreen"}
@@ -74,6 +75,7 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
+androidx-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtimeVersion" }
 
 [bundles]
 camerax = [

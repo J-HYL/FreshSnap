@@ -14,11 +14,8 @@ import com.marujho.freshsnap.BarCodeScanScreen
 import com.marujho.freshsnap.ui.navigation.BottomNavItem
 import com.marujho.freshsnap.ui.settings.Account.SettingsAccountScreen
 import com.marujho.freshsnap.ui.settings.SettingsAlertScreen
-import com.marujho.freshsnap.ui.settings.SettingsAllergyScreen
-import com.marujho.freshsnap.ui.settings.SettingsBackupScreen
-import com.marujho.freshsnap.ui.settings.SettingsPermitsScreen
+import com.marujho.freshsnap.ui.settings.Allergy.SettingsAllergyScreen
 import com.marujho.freshsnap.ui.settings.SettingsScreen
-import com.marujho.freshsnap.ui.settings.SettingsUnitsScreen
 
 @Composable
 fun MainAppScreen(
@@ -103,14 +100,6 @@ fun MainAppScreen(
                 SettingsAccountScreen()
             }
 
-            composable("settings_units") {
-                SettingsUnitsScreen()
-            }
-
-            composable("settings_permissions") {
-                SettingsPermitsScreen()
-            }
-
             composable("settings_alert") {
                 SettingsAlertScreen()
             }
@@ -119,9 +108,6 @@ fun MainAppScreen(
                 SettingsAllergyScreen()
             }
 
-            composable("settings_backup") {
-                SettingsBackupScreen()
-            }
         }
     }
 }

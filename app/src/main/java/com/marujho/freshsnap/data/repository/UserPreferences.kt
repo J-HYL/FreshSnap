@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -19,8 +20,21 @@ class UserPreferences(private val context: Context) {
         private val AGE_KEY = intPreferencesKey("user_age")
         private val GENDER_KEY = stringPreferencesKey("user_gender")
         private val LANGUAGE_KEY = stringPreferencesKey("user_language")
+
+        private val ALLERGIES_KEY = stringSetPreferencesKey("user_allergies")
     }
 
+    //Alergias
+    val userAllergies: Flow<Set<String>> = context.dataStore.data
+        .map { it[ALLERGIES_KEY] ?: emptySet() }
+
+    suspend fun setUserAllergies(allergies: Set<String>) {
+        context.dataStore.edit {
+            it[ALLERGIES_KEY] = allergies
+        }
+    }
+
+    //Dark Mode
     val isDarkMode: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[DARK_MODE_KEY] ?: false
