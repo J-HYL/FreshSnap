@@ -1,6 +1,7 @@
 package com.marujho.freshsnap.ui.settings.Allergy
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.ui.platform.LocalContext
+
 
 @SuppressLint("MutableCollectionMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,7 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun SettingsAllergyScreen(
     viewModel: SettingsAllergyViewModel = viewModel()
 ) {
-
+    val context = LocalContext.current
     val savedAllergies by viewModel.userAllergies.collectAsState()
 
     var selectedAllergies by remember { mutableStateOf(setOf<String>()) }
@@ -36,11 +43,27 @@ fun SettingsAllergyScreen(
     }
 
     val possibleAllergies = listOf(
-        "Leche" to "en:milk",
         "Gluten" to "en:gluten",
+        "Trigo" to "en:wheat",
+        "Centeno" to "en:rye",
+        "Cebada" to "en:barley",
+        "Avena" to "en:oats",
+
+        "Crustáceos" to "en:crustaceans",
         "Huevos" to "en:eggs",
+        "Pescado" to "en:fish",
+        "Cacahuetes" to "en:peanuts",
+        "Soja" to "en:soybeans",
+
+        "Leche" to "en:milk",
         "Frutos secos" to "en:nuts",
-        "Soja" to "en:soybeans"
+        "Apio" to "en:celery",
+        "Mostaza" to "en:mustard",
+        "Sésamo" to "en:sesame-seeds",
+
+        "Sulfitos" to "en:sulphur-dioxide-and-sulphites",
+        "Altramuces" to "en:lupin",
+        "Moluscos" to "en:molluscs"
     )
 
     Scaffold(
@@ -48,14 +71,14 @@ fun SettingsAllergyScreen(
             TopAppBar(title = { Text("Alergias") })
         }
     ) { padding ->
-
-        Column(
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp)
         ) {
 
-            possibleAllergies.forEach { (label, tag) ->
+            items(possibleAllergies) { (label, tag) ->
 
                 Row(
                     verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
@@ -78,16 +101,27 @@ fun SettingsAllergyScreen(
                 }
             }
 
-            Spacer(Modifier.height(24.dp))
+            item {
+                Spacer(Modifier.height(16.dp))
+            }
 
-            Button(
-                onClick = {
-                    viewModel.saveAllergies(selectedAllergies)
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Guardar cambios")
+            item (
+                span = { GridItemSpan(2) }
+            ){
+
+                Button(
+                    onClick = {
+                        viewModel.saveAllergies(selectedAllergies)
+                        Toast.makeText(context, "¡Datos guardados!", Toast.LENGTH_SHORT).show()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                ) {
+                    Text("Guardar cambios")
+                }
             }
         }
+        }
     }
-}
+
