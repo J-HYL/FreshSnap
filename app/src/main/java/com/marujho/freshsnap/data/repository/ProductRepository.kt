@@ -48,7 +48,9 @@ class ProductRepository @Inject constructor(
             val snapshot = collection.get().await()
 
             // convertir los documentos a objetos
-            val products = snapshot.toObjects(UserProduct::class.java)
+            val products = snapshot.documents.mapNotNull { doc ->
+                doc.toObject(UserProduct::class.java)?.copy(id = doc.id)
+            }
 
             Result.success(products)
         } catch (e: Exception) {
@@ -68,6 +70,26 @@ class ProductRepository @Inject constructor(
             } else {
                 Result.success(null)
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun consumeProduct(productId: String): Result<String> {
+        return try {
+            val collection = getUserProductsCollection() ?: throw Exception("No user")
+            collection.document(productId).update("isConsumed", true).await()
+            Result.success("Producto consumido")
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteProduct(productId: String): Result<String> {
+        return try {
+            val collection = getUserProductsCollection() ?: throw Exception("No user")
+            collection.document(productId).delete().await()
+            Result.success("Producto eliminado")
         } catch (e: Exception) {
             Result.failure(e)
         }
