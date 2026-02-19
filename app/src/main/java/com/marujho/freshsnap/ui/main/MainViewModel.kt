@@ -1,5 +1,6 @@
 package com.marujho.freshsnap.ui.main
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.marujho.freshsnap.data.model.UserProduct
 import com.marujho.freshsnap.data.repository.ProductRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,9 +25,15 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.marujho.freshsnap.worker.ExpirationWorker
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
+    @ApplicationContext private val context : Context,
     private val repository: ProductRepository
 ) : ViewModel() {
     private val _allProducts = MutableStateFlow<List<ProductUiModel>>(emptyList())
@@ -39,6 +47,23 @@ class MainViewModel @Inject constructor(
 
     init {
         loadProducts()
+        scheduleExpirationWorker()
+    }
+    private fun scheduleExpirationWorker() {
+
+        val testWorkRequest = OneTimeWorkRequestBuilder<ExpirationWorker>()
+            .setInitialDelay(60, TimeUnit.SECONDS).build()
+
+        WorkManager.getInstance(context).enqueue(testWorkRequest)
+/*        val expirationWorkRequest = PeriodicWorkRequestBuilder<ExpirationWorker>(24, TimeUnit.HOURS)
+            .setInitialDelay(15, TimeUnit.SECONDS)//Cambiar a minutos
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "ChecExpiration",
+            ExistingPeriodicWorkPolicy.KEEP,
+            expirationWorkRequest
+        )*/
     }
 
     fun onSearchQueryChanged(query: String) {
