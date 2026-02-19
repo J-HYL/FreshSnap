@@ -4,17 +4,27 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun SettingsScreen(navController: NavController) {
+fun SettingsScreen(
+    navController: NavController,
+    viewModel: SettingsViewModel = viewModel()
+) {
+
+    val isDarkMode by viewModel.isDarkMode.collectAsState()
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -36,11 +46,13 @@ fun SettingsScreen(navController: NavController) {
 
             SettingsItem(
                 title = "Dark Theme / Light Theme",
-                onClick = {  },
+                onClick = { },
                 trailing = {
                     Switch(
-                        checked = true,
-                        onCheckedChange = {},
+                        checked = isDarkMode,
+                        onCheckedChange = {
+                            viewModel.toggleDarkMode(it)
+                        },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
                             checkedTrackColor = MaterialTheme.colorScheme.primary,
@@ -85,16 +97,6 @@ fun SettingsScreen(navController: NavController) {
 }
 
 
-@Composable
-fun SettingsItem(
-    title: String,
-    onClick: () -> Unit
-) {
-    ListItem(
-        headlineContent = { Text(title) },
-        modifier = Modifier.clickable { onClick() }
-    )
-}
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

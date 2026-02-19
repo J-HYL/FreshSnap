@@ -1,6 +1,7 @@
 [versions]
 agp = "8.13.2"
 coreSplashscreen = "1.2.0"
+datastorePreferences = "1.2.0"
 kotlin = "2.0.21"
 coreKtx = "1.17.0"
 junit = "4.13.2"
@@ -31,8 +32,9 @@ firebaseBom = "32.7.0"
 runtime = "1.10.2"
 
 [libraries]
+androidx-core-splashscreen = {module = "androidx.core:core-splashscreen", version.ref="coreSplashscreen"}
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

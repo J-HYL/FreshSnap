@@ -20,7 +20,13 @@ class ProductRepository @Inject constructor(
                 ?: throw Exception("Error no se encuentra el usuario")
 
             // documento vacio
-            val documentRef = collection.document()
+            val documentRef = if(product.id.isNotEmpty()){
+                collection.document(product.id)
+            }
+            else{
+                collection.document()
+            }
+
 
             // id nuevo
             val productToSave = product.copy(id = documentRef.id)
@@ -47,6 +53,23 @@ class ProductRepository @Inject constructor(
             }
 
             Result.success(products)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getProductByEan(barcode: String): Result<UserProduct?> {
+        return try {
+            val collection = getUserProductsCollection() ?: throw Exception("Usuario no logueado")
+
+            val snapshot = collection.whereEqualTo("ean", barcode).get().await()
+
+            if (!snapshot.isEmpty) {
+                val product = snapshot.documents[0].toObject(UserProduct::class.java)
+                Result.success(product)
+            } else {
+                Result.success(null)
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }

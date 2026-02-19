@@ -57,14 +57,6 @@ data class ProductUiModel(
     val isConsumed: Boolean = false
 )
 
-
-/*
-* COSAS POR HACER:
-* CAMBIAR TEXTOS DE CADUCIDAD PARA CONSUMIDO Y CADUCADO
-* DESACTIVAR EL SWIPE DE CONSUMIDO EN CONSUMIDO
-* ARREGLAR BARRA DE BUSQUEDA
-* */
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
