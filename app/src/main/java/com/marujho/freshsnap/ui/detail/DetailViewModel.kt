@@ -32,13 +32,16 @@ class DetailViewModel @Inject constructor(
 
     private val barcode: String = checkNotNull(savedStateHandle["barcode"])
 
+    private val passedProductId: String? = savedStateHandle["productId"]
+
     var uiState by mutableStateOf<DetailUiState>(DetailUiState.Loading)
         private set
+
+    private var currentFirestoreId : String? = null
 
     init {
         loadProduct()
     }
-    private var currentFirestoreId : String? = null
     private fun loadProduct() {
         viewModelScope.launch {
             uiState = DetailUiState.Loading
@@ -47,18 +50,21 @@ class DetailViewModel @Inject constructor(
             val localProduct = firebaseResult.getOrNull()
 
             if (localProduct != null) {
-                currentFirestoreId = localProduct.id
-                localProduct.expirationDate?.let { millis ->
-                    setExpirationDatefromCal(millis) }
-                Log.d("SOURCE","FIREBASE")
+                if (passedProductId != null && passedProductId == localProduct.id) {
+                    currentFirestoreId = localProduct.id
+                    localProduct.expirationDate?.let { millis -> setExpirationDatefromCal(millis) }
+                    Log.d("SOURCE", "FIREBASE - EDITANDO EXISTENTE")
+                } else {
+                    currentFirestoreId = null
+                    Log.d("SOURCE", "FIREBASE - CACHÉ PARA PRODUCTO NUEVO")
+                }
+
                 uiState = DetailUiState.Success(localProduct.toDto())
-            }
-            else{
+            } else {
                 currentFirestoreId = null
-                Log.d("SOURCE","API")
+                Log.d("SOURCE", "API")
                 loadFromApi()
             }
-
         }
     }
     private suspend fun loadFromApi(){
