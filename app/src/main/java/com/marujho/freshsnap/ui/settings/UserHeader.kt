@@ -12,23 +12,36 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.marujho.freshsnap.ui.settings.Account.SettingsAccountViewModel
 
 @Composable
-fun UserHeader() {
+fun UserHeader(
+    viewModel: SettingsAccountViewModel = viewModel()
+) {
+
+    val name by viewModel.userName.collectAsState()
+    val age by viewModel.userAge.collectAsState()
+    val gender by viewModel.userGender.collectAsState()
+
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
+
             Text(
-                text = "Eshlie Alcantara",
+                text = name,
                 style = MaterialTheme.typography.titleMedium
             )
+
             Text(
-                text = "Madrid · Mujer · 25",
+                text = "$gender · $age años",
                 style = MaterialTheme.typography.bodySmall
             )
         }
