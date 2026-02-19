@@ -1,5 +1,6 @@
 package com.marujho.freshsnap.data.model
 
+import com.google.firebase.firestore.PropertyName
 data class UserProduct(
     // id y fechas
     val id: String = "",
@@ -37,5 +38,10 @@ data class UserProduct(
     val fatLevel: String? = null,
     val saturatedFatLevel: String? = null,
     val sugarLevel: String? = null,
-    val saltLevel: String? = null
+    val saltLevel: String? = null,
+
+    @get:PropertyName("isConsumed")
+    @set:PropertyName("isConsumed")
+    var isConsumed: Boolean = false
+    // forzar nombre (si no la bd lo detecta como Consumed)
 )
