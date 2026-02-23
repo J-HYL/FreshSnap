@@ -357,7 +357,7 @@ fun ProductCardItem(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (selectedTab == 0) {
                             Text(
-                                text = "${product.expiryDays} días",
+                                text = "${product.expiryDays + 1} días",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onSurface
