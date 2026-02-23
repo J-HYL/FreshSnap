@@ -13,7 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.marujho.freshsnap.BarCodeScanScreen
 import com.marujho.freshsnap.ui.navigation.BottomNavItem
 import com.marujho.freshsnap.ui.settings.Account.SettingsAccountScreen
-import com.marujho.freshsnap.ui.settings.SettingsAlertScreen
+import com.marujho.freshsnap.ui.settings.Alerts.SettingsAlertScreen
 import com.marujho.freshsnap.ui.settings.Allergy.SettingsAllergyScreen
 import com.marujho.freshsnap.ui.settings.SettingsScreen
 
@@ -101,7 +101,7 @@ fun MainAppScreen(
             }
 
             composable("settings_alert") {
-                SettingsAlertScreen()
+                SettingsAlertScreen(navController = navController)
             }
 
             composable("settings_allergy") {

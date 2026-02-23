@@ -21,9 +21,30 @@ class UserPreferences(private val context: Context) {
         private val GENDER_KEY = stringPreferencesKey("user_gender")
         private val LANGUAGE_KEY = stringPreferencesKey("user_language")
         private val ALLERGIES_KEY = stringSetPreferencesKey("user_allergies")
-
         private val EXPIRY_ALERT_DAYS_KEY = intPreferencesKey("expiry_alert_days")
+        private val EXPIRY_RED_DAYS_KEY = intPreferencesKey("expiry_red_days")
+        private val EXPIRY_YELLOW_DAYS_KEY = intPreferencesKey("expiry_yellow_days")
 
+    }
+
+    //Caducidad preferencias
+
+    val expiryRedDays: Flow<Int> = context.dataStore.data
+        .map { it[EXPIRY_RED_DAYS_KEY] ?: 2 }
+
+    suspend fun setExpiryRedDays(days: Int) {
+        context.dataStore.edit {
+            it[EXPIRY_RED_DAYS_KEY] = days
+        }
+    }
+
+    val expiryYellowDays: Flow<Int> = context.dataStore.data
+        .map { it[EXPIRY_YELLOW_DAYS_KEY] ?: 5 }
+
+    suspend fun setExpiryYellowDays(days: Int) {
+        context.dataStore.edit {
+            it[EXPIRY_YELLOW_DAYS_KEY] = days
+        }
     }
 
     suspend fun clearAll() {
