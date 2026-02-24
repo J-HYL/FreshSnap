@@ -3,6 +3,10 @@ package com.marujho.freshsnap
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -19,10 +23,21 @@ import com.marujho.freshsnap.ui.login.LoginScreen
 import com.marujho.freshsnap.ui.main.MainAppScreen
 import com.marujho.freshsnap.ui.main.MainScreen
 import com.marujho.freshsnap.ui.splash.SplashScreen
+import com.google.firebase.auth.FirebaseAuth
+
 
 @Composable
 fun AppNavigation(startDestination: String) {
     val navController = rememberNavController()
+
+    var currentUser by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser) }
+
+    LaunchedEffect(Unit) {
+        FirebaseAuth.getInstance().addAuthStateListener {
+            currentUser = it.currentUser
+        }
+    }
+    val startDestination = if (currentUser != null) "main_screen" else "login_screen"
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable("login_screen") {

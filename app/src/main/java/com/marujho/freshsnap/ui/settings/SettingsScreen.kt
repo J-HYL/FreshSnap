@@ -1,11 +1,8 @@
 package com.marujho.freshsnap.ui.settings
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,39 +43,21 @@ fun SettingsScreen(
 
             SettingsItem(
                 title = "Dark Theme / Light Theme",
-                onClick = { },
+                onClick = {},
                 trailing = {
                     Switch(
                         checked = isDarkMode,
                         onCheckedChange = {
                             viewModel.toggleDarkMode(it)
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            uncheckedBorderColor = MaterialTheme.colorScheme.outline,
-                            uncheckedThumbColor = MaterialTheme.colorScheme.outline
-                        )
+                        }
                     )
                 }
             )
 
             SettingsItem(
                 title = "Mi Cuenta",
-                subtitle = "Usuario, contraseña, productos.",
+                subtitle = "Nombre, edad, sexo, idioma.",
                 onClick = { navController.navigate("settings_account") }
-            )
-
-            SettingsItem(
-                title = "Unidades de medida",
-                subtitle = "Gramos, Miligramos, Kilogramos.",
-                onClick = { navController.navigate("settings_units") }
-            )
-
-            SettingsItem(
-                title = "Permisos",
-                subtitle = "Cámara, notificaciones, almacenamiento.",
-                onClick = { navController.navigate("settings_permissions") }
             )
 
             SettingsItem(
@@ -89,14 +68,26 @@ fun SettingsScreen(
 
             SettingsItem(
                 title = "Alertas caducidad",
-                subtitle = "3 dias, 5 dias, 1 semana.",
+                subtitle = "Configura días rojo y amarillo",
                 onClick = { navController.navigate("settings_alert") }
             )
+
+            Spacer(Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    viewModel.logout { }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text("Cerrar sesión")
+            }
         }
     }
 }
-
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

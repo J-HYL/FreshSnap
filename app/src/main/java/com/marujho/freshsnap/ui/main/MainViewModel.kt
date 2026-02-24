@@ -29,12 +29,14 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.marujho.freshsnap.data.repository.UserPreferences
 import com.marujho.freshsnap.worker.ExpirationWorker
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     @ApplicationContext private val context : Context,
-    private val repository: ProductRepository
+    private val repository: ProductRepository,
+    private val userPreferences: UserPreferences
 ) : ViewModel() {
     private val _allProducts = MutableStateFlow<List<ProductUiModel>>(emptyList())
     private val _filteredProducts = MutableStateFlow<List<ProductUiModel>>(emptyList())
@@ -45,14 +47,30 @@ class MainViewModel @Inject constructor(
     var selectedTab by mutableStateOf(0)
         private set
 
+    private val _redDays = MutableStateFlow(2)
+    val redDays: StateFlow<Int> = _redDays
+
+    private val _yellowDays = MutableStateFlow(5)
+    val yellowDays: StateFlow<Int> = _yellowDays
+
     init {
         loadProducts()
         scheduleExpirationWorker()
+        // Sincronizar los días de alerta con UserPreferences
+        viewModelScope.launch {
+            userPreferences.expiryRedDays.collect { _redDays.value = it }
+        }
+        viewModelScope.launch {
+            userPreferences.expiryYellowDays.collect { _yellowDays.value = it }
+        }
     }
     private fun scheduleExpirationWorker() {
 
+        val testWorkRequest = OneTimeWorkRequestBuilder<ExpirationWorker>()
+            .setInitialDelay(60, TimeUnit.SECONDS).build()
 
-        val expirationWorkRequest = PeriodicWorkRequestBuilder<ExpirationWorker>(15, TimeUnit.MINUTES)
+        WorkManager.getInstance(context).enqueue(testWorkRequest)
+/*        val expirationWorkRequest = PeriodicWorkRequestBuilder<ExpirationWorker>(24, TimeUnit.HOURS)
             .setInitialDelay(15, TimeUnit.SECONDS)//Cambiar a minutos
             .build()
 
@@ -60,7 +78,7 @@ class MainViewModel @Inject constructor(
             "ChecExpiration",
             ExistingPeriodicWorkPolicy.KEEP,
             expirationWorkRequest
-        )
+        )*/
     }
 
     fun onSearchQueryChanged(query: String) {
