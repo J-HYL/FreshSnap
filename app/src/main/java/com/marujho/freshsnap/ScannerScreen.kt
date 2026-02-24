@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
@@ -194,7 +195,7 @@ fun CameraContent(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Volver a la pantalla anterior",
+                        contentDescription = stringResource(R.string.back_button_desc),
                         tint = Color.White
                     )
                 }
@@ -204,7 +205,7 @@ fun CameraContent(
                 ) {
                     Icon(
                         painter = painterResource(id = if (isFlashOn) R.drawable.ic_flash_on else R.drawable.ic_flash_off),
-                        contentDescription = "Activar/Desativar Flash",
+                        contentDescription = stringResource(R.string.flash_button_desc),
                         tint = Color.White
                     )
                 }
