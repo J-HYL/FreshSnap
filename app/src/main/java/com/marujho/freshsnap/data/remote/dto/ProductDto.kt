@@ -36,7 +36,11 @@ data class ProductDto(
     val nutriments: NutrimentsDto?,
 
     @Json(name = "nutrient_levels")
-    val nutrimentsLevels : NutrimentsLevelDto?
+    val nutrimentsLevels : NutrimentsLevelDto?,
+
+    //Alergenos
+    @Json(name = "allergens_tags")
+    val allergensTags: List<String>? = null
 )
 
 

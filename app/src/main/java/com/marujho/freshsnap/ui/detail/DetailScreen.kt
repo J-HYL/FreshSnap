@@ -1,62 +1,35 @@
 package com.marujho.freshsnap.ui.detail
 
-import android.content.ClipData
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.marujho.freshsnap.R
 import com.marujho.freshsnap.data.remote.dto.NutrientLevel
 import com.marujho.freshsnap.data.remote.dto.ProductDto
-import com.marujho.freshsnap.R
-import java.text.SimpleDateFormat
-import java.util.Locale
 import com.marujho.freshsnap.ui.theme.Green
 import com.marujho.freshsnap.ui.theme.SoftRed
 import com.marujho.freshsnap.ui.theme.Yellow
+import java.text.SimpleDateFormat
+import java.util.Locale
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.rememberDatePickerState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,11 +38,9 @@ fun detailScreen(
     onNavigateMain: () -> Unit,
     onNavigationToScanDate: () -> Unit = {}
 ) {
-
     val state = viewModel.uiState
     val context = LocalContext.current
 
-    // ESTO HAY QUE CAMBIARLO CUANDO SE META EL DIALOG DE LA FECHA DE CADUCIDAD
     fun onConfirmPressed() {
         viewModel.saveProduct(
             onSuccess = {
@@ -83,15 +54,14 @@ fun detailScreen(
     }
 
     when (state) {
-        is DetailUiState.Loading -> {}//Imagen cargando
-        is DetailUiState.Error -> {}//Imagen Error
+        is DetailUiState.Loading -> {} // Cargando
+        is DetailUiState.Error -> {} // Error
         is DetailUiState.Success -> {
             val product = state.product
 
             var showSelectDialog by remember { mutableStateOf(false) }
             var showDatePick by remember { mutableStateOf(false) }
             var datePickerState = rememberDatePickerState()
-
 
             Scaffold(
                 containerColor = MaterialTheme.colorScheme.background,
@@ -110,27 +80,20 @@ fun detailScreen(
                     contentPadding = PaddingValues(8.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    item {
-                        detailImage(product.imageUrl ?: "")
-                    }
+                    item { detailImage(product.imageUrl ?: "") }
                     if (viewModel.expirationDate != null) {
-                        item {
-                            Text("Caducidad ${viewModel.expirationDate}")
-                        }
+                        item { Text("Caducidad ${viewModel.expirationDate}") }
                     }
-                    item {
-                        detailGeneralInformation(product = product)
-                    }
-                    item {
-                        detailHealth(product = product)
-                    }
-                    item {
-                        detailNutriments(product = product)
-                    }
+                    item { detailGeneralInformation(product = product) }
+                    item { detailHealth(product = product) }
+                    item { detailNutriments(product = product) }
+                    // NUEVA SECCIÓN: alergias
+                    item { detailAllergies(product.allergensTags) }
                 }
             }
+
             if (showSelectDialog) {
-                AlertDialog( //Dialog para añadir fecha de caducidad
+                AlertDialog(
                     onDismissRequest = { showSelectDialog = false },
                     title = { Text("Añadir fecha de caducidad") },
                     text = { Text("¿Cómo quieres añadirla?") },
@@ -142,7 +105,7 @@ fun detailScreen(
                             }
                         ) { Text("Escanear") }
                     },
-                    dismissButton = { //Boton para añadir manualmente
+                    dismissButton = {
                         TextButton(onClick = {
                             showSelectDialog = false
                             showDatePick = true
@@ -153,27 +116,25 @@ fun detailScreen(
                     textContentColor = MaterialTheme.colorScheme.onSurface
                 )
             }
-            if (showDatePick) { //Dialog para el calendario
+
+            if (showDatePick) {
                 DatePickerDialog(
                     onDismissRequest = { showDatePick = false },
                     confirmButton = {
                         Button(onClick = {
                             showDatePick = false
-                            viewModel.setExpirationDatefromCal(datePickerState.selectedDateMillis)
+                            viewModel.setExpirationDateFromMillis(datePickerState.selectedDateMillis ?: return@Button)
                         }) { Text("Guardar") }
                     },
                     colors = DatePickerDefaults.colors(
                         containerColor = MaterialTheme.colorScheme.surface,
                     )
-                ) {
-                    DatePicker(state = datePickerState)
-                }
+                ) { DatePicker(state = datePickerState) }
             }
         }
     }
-
-
 }
+
 
 @Composable
 fun detailImage(url: String) {
@@ -218,17 +179,13 @@ fun detectNullText(
 }
 
 @Composable
-fun detailGeneralInformation(product: ProductDto) { //Connectar con viewmodel para conseguir los datos
-    val paddingMod: Int = 4
+fun detailGeneralInformation(product: ProductDto) {
+    val paddingMod = 4
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = "INFORMACIÓN GENERAL",
                 style = MaterialTheme.typography.titleLarge,
@@ -236,15 +193,11 @@ fun detailGeneralInformation(product: ProductDto) { //Connectar con viewmodel pa
                 modifier = Modifier.padding(bottom = 12.dp)
             )
             detectNullText("Nombre", product.productName, paddingMod)
-            detectNullText("Fecha Escaner", "", paddingMod) //Añadir fecha actual
+            detectNullText("Fecha Escaner", "", paddingMod)
             detectNullText("Cantidad", product.quantity, paddingMod)
             detectNullText("Denominacion general", product.categories, paddingMod)
             detectNullText("Envase", product.packaging, paddingMod)
-            detectNullText(
-                "Tienda",
-                product.quantity,
-                paddingMod
-            ) //Falta añadir la variable de tiendas
+            detectNullText("Tienda", product.quantity, paddingMod)
             detectNullText("Paises de venta", product.countries, paddingMod)
         }
     }
@@ -264,10 +217,9 @@ fun detailHealth(product: ProductDto) {
                 modifier = Modifier.padding(bottom = 12.dp)
             )
             val nutriScoreResource = getNutriScoreResource(product.nutriScore)
-
             if (nutriScoreResource != null) {
                 Image(
-                    painter = painterResource(id = getNutriScoreResource(product.nutriScore)!!),
+                    painter = painterResource(id = nutriScoreResource),
                     contentDescription = "NutriScore",
                     modifier = Modifier
                         .size(100.dp)
@@ -302,7 +254,6 @@ fun detailNutrimentsLevels(label: String, level: NutrientLevel?) {
             NutrientLevel.MODERATE -> Pair(Yellow, "Moderado en")
             NutrientLevel.HIGH -> Pair(SoftRed, "Alto en")
         }
-
         Row(modifier = Modifier.padding(vertical = 2.dp)) {
             Box(
                 modifier = Modifier
@@ -390,9 +341,7 @@ fun detailBottomBar(
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.error
             )
-        ) {
-            Text("Cancelar")
-        }
+        ) { Text("Cancelar") }
 
         OutlinedButton(
             onClick = onDate,
@@ -400,9 +349,7 @@ fun detailBottomBar(
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.primary
             )
-        ) {
-            Text("Caducidad")
-        }
+        ) { Text("Caducidad") }
 
         Button(
             onClick = onConfirm,
@@ -411,8 +358,34 @@ fun detailBottomBar(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             )
+        ) { Text("Guardar") }
+    }
+}
+
+
+@Composable
+fun detailAllergies(allergensTags: List<String>?) {
+    if (!allergensTags.isNullOrEmpty()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            Text("Guardar")
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "ALERGIAS",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+                allergensTags.forEach { tag ->
+                    Text(
+                        text = "• $tag",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    )
+                }
+            }
         }
     }
 }

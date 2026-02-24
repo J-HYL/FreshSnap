@@ -40,6 +40,8 @@ data class UserProduct(
     val sugarLevel: String? = null,
     val saltLevel: String? = null,
 
+    val allergensTags: List<String>? = null,
+
     @get:PropertyName("isConsumed")
     @set:PropertyName("isConsumed")
     var isConsumed: Boolean = false
