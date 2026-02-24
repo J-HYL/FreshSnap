@@ -14,13 +14,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.LocalContext
-
+import androidx.compose.ui.res.stringResource
+import com.marujho.freshsnap.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-
 fun SettingsAccountScreen(
-
     viewModel: SettingsAccountViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -47,13 +46,20 @@ fun SettingsAccountScreen(
     LaunchedEffect(gender) { editedGender = gender }
     LaunchedEffect(language) { editedLanguage = language }
 
-    val genders = listOf("Masculino", "Femenino", "Otro")
-    val languages = listOf("Español", "English")
+    val gendersList = listOf(
+        stringResource(R.string.gender_male),
+        stringResource(R.string.gender_female),
+        stringResource(R.string.gender_other)
+    )
+    val languagesList = listOf(
+        stringResource(R.string.language_spanish),
+        stringResource(R.string.language_english)
+    )
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mi Cuenta") }
+                title = { Text(stringResource(R.string.settings_account)) }
             )
         }
     ) { padding ->
@@ -74,26 +80,26 @@ fun SettingsAccountScreen(
                     .padding(vertical = 8.dp)
             ) {
                 Text(
-                    text = "Nombre: $editedName",
+                    text = stringResource(R.string.name_value, editedName),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.weight(1f),
                     fontSize = 16.sp
                 )
                 Icon(
                     imageVector = Icons.Default.Edit,
-                    contentDescription = "Editar nombre"
+                    contentDescription = stringResource(R.string.edit_name_title)
                 )
             }
 
             if (isEditingName) {
                 AlertDialog(
                     onDismissRequest = { isEditingName = false },
-                    title = { Text("Editar nombre") },
+                    title = { Text(stringResource(R.string.edit_name_title)) },
                     text = {
                         OutlinedTextField(
                             value = tempName,
                             onValueChange = { tempName = it },
-                            label = { Text("Nombre") },
+                            label = { Text(stringResource(R.string.general_name)) },
                             singleLine = true
                         )
                     },
@@ -102,12 +108,12 @@ fun SettingsAccountScreen(
                             editedName = tempName
                             isEditingName = false
                         }) {
-                            Text("Guardar")
+                            Text(stringResource(R.string.save))
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { isEditingName = false }) {
-                            Text("Cancelar")
+                            Text(stringResource(R.string.cancel))
                         }
                     }
                 )
@@ -124,26 +130,26 @@ fun SettingsAccountScreen(
                     .padding(vertical = 8.dp)
             ) {
                 Text(
-                    text = "Edad: $editedAge años",
+                    text = stringResource(R.string.age_value, editedAge),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.weight(1f),
                     fontSize = 16.sp
                 )
                 Icon(
                     imageVector = Icons.Default.Edit,
-                    contentDescription = "Editar edad"
+                    contentDescription = stringResource(R.string.edit_age_title)
                 )
             }
 
             if (isEditingAge) {
                 AlertDialog(
                     onDismissRequest = { isEditingAge = false },
-                    title = { Text("Editar edad") },
+                    title = { Text(stringResource(R.string.edit_age_title)) },
                     text = {
                         OutlinedTextField(
                             value = tempAge,
                             onValueChange = { tempAge = it.filter { c -> c.isDigit() } },
-                            label = { Text("Edad") },
+                            label = { Text(stringResource(R.string.general_age)) },
                             singleLine = true
                         )
                     },
@@ -152,12 +158,12 @@ fun SettingsAccountScreen(
                             editedAge = tempAge
                             isEditingAge = false
                         }) {
-                            Text("Guardar")
+                            Text(stringResource(R.string.save))
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { isEditingAge = false }) {
-                            Text("Cancelar")
+                            Text(stringResource(R.string.cancel))
                         }
                     }
                 )
@@ -166,9 +172,8 @@ fun SettingsAccountScreen(
             Spacer(Modifier.height(16.dp))
 
             // Sexo
-            Text("Sexo", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.gender_title), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
-            val gendersList = genders
             gendersList.forEach { g ->
                 Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                     RadioButton(
@@ -182,9 +187,8 @@ fun SettingsAccountScreen(
             Spacer(Modifier.height(16.dp))
 
             // Idioma
-            Text("Idioma", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.language_title), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
-            val languagesList = languages
             languagesList.forEach { l ->
                 Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                     RadioButton(
@@ -204,16 +208,13 @@ fun SettingsAccountScreen(
                         editedName,
                         editedAge.toIntOrNull() ?: 0,
                         editedGender,
-                        editedLanguage,
-
+                        editedLanguage
                     )
-                    Toast.makeText(context, "¡Datos guardados!", Toast.LENGTH_SHORT).show()
-
+                    Toast.makeText(context, context.getString(R.string.data_saved), Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Guardar cambios")
-
+                Text(stringResource(R.string.save_changes))
             }
         }
     }

@@ -83,6 +83,7 @@
     <string name="logout_button">Cerrar sesión</string>
     <string name="edit_name_title">Editar nombre</string>
     <string name="edit_age_title">Editar edad</string>
+    <string name="general_age">Edad</string>
     <string name="name_value">Nombre: %1$s</string>
     <string name="age_value">Edad: %1$s años</string>
     <string name="gender_title">Sexo</string>
