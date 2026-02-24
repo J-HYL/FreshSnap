@@ -1,11 +1,11 @@
-package com.marujho.freshsnap
+package com.marujho.freshsnap.ui.scanner
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.os.Bundle
+import android.util.Log
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.LinearLayout
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.ImageAnalysis
@@ -13,12 +13,16 @@ import androidx.camera.mlkit.vision.MlKitAnalyzer
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -26,98 +30,86 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.marujho.freshsnap.ui.openFoodFacts.OpenFoodViewModel
-import com.marujho.freshsnap.ui.theme.FreshSnapTheme
-import java.util.concurrent.Executors
-import android.Manifest
-import android.annotation.SuppressLint
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.marujho.freshsnap.R
 import com.marujho.freshsnap.data.model.ScanType
-import java.util.regex.Pattern
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
-
+import java.util.concurrent.Executors
 
 @Composable
 fun BarCodeScanScreen(
+    viewModel: ScannerViewModel = hiltViewModel(),
     onNavigateToDetail: (String) -> Unit = {},
     onDateScanned: (String) -> Unit = {},
-    scanType: ScanType = ScanType.BARCODE
+    scanType: ScanType = ScanType.BARCODE,
+    onBackClick: () -> Unit = {}
 ) {
-    Log.d("OFF_TEST2", "Entro")
-
     val context = LocalContext.current
 
-    //Hay Permiso??
     var hasCameraPermission by remember {
         mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
         )
     }
 
-    //Pedir Permiso
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { granted -> hasCameraPermission = granted }
     )
 
-    if (hasCameraPermission) {
-        CameraContent(scanType,
-            onResultScanned = { result ->
-                if (scanType == ScanType.BARCODE) {
-                    onNavigateToDetail(result)
-                }else{
-                    onDateScanned(result)
-                }
-            },
-            onNavigateToDetail = onNavigateToDetail)
-    } else {
-        LaunchedEffect(key1 = true) {
+    val scannedResult by viewModel.scannedResult.collectAsState()
+
+
+    LaunchedEffect(scannedResult) {
+        scannedResult?.let { result ->
+            if (scanType == ScanType.BARCODE) {
+                onNavigateToDetail(result)
+            } else {
+                onDateScanned(result)
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.resetScanState()
+        if (!hasCameraPermission) {
             launcher.launch(Manifest.permission.CAMERA)
         }
+    }
+
+    if (hasCameraPermission) {
+        CameraContent(
+            viewModel = viewModel,
+            scanType = scanType,
+            onBackClick = onBackClick
+        )
     }
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CameraContent(
-    scanType: ScanType = ScanType.BARCODE,
-    onResultScanned: (String) -> Unit = {},
-    onNavigateToDetail: (String) -> Unit = {}
+    viewModel: ScannerViewModel,
+    scanType: ScanType,
+    onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
     val lifeCycleOwner = LocalLifecycleOwner.current
     val cameraController = remember { LifecycleCameraController(context) }
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
 
-    val scope = rememberCoroutineScope()
+    val isFlashOn by viewModel.isFlashOn.collectAsState()
 
-    var scannedBarcode by remember { mutableStateOf<String?>(null) }
-    var dateFoundFlag by remember { mutableStateOf(false) }
-    scannedBarcode = "3017620422003" //Para probar sin camara *******************************************************************
-    LaunchedEffect(scannedBarcode) {
-        if (scannedBarcode != null) {
-            Log.d("OFF_TEST2", "Código detectado en estado: $scannedBarcode")
-            onNavigateToDetail(scannedBarcode!!)
-        }
-    }
-
-    val barcodeScanner by lazy {
+    val barcodeScanner = remember {
         val options = BarcodeScannerOptions.Builder()
             .setBarcodeFormats(
                 com.google.mlkit.vision.barcode.common.Barcode.FORMAT_EAN_13,
@@ -129,7 +121,7 @@ fun CameraContent(
         BarcodeScanning.getClient(options)
     }
 
-    val textScanner by lazy {
+    val textScanner = remember {
         TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     }
 
@@ -141,15 +133,9 @@ fun CameraContent(
                     ImageAnalysis.COORDINATE_SYSTEM_VIEW_REFERENCED,
                     cameraExecutor
                 ) { result: MlKitAnalyzer.Result? ->
-                    if (scannedBarcode != null) return@MlKitAnalyzer
-
                     val barcodeResults = result?.getValue(barcodeScanner)
                     if (!barcodeResults.isNullOrEmpty()) {
-                        val barcode = barcodeResults.first().rawValue
-                        if (barcode != null) {
-                            Log.e("BARCODE", "Leído hardware: $barcode")
-                            scannedBarcode = barcode
-                        }
+                        viewModel.processBarcode(barcodeResults.first().rawValue)
                     }
                 }
             }
@@ -160,27 +146,25 @@ fun CameraContent(
                     cameraExecutor
                 ) { result: MlKitAnalyzer.Result? ->
                     val textResults = result?.getValue(textScanner)
-                    if (textResults != null && !dateFoundFlag) {
-                        val dateFound = findExpirationDate(textResults.text)
-                        if (dateFound != null) {
-                            dateFoundFlag = true
-                            scope.launch {
-                                onResultScanned(dateFound)
-                            }
-                        }
-                    }
+                    viewModel.processText(textResults?.text)
                 }
             }
         }
         cameraController.setImageAnalysisAnalyzer(cameraExecutor, analyzer)
     }
 
+    LaunchedEffect(isFlashOn) {
+        cameraController.enableTorch(isFlashOn)
+    }
+
     Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
             AndroidView(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+                modifier = Modifier.fillMaxSize(),
                 factory = { ctx ->
                     PreviewView(ctx).apply {
                         layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
@@ -192,76 +176,75 @@ fun CameraContent(
                     cameraController.bindToLifecycle(lifeCycleOwner)
                 }
             )
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val width = size.width
-                val height = size.height
 
-                val rectWidth = width * 0.75f
-                val rectHeight = height * 0.25f
+            ScannerOverlay()
 
-                val left = (width - rectWidth) / 2
-                val top = (height - rectHeight) / 2
-
-                val cornerRadius = 20f
-
-                drawRect(
-                    color = Color.Black.copy(alpha = 0.6f),
-                    size = size
-                )
-
-                drawRoundRect(
-                    color = Color.Transparent,
-                    topLeft = Offset(left, top),
-                    size = Size(rectWidth, rectHeight),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(
-                        cornerRadius,
-                        cornerRadius
-                    ),
-                    blendMode = BlendMode.Clear
-                )
-
-                drawRoundRect(
-                    color = Color.White,
-                    topLeft = Offset(left, top),
-                    size = Size(rectWidth, rectHeight),
-                    style = Stroke(width = 4f),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(
-                        cornerRadius,
-                        cornerRadius
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 120.dp)
+                    .zIndex(10f),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = onBackClick,
+                    modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "Volver a la pantalla anterior",
+                        tint = Color.White
                     )
-                )
+                }
+                IconButton(
+                    onClick = { viewModel.toggleFlash() },
+                    modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                ) {
+                    Icon(
+                        painter = painterResource(id = if (isFlashOn) R.drawable.ic_flash_on else R.drawable.ic_flash_off),
+                        contentDescription = "Activar/Desativar Flash",
+                        tint = Color.White
+                    )
+                }
             }
         }
     }
 }
 
-fun findExpirationDate(text : String) : String ?{
-
-    val patterns = listOf(
-        "\\b\\d{1,2}[/.-]\\d{1,2}[/.-]\\d{2,4}\\b",
-        "\\b\\d{1,2}[\\s.-]+(?:ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC|JAN|APR|AUG|DEC)[a-z]*[\\s.-]+\\d{2,4}\\b",
-        "\\b\\d{4}[/.-]\\d{1,2}[/.-]\\d{1,2}\\b",
-        "\\b(0[1-9]|1[0-2])[/.-]\\d{4}\\b"
-    )
-
-    for (pattern in patterns) {
-        try {
-            val compiledPattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
-            val matcher = compiledPattern.matcher(text)
-
-            if (matcher.find()) {
-                return matcher.group()
-            }
-        } catch (e: Exception) {
-            continue
-        }
-    }
-    return null
-}
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun BarCodeScanScreenPreview() {
-    FreshSnapTheme {
-        CameraContent()
+fun ScannerOverlay() {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val width = size.width
+        val height = size.height
+
+        val rectWidth = width * 0.75f
+        val rectHeight = height * 0.25f
+
+        val left = (width - rectWidth) / 2
+        val top = (height - rectHeight) / 2
+        val cornerRadius = 20f
+
+        drawRect(
+            color = Color.Black.copy(alpha = 0.6f),
+            size = size
+        )
+
+        drawRoundRect(
+            color = Color.Transparent,
+            topLeft = Offset(left, top),
+            size = Size(rectWidth, rectHeight),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerRadius, cornerRadius),
+            blendMode = BlendMode.Clear
+        )
+
+        drawRoundRect(
+            color = Color.White,
+            topLeft = Offset(left, top),
+            size = Size(rectWidth, rectHeight),
+            style = Stroke(width = 4f),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerRadius, cornerRadius)
+        )
     }
 }

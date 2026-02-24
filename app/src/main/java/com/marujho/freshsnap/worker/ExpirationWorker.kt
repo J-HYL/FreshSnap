@@ -43,11 +43,13 @@ class ExpirationWorker @AssistedInject constructor(
                 .await()
             val products = productSnapshot.toObjects(UserProduct::class.java)
             val productsAboutToExpire = mutableListOf<String>()
+
             val calendar = Calendar.getInstance()
             calendar.set(Calendar.HOUR_OF_DAY, 0)
             calendar.set(Calendar.MINUTE, 0)
             calendar.set(Calendar.SECOND, 0)
             calendar.set(Calendar.MILLISECOND, 0)
+
             val now = calendar.timeInMillis
             Log.d("EXPIRATIONWORKER",products.toString())
             products.forEach{product ->

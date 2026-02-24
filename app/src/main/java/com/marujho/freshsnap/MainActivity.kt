@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
                     val startDest by splashViewModel.startDestination.collectAsState()
 
                     if (startDest != null) {
-                        AppNavigation(startDestination = startDest!!)
+                        AppNavigation()
                     }
                 }
             }
