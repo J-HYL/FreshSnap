@@ -6,6 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -40,6 +43,8 @@ fun detailScreen(
 ) {
     val state = viewModel.uiState
     val context = LocalContext.current
+
+    val allergyMatches by viewModel.allergyMatches.collectAsState()
 
     fun onConfirmPressed() {
         viewModel.saveProduct(
@@ -80,15 +85,14 @@ fun detailScreen(
                     contentPadding = PaddingValues(8.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    item { detailImage(product.imageUrl ?: "") }
+                    item { detailImage(product.imageUrl ?: "", hasWarning = allergyMatches.isNotEmpty()) }
                     if (viewModel.expirationDate != null) {
                         item { Text("Caducidad ${viewModel.expirationDate}") }
                     }
                     item { detailGeneralInformation(product = product) }
                     item { detailHealth(product = product) }
                     item { detailNutriments(product = product) }
-                    // NUEVA SECCIÓN: alergias
-                    item { detailAllergies(product.allergensTags) }
+                    item { detailAllergies(product.allergensTags, allergyMatches) }
                 }
             }
 
@@ -137,7 +141,7 @@ fun detailScreen(
 
 
 @Composable
-fun detailImage(url: String) {
+fun detailImage(url: String, hasWarning: Boolean = false) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -157,6 +161,18 @@ fun detailImage(url: String) {
                 modifier = Modifier.size(200.dp),
                 contentScale = ContentScale.Fit
             )
+
+            if (hasWarning) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = "Alerta de alergia",
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .align(androidx.compose.ui.Alignment.TopEnd)
+                        .size(36.dp)
+                        .padding(4.dp)
+                )
+            }
         }
     }
 }
@@ -363,27 +379,60 @@ fun detailBottomBar(
 }
 
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun detailAllergies(allergensTags: List<String>?) {
+fun detailAllergies(allergensTags: List<String>?, allergyMatches: List<String>) {
     if (!allergensTags.isNullOrEmpty()) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "ALERGIAS",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-                allergensTags.forEach { tag ->
+
+                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                     Text(
-                        text = "• $tag",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(vertical = 2.dp)
+                        text = "ALERGIAS",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary,
                     )
+                    if (allergyMatches.isNotEmpty()) {
+                        Spacer(Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = "Peligro de alergia",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    allergensTags.forEach { tag ->
+                        val isMatch = allergyMatches.contains(tag)
+                        val cleanTag = tag.substringAfter("en:").replaceFirstChar { it.uppercase() }
+
+                        val containerColor = if (isMatch) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surfaceVariant
+                        val contentColor = if (isMatch) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurfaceVariant
+
+                        Box(
+                            modifier = Modifier
+                                .background(containerColor, shape = RoundedCornerShape(16.dp))
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = cleanTag,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = contentColor,
+                                fontWeight = if (isMatch) FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
+                    }
                 }
             }
         }
