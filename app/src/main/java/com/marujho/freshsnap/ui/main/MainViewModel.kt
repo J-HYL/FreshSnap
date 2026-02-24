@@ -52,7 +52,7 @@ class MainViewModel @Inject constructor(
     private fun scheduleExpirationWorker() {
 
 
-        val expirationWorkRequest = PeriodicWorkRequestBuilder<ExpirationWorker>(24, TimeUnit.HOURS)
+        val expirationWorkRequest = PeriodicWorkRequestBuilder<ExpirationWorker>(15, TimeUnit.MINUTES)
             .setInitialDelay(15, TimeUnit.SECONDS)//Cambiar a minutos
             .build()
 
