@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -70,7 +71,11 @@ fun MainScreen(
     val products by viewModel.products.collectAsState() // datos de prueba
     val searchQuery by viewModel.searchQuery.collectAsState()
     val selectedTab = viewModel.selectedTab
-    val tabs = listOf("Despensa", "Caducados", "Consumidos")
+    val tabs = listOf(
+        stringResource(R.string.tab_pantry),
+        stringResource(R.string.tab_expired),
+        stringResource(R.string.tab_consumed)
+    )
     val redDays by viewModel.redDays.collectAsState()
     val yellowDays by viewModel.yellowDays.collectAsState()
 
@@ -93,7 +98,7 @@ fun MainScreen(
                 shape = CircleShape,
                 modifier = Modifier.padding(bottom = bottomBarPadding)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Añadir")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_button_desc))
             }
         }
     ) { padding ->
@@ -247,7 +252,7 @@ fun SearchBar(
     TextField(
         value = query,
         onValueChange = onQueryChange,
-        placeholder = { Text("Buscar producto o EAN") },
+        placeholder = { Text(stringResource(R.string.search_placeholder)) },
         leadingIcon = {
             Icon(
                 Icons.Default.Search,
@@ -333,12 +338,12 @@ fun ProductCardItem(
                 ) {
                     AsyncImage(
                         model = product.imageUrl,
-                        contentDescription = "Foto producto",
+                        contentDescription = stringResource(R.string.product_image_desc),
                         modifier = Modifier
                             .fillMaxSize()
                             .clip(RoundedCornerShape(8.dp)),
                         contentScale = ContentScale.Crop,
-                        placeholder = painterResource(R.drawable.ic_freshsnap_logo),
+                        placeholder = painterResource(R.drawable.ic_freshsnap_logo_splash),
                         error = painterResource(android.R.drawable.ic_menu_gallery)
                     )
                 }
@@ -370,20 +375,20 @@ fun ProductCardItem(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (selectedTab == 0) {
                             Text(
-                                text = "${product.expiryDays + 1} días",
+                                text = stringResource(R.string.days_remaining, product.expiryDays + 1),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         } else if (selectedTab == 1) {
                             Text(
-                                text = "Caducado",
+                                text = stringResource(R.string.status_expired),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             )
                         } else if (selectedTab == 2) {
                             Text(
-                                text = "Consumido",
+                                text = stringResource(R.string.status_consumed),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp
                             )
@@ -391,7 +396,7 @@ fun ProductCardItem(
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Expand",
+                            contentDescription = stringResource(R.string.expand_desc),
                             modifier = Modifier.rotate(rotationState),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
@@ -418,10 +423,10 @@ fun ProductCardItem(
 
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.weight(1f)) {
-                            TextDetail("Cantidad:", product.quantity)
-                            TextDetail("Marca:", product.brand)
-                            TextDetail("Escaneado:", product.scannedDate)
-                            TextDetail("EAN:", product.ean)
+                            TextDetail(stringResource(R.string.quantity_label), product.quantity)
+                            TextDetail(stringResource(R.string.brand_label), product.brand)
+                            TextDetail(stringResource(R.string.scanned_label), product.scannedDate)
+                            TextDetail(stringResource(R.string.ean_label), product.ean)
                         }
 
                         Column(horizontalAlignment = Alignment.End) {
@@ -476,7 +481,7 @@ fun ProductCardItem(
                         ),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("Ver más", color = Color.White)
+                        Text(stringResource(R.string.see_more_button), color = Color.White)
                     }
                 }
             }
