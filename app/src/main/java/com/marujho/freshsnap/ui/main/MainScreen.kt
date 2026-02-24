@@ -28,6 +28,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -135,80 +136,91 @@ fun MainScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = bottomBarPadding + 80.dp)
-            ) {
-                items(
-                    items = products,
-                    key = { product -> "${product.id}_$selectedTab" }
-                ) { product ->
+            if (products.isEmpty()) {
+                EmptyStateMessage(selectedTab = selectedTab)
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = bottomBarPadding + 80.dp)
+                ) {
+                    items(
+                        items = products,
+                        key = { product -> "${product.id}_$selectedTab" }
+                    ) { product ->
 
-                    val dismissState = rememberSwipeToDismissBoxState(
-                        confirmValueChange = { dismissValue ->
-                            when (dismissValue) {
-                                SwipeToDismissBoxValue.StartToEnd -> {
-                                    viewModel.consumeProduct(product.id)
-                                    true
+                        val dismissState = rememberSwipeToDismissBoxState(
+                            confirmValueChange = { dismissValue ->
+                                when (dismissValue) {
+                                    SwipeToDismissBoxValue.StartToEnd -> {
+                                        viewModel.consumeProduct(product.id)
+                                        true
+                                    }
+
+                                    SwipeToDismissBoxValue.EndToStart -> {
+                                        viewModel.deleteProduct(product.id)
+                                        true
+                                    }
+
+                                    else -> false
                                 }
-                                SwipeToDismissBoxValue.EndToStart -> {
-                                    viewModel.deleteProduct(product.id)
-                                    true
+                            },
+                            positionalThreshold = { totalDistance -> totalDistance * 0.12f }
+                        )
+
+                        LaunchedEffect(selectedTab) {
+                            dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+                        }
+
+                        SwipeToDismissBox(
+                            state = dismissState,
+                            enableDismissFromStartToEnd = selectedTab == 0,
+                            enableDismissFromEndToStart = true,
+                            backgroundContent = {
+                                val color = when (dismissState.targetValue) {
+                                    SwipeToDismissBoxValue.StartToEnd -> Color(0xFF4CAF50)
+                                    SwipeToDismissBoxValue.EndToStart -> Color(0xFFE57373)
+                                    else -> Color.Transparent
                                 }
-                                else -> false
-                            }
-                        },
-                        positionalThreshold = { totalDistance -> totalDistance * 0.12f }
-                    )
 
-                    LaunchedEffect(selectedTab) {
-                        dismissState.snapTo(SwipeToDismissBoxValue.Settled)
-                    }
+                                val icon = when (dismissState.targetValue) {
+                                    SwipeToDismissBoxValue.StartToEnd -> Icons.Default.Check
+                                    SwipeToDismissBoxValue.EndToStart -> Icons.Default.Delete
+                                    else -> null
+                                }
 
-                    SwipeToDismissBox(
-                        state = dismissState,
-                        enableDismissFromStartToEnd = selectedTab == 0,
-                        enableDismissFromEndToStart = true,
-                        backgroundContent = {
-                            val color = when (dismissState.targetValue) {
-                                SwipeToDismissBoxValue.StartToEnd -> Color(0xFF4CAF50)
-                                SwipeToDismissBoxValue.EndToStart -> Color(0xFFE57373)
-                                else -> Color.Transparent
-                            }
+                                val alignment =
+                                    if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd)
+                                        Alignment.CenterStart else Alignment.CenterEnd
 
-                            val icon = when (dismissState.targetValue) {
-                                SwipeToDismissBoxValue.StartToEnd -> Icons.Default.Check
-                                SwipeToDismissBoxValue.EndToStart -> Icons.Default.Delete
-                                else -> null
-                            }
-
-                            val alignment = if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd)
-                                Alignment.CenterStart else Alignment.CenterEnd
-
-                            if (dismissState.dismissDirection != SwipeToDismissBoxValue.Settled) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(color, RoundedCornerShape(12.dp))
-                                        .padding(horizontal = 20.dp),
-                                    contentAlignment = alignment
-                                ) {
-                                    if (icon != null) {
-                                        Icon(icon, contentDescription = null, tint = Color.White)
+                                if (dismissState.dismissDirection != SwipeToDismissBoxValue.Settled) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(color, RoundedCornerShape(12.dp))
+                                            .padding(horizontal = 20.dp),
+                                        contentAlignment = alignment
+                                    ) {
+                                        if (icon != null) {
+                                            Icon(
+                                                icon,
+                                                contentDescription = null,
+                                                tint = Color.White
+                                            )
+                                        }
                                     }
                                 }
+                            },
+                            content = {
+                                ProductCardItem(
+                                    product = product,
+                                    selectedTab = selectedTab,
+                                    redDays = redDays,
+                                    yellowDays = yellowDays,
+                                    onNavigateToDetail = onNavigateToDetail
+                                )
                             }
-                        },
-                        content = {
-                            ProductCardItem(
-                                product = product,
-                                selectedTab = selectedTab,
-                                redDays = redDays,
-                                yellowDays = yellowDays,
-                                onNavigateToDetail = onNavigateToDetail
-                            )
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -526,5 +538,44 @@ fun getEcoScoreIcon(score: String?): Int? {
         "e" -> R.drawable.ic_ecoscore_e
         "f" -> R.drawable.ic_ecoscore_f
         else -> null
+    }
+}
+
+@Composable
+fun EmptyStateMessage(selectedTab: Int) {
+    val message = when (selectedTab) {
+        0 -> stringResource(R.string.empty_pantry)
+        1 -> stringResource(R.string.empty_expired)
+        2 -> stringResource(R.string.empty_consumed)
+        else -> ""
+    }
+
+    val icon = when (selectedTab) {
+        0 -> Icons.Default.ShoppingCart
+        1 -> Icons.Default.CheckCircle
+        2 -> Icons.Default.Fastfood
+        else -> Icons.Default.Info
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
     }
 }
