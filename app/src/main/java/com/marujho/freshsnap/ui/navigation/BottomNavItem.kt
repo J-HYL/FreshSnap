@@ -1,15 +1,17 @@
 package com.marujho.freshsnap.ui.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.marujho.freshsnap.R
 
-sealed class BottomNavItem(val route: String, val title: String, val icon: ImageVector) {
-    object Home : BottomNavItem("home_screen", "Inicio", Icons.Default.Home)
-    object Scanner : BottomNavItem("scanner_screen", "Escanear", Icons.Default.Search)
-    object Settings : BottomNavItem("settings_screen", "Ajustes", Icons.Default.Settings)
+sealed class BottomNavItem(val route: String, @StringRes val titleResId: Int, val icon: ImageVector) {
+    object Home : BottomNavItem("home_screen", R.string.nav_home, Icons.Default.Home)
+    object Scanner : BottomNavItem("scanner_screen", R.string.nav_scanner, Icons.Default.Search)
+    object Settings : BottomNavItem("settings_screen", R.string.nav_settings, Icons.Default.Settings)
 }
 
 // VER COMO METES ICONO DE LA CAMARA
