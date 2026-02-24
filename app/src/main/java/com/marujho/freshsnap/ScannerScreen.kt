@@ -42,19 +42,37 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.marujho.freshsnap.data.model.ScanType
 import java.util.regex.Pattern
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.zIndex
 
 
 @Composable
 fun BarCodeScanScreen(
     onNavigateToDetail: (String) -> Unit = {},
     onDateScanned: (String) -> Unit = {},
-    scanType: ScanType = ScanType.BARCODE
+    scanType: ScanType = ScanType.BARCODE,
+    onBackClick : () ->Unit = {}
 ) {
     Log.d("OFF_TEST2", "Entro")
 
@@ -77,7 +95,8 @@ fun BarCodeScanScreen(
     )
 
     if (hasCameraPermission) {
-        CameraContent(scanType,
+        CameraContent(
+            scanType = scanType,
             onResultScanned = { result ->
                 if (scanType == ScanType.BARCODE) {
                     onNavigateToDetail(result)
@@ -85,7 +104,8 @@ fun BarCodeScanScreen(
                     onDateScanned(result)
                 }
             },
-            onNavigateToDetail = onNavigateToDetail)
+            //onNavigateToDetail = onNavigateToDetail,
+            onBackClick = onBackClick)
     } else {
         LaunchedEffect(key1 = true) {
             launcher.launch(Manifest.permission.CAMERA)
@@ -98,7 +118,8 @@ fun BarCodeScanScreen(
 fun CameraContent(
     scanType: ScanType = ScanType.BARCODE,
     onResultScanned: (String) -> Unit = {},
-    onNavigateToDetail: (String) -> Unit = {}
+    onNavigateToDetail: (String) -> Unit = {},
+    onBackClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val lifeCycleOwner = LocalLifecycleOwner.current
@@ -109,6 +130,8 @@ fun CameraContent(
 
     var scannedBarcode by remember { mutableStateOf<String?>(null) }
     var dateFoundFlag by remember { mutableStateOf(false) }
+
+    var isFlashon by remember { mutableStateOf(false) }
     //scannedBarcode = "8480000101617" //Para probar sin camara *******************************************************************
     LaunchedEffect(scannedBarcode) {
         if (scannedBarcode != null) {
@@ -176,11 +199,11 @@ fun CameraContent(
     }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize()
+            .padding(paddingValues)) {
             AndroidView(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+                    .fillMaxSize(),
                 factory = { ctx ->
                     PreviewView(ctx).apply {
                         layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
@@ -230,6 +253,44 @@ fun CameraContent(
                         cornerRadius
                     )
                 )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 120.dp)
+                    .zIndex(10f),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                IconButton(
+                    onClick = {
+                        Log.d("NAV_DEBUG","click funciona")
+                        onBackClick()
+                              },
+                    modifier = Modifier
+                        .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "Volver a la pantalla anterior",
+                        tint = Color.White
+                    )
+                }
+                IconButton(
+                    onClick = {
+                        isFlashon = !isFlashon
+                        cameraController.enableTorch(isFlashon)
+                    },
+                    modifier = Modifier
+                        .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                ) {
+                    Icon(
+                        painter = painterResource(id = if(isFlashon) R.drawable.ic_flash_on else R.drawable.ic_flash_off),
+                        contentDescription = "Activar/Desativar Flash",
+                        tint = Color.White
+                    )
+                }
             }
         }
     }

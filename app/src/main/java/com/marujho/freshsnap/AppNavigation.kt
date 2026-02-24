@@ -50,7 +50,7 @@ fun AppNavigation(startDestination: String) {
 
         composable("main_screen") {
             MainAppScreen(
-                onNavigateToDetail = {barcode ->
+                onNavigateToDetail = { barcode ->
                     navController.navigate("detail_screen/$barcode")
                 }
             )
@@ -79,6 +79,10 @@ fun AppNavigation(startDestination: String) {
                     navController.previousBackStackEntry
                         ?.savedStateHandle
                         ?.set("scanned_date", date)
+                    navController.popBackStack()
+                },
+                onBackClick = {
+                    Log.d("NAV", "Quiere volver")
                     navController.popBackStack()
                 }
             )
