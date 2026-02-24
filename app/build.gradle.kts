@@ -90,7 +90,7 @@ dependencies {
     implementation(libs.logging.interceptor)
 
 
-
+    implementation(libs.androidx.compose.material.icons.extended)
 
     // ROOM (BASE DE DATOS)
     implementation(libs.androidx.room.runtime)
