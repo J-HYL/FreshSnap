@@ -10,8 +10,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.marujho.freshsnap.BarCodeScanScreen
 import com.marujho.freshsnap.ui.navigation.BottomNavItem
+import com.marujho.freshsnap.ui.scanner.BarCodeScanScreen
 import com.marujho.freshsnap.ui.settings.Account.SettingsAccountScreen
 import com.marujho.freshsnap.ui.settings.Alerts.SettingsAlertScreen
 import com.marujho.freshsnap.ui.settings.Allergy.SettingsAllergyScreen
@@ -90,7 +90,18 @@ fun MainAppScreen(
                 )
             }
             composable(BottomNavItem.Scanner.route) {
-                BarCodeScanScreen(onNavigateToDetail = onNavigateToDetail)
+                BarCodeScanScreen(
+                    onNavigateToDetail = onNavigateToDetail,
+                    onBackClick = {
+                        navController.navigate(BottomNavItem.Home.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
             composable(BottomNavItem.Settings.route) {
                 SettingsScreen(navController)
