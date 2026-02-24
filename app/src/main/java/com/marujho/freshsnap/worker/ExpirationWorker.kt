@@ -78,16 +78,16 @@ class ExpirationWorker @AssistedInject constructor(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val channel = NotificationChannel(
                 channelId,
-                "Caducidad de Alimentos",
+                applicationContext.getString(R.string.notif_channel_name),
                 NotificationManager.IMPORTANCE_HIGH
             )
             notificationManager.createNotificationChannel(channel)
         }
-        val title = "Estan apunto de caducar alimentos"
+        val title = applicationContext.getString(R.string.notif_title)
         val content = if(products.size == 1){
-            "${products[0]} está a punto de caducar"
+            applicationContext.getString(R.string.notif_single_item, products[0])
         }else{
-            "${products.size} alimentos caducan en $daysSetting días."
+            applicationContext.getString(R.string.notif_multiple_items, products.size, daysSetting)
         }
 
         val notification = NotificationCompat.Builder(applicationContext, channelId)

@@ -51,7 +51,7 @@ fun LoginScreen(
                     }
                 },
                 onError = { mensajeError ->
-                    Toast.makeText(context, "Error: $mensajeError", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.error_prefix, mensajeError), Toast.LENGTH_SHORT).show()
                 }
             )
         },
@@ -82,7 +82,7 @@ fun LoginBox(
         Spacer(modifier = Modifier.height(24.dp))
 
         EditTextField(
-            label = "Email",
+            label = stringResource(R.string.email_label),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
@@ -96,7 +96,7 @@ fun LoginBox(
         )
 
         EditTextField(
-            label = "Password",
+            label = stringResource(R.string.password_label),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done
@@ -124,7 +124,7 @@ fun LoginBox(
                 ),
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Iniciar Sesión")
+                Text(stringResource(R.string.login_button))
             }
             OutlinedButton(
                 onClick = { onSignUpClick() },
@@ -133,7 +133,7 @@ fun LoginBox(
                     contentColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                Text("Crear Cuenta")
+                Text(stringResource(R.string.create_account_button))
             }
         }
     }
@@ -194,7 +194,7 @@ fun EditTextField(
                         painter = painterResource(
                             id = if (isPasswordVisible) R.drawable.ic_visibility else R.drawable.ic_visibility_off
                         ),
-                        contentDescription = if (isPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                        contentDescription = if (isPasswordVisible) stringResource(R.string.hide_password) else stringResource(R.string.show_password),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }

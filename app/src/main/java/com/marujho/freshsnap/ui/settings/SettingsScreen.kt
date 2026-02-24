@@ -4,11 +4,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.marujho.freshsnap.R
 
 @Composable
 fun SettingsScreen(
@@ -34,7 +36,7 @@ fun SettingsScreen(
             Spacer(Modifier.height(24.dp))
 
             Text(
-                text = "Ajustes",
+                text = stringResource(R.string.settings_title),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -42,7 +44,7 @@ fun SettingsScreen(
             Spacer(Modifier.height(16.dp))
 
             SettingsItem(
-                title = "Dark Theme / Light Theme",
+                title = stringResource(R.string.settings_theme),
                 onClick = {},
                 trailing = {
                     Switch(
@@ -55,20 +57,20 @@ fun SettingsScreen(
             )
 
             SettingsItem(
-                title = "Mi Cuenta",
-                subtitle = "Nombre, edad, sexo, idioma.",
+                title = stringResource(R.string.settings_account),
+                subtitle = stringResource(R.string.settings_account_sub),
                 onClick = { navController.navigate("settings_account") }
             )
 
             SettingsItem(
-                title = "Alergias",
-                subtitle = "Leche, gluten, huevos.",
+                title = stringResource(R.string.settings_allergies),
+                subtitle = stringResource(R.string.settings_allergies_sub),
                 onClick = { navController.navigate("settings_allergy") }
             )
 
             SettingsItem(
-                title = "Alertas caducidad",
-                subtitle = "Configura días rojo y amarillo",
+                title = stringResource(R.string.settings_alerts),
+                subtitle = stringResource(R.string.settings_alerts_sub),
                 onClick = { navController.navigate("settings_alert") }
             )
 
@@ -83,7 +85,7 @@ fun SettingsScreen(
                     containerColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("Cerrar sesión")
+                Text(stringResource(R.string.logout_button))
             }
         }
     }

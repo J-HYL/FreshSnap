@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -49,7 +50,7 @@ fun MainAppScreen(
                         icon = {
                             Icon(
                                 imageVector = screen.icon,
-                                contentDescription = screen.title
+                                contentDescription = stringResource(screen.titleResId)
                             )
                         },
                         label = null, // PREGUNTAR SI DEJAR LAS LABEL O QUITARLAS COMO EN EL DISEÑO ORIGINAL

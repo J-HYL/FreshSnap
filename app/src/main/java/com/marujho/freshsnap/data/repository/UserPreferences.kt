@@ -101,7 +101,7 @@ class UserPreferences @Inject constructor(
 
     // Idioma
     val userLanguage: Flow<String> = context.dataStore.data
-        .map { it[LANGUAGE_KEY] ?: "Español" }
+        .map { it[LANGUAGE_KEY] ?: "Sistema" }
 
     suspend fun setUserLanguage(language: String) {
         context.dataStore.edit { it[LANGUAGE_KEY] = language }

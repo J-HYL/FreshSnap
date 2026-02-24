@@ -33,6 +33,7 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,7 +50,7 @@ fun detailScreen(
     fun onConfirmPressed() {
         viewModel.saveProduct(
             onSuccess = {
-                Toast.makeText(context, "Producto guardado", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.product_saved), Toast.LENGTH_SHORT).show()
                 onNavigateMain()
             },
             onError = { error ->
@@ -87,7 +88,7 @@ fun detailScreen(
                 ) {
                     item { detailImage(product.imageUrl ?: "", hasWarning = allergyMatches.isNotEmpty()) }
                     if (viewModel.expirationDate != null) {
-                        item { Text("Caducidad ${viewModel.expirationDate}") }
+                        item { Text(stringResource(R.string.expiry_date_value, viewModel.expirationDate ?: "")) }
                     }
                     item { detailGeneralInformation(product = product) }
                     item { detailHealth(product = product) }
@@ -99,21 +100,21 @@ fun detailScreen(
             if (showSelectDialog) {
                 AlertDialog(
                     onDismissRequest = { showSelectDialog = false },
-                    title = { Text("Añadir fecha de caducidad") },
-                    text = { Text("¿Cómo quieres añadirla?") },
+                    title = { Text(stringResource(R.string.add_expiry_date_title)) },
+                    text = { Text(stringResource(R.string.add_expiry_date_text)) },
                     confirmButton = {
                         TextButton(
                             onClick = {
                                 showSelectDialog = false
                                 onNavigationToScanDate()
                             }
-                        ) { Text("Escanear") }
+                        ) { Text(stringResource(R.string.scan_button)) }
                     },
                     dismissButton = {
                         TextButton(onClick = {
                             showSelectDialog = false
                             showDatePick = true
-                        }) { Text("Manual") }
+                        }) { Text(stringResource(R.string.manual_button)) }
                     },
                     containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
@@ -128,7 +129,7 @@ fun detailScreen(
                         Button(onClick = {
                             showDatePick = false
                             viewModel.setExpirationDateFromMillis(datePickerState.selectedDateMillis ?: return@Button)
-                        }) { Text("Guardar") }
+                        }) { Text(stringResource(R.string.save)) }
                     },
                     colors = DatePickerDefaults.colors(
                         containerColor = MaterialTheme.colorScheme.surface,
@@ -155,7 +156,7 @@ fun detailImage(url: String, hasWarning: Boolean = false) {
         ) {
             AsyncImage(
                 model = url,
-                contentDescription = "Imagen del producto",
+                contentDescription = stringResource(R.string.detail_image_desc),
                 placeholder = painterResource(android.R.drawable.ic_menu_gallery),
                 error = painterResource(android.R.drawable.ic_dialog_alert),
                 modifier = Modifier.size(200.dp),
@@ -203,18 +204,18 @@ fun detailGeneralInformation(product: ProductDto) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "INFORMACIÓN GENERAL",
+                text = stringResource(R.string.general_info_title),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
-            detectNullText("Nombre", product.productName, paddingMod)
-            detectNullText("Fecha Escaner", "", paddingMod)
-            detectNullText("Cantidad", product.quantity, paddingMod)
-            detectNullText("Denominacion general", product.categories, paddingMod)
-            detectNullText("Envase", product.packaging, paddingMod)
-            detectNullText("Tienda", product.quantity, paddingMod)
-            detectNullText("Paises de venta", product.countries, paddingMod)
+            detectNullText(stringResource(R.string.general_name), product.productName, paddingMod)
+            detectNullText(stringResource(R.string.general_scan_date), "", paddingMod)
+            detectNullText(stringResource(R.string.general_quantity), product.quantity, paddingMod)
+            detectNullText(stringResource(R.string.general_denomination), product.categories, paddingMod)
+            detectNullText(stringResource(R.string.general_packaging), product.packaging, paddingMod)
+            detectNullText(stringResource(R.string.general_store), product.brands, paddingMod)
+            detectNullText(stringResource(R.string.general_countries), product.countries, paddingMod)
         }
     }
 }
@@ -227,7 +228,7 @@ fun detailHealth(product: ProductDto) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "SALUD",
+                text = stringResource(R.string.health_title),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 12.dp)
@@ -236,7 +237,7 @@ fun detailHealth(product: ProductDto) {
             if (nutriScoreResource != null) {
                 Image(
                     painter = painterResource(id = nutriScoreResource),
-                    contentDescription = "NutriScore",
+                    contentDescription = stringResource(R.string.nutriscore_desc),
                     modifier = Modifier
                         .size(100.dp)
                         .padding(bottom = 8.dp),
@@ -266,9 +267,9 @@ fun getNutriScoreResource(nutriScore: String?): Int? {
 fun detailNutrimentsLevels(label: String, level: NutrientLevel?) {
     if (level != null) {
         val (color, textPrefix) = when (level) {
-            NutrientLevel.LOW -> Pair(Green, "Bajo en")
-            NutrientLevel.MODERATE -> Pair(Yellow, "Moderado en")
-            NutrientLevel.HIGH -> Pair(SoftRed, "Alto en")
+            NutrientLevel.LOW -> Pair(Green, stringResource(R.string.low_in))
+            NutrientLevel.MODERATE -> Pair(Yellow, stringResource(R.string.moderate_in))
+            NutrientLevel.HIGH -> Pair(SoftRed, stringResource(R.string.high_in))
         }
         Row(modifier = Modifier.padding(vertical = 2.dp)) {
             Box(
@@ -294,20 +295,20 @@ fun detailNutriments(product: ProductDto) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "VALOR NUTRICIONAL (100g)",
+                text = stringResource(R.string.nutritional_value_title),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
-            detailRowNutriments("Energia", product.nutriments?.energyKcal100g, "Kcal")
-            detailRowNutriments("Grasas", product.nutriments?.fat100g, "g")
-            detailRowNutriments("Grasas sat.", product.nutriments?.saturatedFat100g, "g")
-            detailRowNutriments("Carbohidratos", product.nutriments?.carbohydrates100g, "g")
-            detailRowNutriments("Azúcares", product.nutriments?.sugars100g, "g")
-            detailRowNutriments("Proteínas", product.nutriments?.proteins100g, "g")
-            detailRowNutriments("Sal", product.nutriments?.salt100g, "g")
-            detailRowNutriments("Sodio", product.nutriments?.sodium100g, "g")
-            detailRowNutriments("Fibra", product.nutriments?.fiber100g, "g")
+            detailRowNutriments(stringResource(R.string.nutriment_energy), product.nutriments?.energyKcal100g, "Kcal")
+            detailRowNutriments(stringResource(R.string.nutriment_fats), product.nutriments?.fat100g, "g")
+            detailRowNutriments(stringResource(R.string.nutriment_sat_fats), product.nutriments?.saturatedFat100g, "g")
+            detailRowNutriments(stringResource(R.string.nutriment_carbs), product.nutriments?.carbohydrates100g, "g")
+            detailRowNutriments(stringResource(R.string.nutriment_sugars), product.nutriments?.sugars100g, "g")
+            detailRowNutriments(stringResource(R.string.nutriment_proteins), product.nutriments?.proteins100g, "g")
+            detailRowNutriments(stringResource(R.string.nutriment_salt), product.nutriments?.salt100g, "g")
+            detailRowNutriments(stringResource(R.string.nutriment_sodium), product.nutriments?.sodium100g, "g")
+            detailRowNutriments(stringResource(R.string.nutriment_fiber), product.nutriments?.fiber100g, "g")
         }
     }
 }
@@ -357,7 +358,7 @@ fun detailBottomBar(
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.error
             )
-        ) { Text("Cancelar") }
+        ) { Text(stringResource(R.string.cancel)) }
 
         OutlinedButton(
             onClick = onDate,
@@ -365,7 +366,7 @@ fun detailBottomBar(
             colors = ButtonDefaults.outlinedButtonColors(
                 contentColor = MaterialTheme.colorScheme.primary
             )
-        ) { Text("Caducidad") }
+        ) { Text(stringResource(R.string.expiry_date_label)) }
 
         Button(
             onClick = onConfirm,
@@ -374,7 +375,7 @@ fun detailBottomBar(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             )
-        ) { Text("Guardar") }
+        ) { Text(stringResource(R.string.save)) }
     }
 }
 
@@ -391,7 +392,7 @@ fun detailAllergies(allergensTags: List<String>?, allergyMatches: List<String>) 
 
                 Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                     Text(
-                        text = "ALERGIAS",
+                        text = stringResource(R.string.allergies_title),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary,
                     )

@@ -24,6 +24,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.marujho.freshsnap.R
 
 
 @SuppressLint("MutableCollectionMutableState")
@@ -43,27 +45,24 @@ fun SettingsAllergyScreen(
     }
 
     val possibleAllergies = listOf(
-        "Gluten" to "en:gluten",
-        "Trigo" to "en:wheat",
-        "Centeno" to "en:rye",
-        "Cebada" to "en:barley",
-        "Avena" to "en:oats",
-
-        "Crustáceos" to "en:crustaceans",
-        "Huevos" to "en:eggs",
-        "Pescado" to "en:fish",
-        "Cacahuetes" to "en:peanuts",
-        "Soja" to "en:soybeans",
-
-        "Leche" to "en:milk",
-        "Frutos secos" to "en:nuts",
-        "Apio" to "en:celery",
-        "Mostaza" to "en:mustard",
-        "Sésamo" to "en:sesame-seeds",
-
-        "Sulfitos" to "en:sulphur-dioxide-and-sulphites",
-        "Altramuces" to "en:lupin",
-        "Moluscos" to "en:molluscs"
+        stringResource(R.string.allergy_gluten) to "en:gluten",
+        stringResource(R.string.allergy_wheat) to "en:wheat",
+        stringResource(R.string.allergy_rye) to "en:rye",
+        stringResource(R.string.allergy_barley) to "en:barley",
+        stringResource(R.string.allergy_oats) to "en:oats",
+        stringResource(R.string.allergy_crustaceans) to "en:crustaceans",
+        stringResource(R.string.allergy_eggs) to "en:eggs",
+        stringResource(R.string.allergy_fish) to "en:fish",
+        stringResource(R.string.allergy_peanuts) to "en:peanuts",
+        stringResource(R.string.allergy_soybeans) to "en:soybeans",
+        stringResource(R.string.allergy_milk) to "en:milk",
+        stringResource(R.string.allergy_nuts) to "en:nuts",
+        stringResource(R.string.allergy_celery) to "en:celery",
+        stringResource(R.string.allergy_mustard) to "en:mustard",
+        stringResource(R.string.allergy_sesame) to "en:sesame-seeds",
+        stringResource(R.string.allergy_sulphites) to "en:sulphur-dioxide-and-sulphites",
+        stringResource(R.string.allergy_lupin) to "en:lupin",
+        stringResource(R.string.allergy_molluscs) to "en:molluscs"
     )
 
     Scaffold(
@@ -112,13 +111,13 @@ fun SettingsAllergyScreen(
                 Button(
                     onClick = {
                         viewModel.saveAllergies(selectedAllergies)
-                        Toast.makeText(context, "¡Datos guardados!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.data_saved), Toast.LENGTH_SHORT).show()
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp)
                 ) {
-                    Text("Guardar cambios")
+                    Text(stringResource(R.string.save_changes))
                 }
             }
         }

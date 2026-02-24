@@ -42,7 +42,7 @@ fun AppNavigation() {
         }
 
         composable("sign_up_screen") {
-            // SignUpScreen(navController = navController) // Descomentar cuando la tengas
+            SignUpScreen(navController = navController)
         }
 
         composable("main_screen") {

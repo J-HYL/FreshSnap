@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -85,7 +86,7 @@ fun SignUpBox(
         Spacer(modifier = Modifier.height(24.dp))
 
         EditTextField(
-            label = "Nombre",
+            label = stringResource(R.string.name_label),
             value = name,
             onValueChange = { name = it },
             keyboardOptions = KeyboardOptions.Default.copy(
@@ -97,7 +98,7 @@ fun SignUpBox(
         )
 
         EditTextField(
-            label = "Email",
+            label = stringResource(R.string.email_label),
             value = email,
             onValueChange = { email = it },
             keyboardOptions = KeyboardOptions.Default.copy(
@@ -109,7 +110,7 @@ fun SignUpBox(
         )
 
         EditTextField(
-            label = "Password",
+            label = stringResource(R.string.password_label),
             value = password,
             onValueChange = { password = it },
             keyboardOptions = KeyboardOptions.Default.copy(
@@ -122,7 +123,7 @@ fun SignUpBox(
         )
 
         EditTextField(
-            label = "Confirmar Password",
+            label = stringResource(R.string.confirm_password_label),
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
             keyboardOptions = KeyboardOptions.Default.copy(
@@ -148,7 +149,7 @@ fun SignUpBox(
                 ),
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Registrarse")
+                Text(stringResource(R.string.signup_button))
             }
 
             OutlinedButton(
@@ -158,7 +159,7 @@ fun SignUpBox(
                     contentColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancel))
             }
         }
     }
