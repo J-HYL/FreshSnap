@@ -109,7 +109,7 @@ fun CameraContent(
 
     var scannedBarcode by remember { mutableStateOf<String?>(null) }
     var dateFoundFlag by remember { mutableStateOf(false) }
-    //scannedBarcode = "8480000101617" //Para probar sin camara *******************************************************************
+    scannedBarcode = "3017620422003" //Para probar sin camara *******************************************************************
     LaunchedEffect(scannedBarcode) {
         if (scannedBarcode != null) {
             Log.d("OFF_TEST2", "Código detectado en estado: $scannedBarcode")

@@ -159,7 +159,8 @@ class DetailViewModel @Inject constructor(
                 fatLevel = dto.nutrimentsLevels?.fat?.name,
                 saturatedFatLevel = dto.nutrimentsLevels?.saturatedFat?.name,
                 sugarLevel = dto.nutrimentsLevels?.sugars?.name,
-                saltLevel = dto.nutrimentsLevels?.salt?.name
+                saltLevel = dto.nutrimentsLevels?.salt?.name,
+                allergensTags = dto.allergensTags
             )
 
             viewModelScope.launch {
@@ -199,6 +200,7 @@ class DetailViewModel @Inject constructor(
             nutriScore = this.nutriScore,
             novaGroup = this.novaGroup,
             greenScore = this.greenScore,
+            allergensTags = this.allergensTags ?: emptyList(),
             nutriments = NutrimentsDto(
                 energyKcal100g = this.energyKcal,
                 energyKj100g = this.energyKj,
