@@ -16,6 +16,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.marujho.freshsnap.R
+import android.app.LocaleManager
+import android.os.Build
+import android.os.LocaleList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -189,32 +192,39 @@ fun SettingsAccountScreen(
             // Idioma
             Text(stringResource(R.string.language_title), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
-            languagesList.forEach { l ->
+
+            val languagesList = listOf(
+                stringResource(R.string.language_system) to "Sistema",
+                stringResource(R.string.language_spanish) to "es",
+                stringResource(R.string.language_english) to "en"
+            )
+
+            languagesList.forEach { (label, langCode) ->
                 Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                     RadioButton(
-                        selected = editedLanguage == l,
-                        onClick = { editedLanguage = l }
+                        selected = editedLanguage == langCode || (editedLanguage.isEmpty() && langCode == "Sistema"),
+                        onClick = {
+                            editedLanguage = langCode
+
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                val localeManager = context.getSystemService(LocaleManager::class.java)
+
+                                if (langCode == "Sistema") {
+                                    localeManager.applicationLocales = LocaleList.getEmptyLocaleList()
+                                } else {
+                                    localeManager.applicationLocales = LocaleList.forLanguageTags(langCode)
+                                }
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "El cambio de idioma manual requiere Android 13+. Cambia el idioma desde los ajustes de tu teléfono.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
                     )
-                    Text(l)
+                    Text(label)
                 }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            // Guardar cambios
-            Button(
-                onClick = {
-                    viewModel.saveUserData(
-                        editedName,
-                        editedAge.toIntOrNull() ?: 0,
-                        editedGender,
-                        editedLanguage
-                    )
-                    Toast.makeText(context, context.getString(R.string.data_saved), Toast.LENGTH_SHORT).show()
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.save_changes))
             }
         }
     }

@@ -129,4 +129,6 @@
     <string name="notif_title">Están a punto de caducar alimentos</string>
     <string name="notif_single_item">%1$s está a punto de caducar</string>
     <string name="notif_multiple_items">%1$d alimentos caducan en %2$d días.</string>
+
+    <string name="language_system">Idioma del sistema</string>
 </resources>
