@@ -39,6 +39,8 @@ import coil.compose.AsyncImage
 import com.marujho.freshsnap.ui.theme.Green
 import com.marujho.freshsnap.ui.theme.Grey
 import com.marujho.freshsnap.R
+import com.marujho.freshsnap.ui.theme.SoftRed
+import com.marujho.freshsnap.ui.theme.Yellow
 
 data class ProductUiModel(
     val id: String,
@@ -69,6 +71,8 @@ fun MainScreen(
     val searchQuery by viewModel.searchQuery.collectAsState()
     val selectedTab = viewModel.selectedTab
     val tabs = listOf("Despensa", "Caducados", "Consumidos")
+    val redDays by viewModel.redDays.collectAsState()
+    val yellowDays by viewModel.yellowDays.collectAsState()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -191,7 +195,13 @@ fun MainScreen(
                             }
                         },
                         content = {
-                            ProductCardItem(product, selectedTab, onNavigateToDetail)
+                            ProductCardItem(
+                                product = product,
+                                selectedTab = selectedTab,
+                                redDays = redDays,
+                                yellowDays = yellowDays,
+                                onNavigateToDetail = onNavigateToDetail
+                            )
                         }
                     )
                 }
@@ -267,7 +277,10 @@ fun SearchBar(
 fun ProductCardItem(
     product: ProductUiModel,
     selectedTab: Int,
+    redDays: Int,
+    yellowDays: Int,
     onNavigateToDetail: (String) -> Unit
+
 ) {
     var expanded by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
@@ -276,10 +289,10 @@ fun ProductCardItem(
     )
 
     val statusColor = when {
-        selectedTab == 2 -> Color(0xFF42A5F5) // Azul
-        product.expiryDays <= 2 -> Color(0xFFFF5252) // Rojo
-        product.expiryDays <= 5 -> Color(0xFFFFC107) // Amarillo
-        else -> Color(0xFF69F0AE) // Verde
+        selectedTab == 2 -> Color(0xFF42A5F5) // azul consumidos
+        product.expiryDays <= redDays -> SoftRed
+        product.expiryDays <= yellowDays -> Yellow
+        else -> Green
     }
 
     val interactionSource = remember { MutableInteractionSource() }
