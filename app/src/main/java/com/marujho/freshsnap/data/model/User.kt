@@ -3,5 +3,6 @@ package com.marujho.freshsnap.data.model
 data class FirestoreUser(
     val id: String = "",
     val email: String = "",
-    val name: String = ""
+    val name: String = "",
+    val daysToNotify : Int = 3,
 )

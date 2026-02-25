@@ -1,5 +1,138 @@
 <resources>
     <string name="app_name">FreshSnap</string>
-    <string name="title_activity_login">Login</string>
-    <string name="title_activity_scanner_screen">ScannerScreen</string>
+
+    <string name="save">Guardar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="error_prefix">Error: %1$s</string>
+    <string name="data_saved">¡Datos guardados!</string>
+    <string name="save_changes">Guardar cambios</string>
+
+    <string name="email_label">Email</string>
+    <string name="password_label">Password</string>
+    <string name="name_label">Nombre</string>
+    <string name="confirm_password_label">Confirmar Password</string>
+    <string name="login_button">Iniciar Sesión</string>
+    <string name="create_account_button">Crear Cuenta</string>
+    <string name="signup_button">Registrarse</string>
+    <string name="hide_password">Ocultar contraseña</string>
+    <string name="show_password">Mostrar contraseña</string>
+    <string name="fill_all_fields">Por favor, rellena todos los campos</string>
+    <string name="passwords_not_match">Las contraseñas no coinciden</string>
+    <string name="password_length_error">La contraseña debe tener al menos 6 caracteres</string>
+
+    <string name="search_placeholder">Buscar producto o EAN</string>
+    <string name="tab_pantry">Despensa</string>
+    <string name="tab_expired">Caducados</string>
+    <string name="tab_consumed">Consumidos</string>
+    <string name="add_button_desc">Añadir</string>
+    <string name="days_remaining">%1$d días</string>
+    <string name="status_expired">Caducado</string>
+    <string name="status_consumed">Consumido</string>
+    <string name="expand_desc">Expand</string>
+    <string name="quantity_label">Cantidad:</string>
+    <string name="brand_label">Marca:</string>
+    <string name="scanned_label">Escaneado:</string>
+    <string name="ean_label">EAN:</string>
+    <string name="see_more_button">Ver más</string>
+    <string name="product_image_desc">Foto producto</string>
+
+    <string name="product_saved">Producto guardado</string>
+    <string name="add_expiry_date_title">Añadir fecha de caducidad</string>
+    <string name="add_expiry_date_text">¿Cómo quieres añadirla?</string>
+    <string name="scan_button">Escanear</string>
+    <string name="manual_button">Manual</string>
+    <string name="expiry_date_label">Caducidad</string>
+    <string name="expiry_date_value">Caducidad %1$s</string>
+    <string name="detail_image_desc">Imagen del producto</string>
+    <string name="general_info_title">INFORMACIÓN GENERAL</string>
+    <string name="general_name">Nombre</string>
+    <string name="general_scan_date">Fecha Escaner</string>
+    <string name="general_quantity">Cantidad</string>
+    <string name="general_denomination">Denominacion general</string>
+    <string name="general_packaging">Envase</string>
+    <string name="general_store">Tienda</string>
+    <string name="general_countries">Paises de venta</string>
+    <string name="health_title">SALUD</string>
+    <string name="nutriscore_desc">NutriScore</string>
+    <string name="low_in">Bajo en</string>
+    <string name="moderate_in">Moderado en</string>
+    <string name="high_in">Alto en</string>
+    <string name="nutritional_value_title">VALOR NUTRICIONAL (100g)</string>
+    <string name="nutriment_energy">Energia</string>
+    <string name="nutriment_fats">Grasas</string>
+    <string name="nutriment_sat_fats">Grasas sat.</string>
+    <string name="nutriment_carbs">Carbohidratos</string>
+    <string name="nutriment_sugars">Azúcares</string>
+    <string name="nutriment_proteins">Proteínas</string>
+    <string name="nutriment_salt">Sal</string>
+    <string name="nutriment_sodium">Sodio</string>
+    <string name="nutriment_fiber">Fibra</string>
+    <string name="allergies_title">ALERGIAS</string>
+
+    <string name="back_button_desc">Volver a la pantalla anterior</string>
+    <string name="flash_button_desc">Activar/Desativar Flash</string>
+
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_theme">Dark Theme / Light Theme</string>
+    <string name="settings_account">Mi Cuenta</string>
+    <string name="settings_account_sub">Nombre, edad, sexo, idioma.</string>
+    <string name="settings_allergies">Alergias</string>
+    <string name="settings_allergies_sub">Leche, gluten, huevos.</string>
+    <string name="settings_alerts">Alertas caducidad</string>
+    <string name="settings_alerts_sub">Configura días rojo y amarillo</string>
+    <string name="logout_button">Cerrar sesión</string>
+    <string name="edit_name_title">Editar nombre</string>
+    <string name="edit_age_title">Editar edad</string>
+    <string name="general_age">Edad</string>
+    <string name="name_value">Nombre: %1$s</string>
+    <string name="age_value">Edad: %1$s años</string>
+    <string name="gender_title">Sexo</string>
+    <string name="gender_male">Masculino</string>
+    <string name="gender_female">Femenino</string>
+    <string name="gender_other">Otro</string>
+    <string name="language_title">Idioma</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_english">English</string>
+    <string name="alert_red">Alerta Roja</string>
+    <string name="alert_yellow">Alerta Amarilla</string>
+    <string name="days_before">%1$d días antes</string>
+
+    <string name="allergy_gluten">Gluten</string>
+    <string name="allergy_wheat">Trigo</string>
+    <string name="allergy_rye">Centeno</string>
+    <string name="allergy_barley">Cebada</string>
+    <string name="allergy_oats">Avena</string>
+    <string name="allergy_crustaceans">Crustáceos</string>
+    <string name="allergy_eggs">Huevos</string>
+    <string name="allergy_fish">Pescado</string>
+    <string name="allergy_peanuts">Cacahuetes</string>
+    <string name="allergy_soybeans">Soja</string>
+    <string name="allergy_milk">Leche</string>
+    <string name="allergy_nuts">Frutos secos</string>
+    <string name="allergy_celery">Apio</string>
+    <string name="allergy_mustard">Mostaza</string>
+    <string name="allergy_sesame">Sésamo</string>
+    <string name="allergy_sulphites">Sulfitos</string>
+    <string name="allergy_lupin">Altramuces</string>
+    <string name="allergy_molluscs">Moluscos</string>
+
+    <string name="nav_home">Inicio</string>
+    <string name="nav_scanner">Escanear</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <string name="default_unnamed">Sin nombre</string>
+    <string name="default_unbranded">Sin marca</string>
+    <string name="default_user">Usuario</string>
+    <string name="default_unspecified">No especificado</string>
+
+    <string name="notif_channel_name">Caducidad de Alimentos</string>
+    <string name="notif_title">Están a punto de caducar alimentos</string>
+    <string name="notif_single_item">%1$s está a punto de caducar</string>
+    <string name="notif_multiple_items">%1$d alimentos caducan en %2$d días.</string>
+
+    <string name="language_system">Idioma del sistema</string>
+
+    <string name="empty_pantry">Tu despensa está vacía.\n¡Escanea un producto para empezar!</string>
+    <string name="empty_expired">¡Genial!\nNo tienes ningún producto caducado.</string>
+    <string name="empty_consumed">Aún no has consumido ningún producto.</string>
 </resources>

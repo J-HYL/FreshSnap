@@ -4,6 +4,9 @@ import NutrimentsDto
 import com.squareup.moshi.Json
 
 data class ProductDto(
+    @Json(name = "code")
+    val code: String?,
+
     @Json(name = "product_name")
     val productName: String?,
 
@@ -30,6 +33,15 @@ data class ProductDto(
     val greenScore: String?,
 
     //Nutriments
-    val nutriments: NutrimentsDto?
+    val nutriments: NutrimentsDto?,
 
+    @Json(name = "nutrient_levels")
+    val nutrimentsLevels : NutrimentsLevelDto?,
+
+    //Alergenos
+    @Json(name = "allergens_tags")
+    val allergensTags: List<String>? = null
 )
+
+
+

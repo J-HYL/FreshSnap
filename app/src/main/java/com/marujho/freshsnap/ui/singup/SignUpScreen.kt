@@ -1,19 +1,24 @@
 package com.marujho.freshsnap
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -67,14 +72,21 @@ fun SignUpBox(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    Column(modifier = modifier.padding(16.dp)) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
         IconText()
 
         Spacer(modifier = Modifier.height(24.dp))
 
         EditTextField(
-            label = "Nombre",
+            label = stringResource(R.string.name_label),
             value = name,
             onValueChange = { name = it },
             keyboardOptions = KeyboardOptions.Default.copy(
@@ -86,7 +98,7 @@ fun SignUpBox(
         )
 
         EditTextField(
-            label = "Email",
+            label = stringResource(R.string.email_label),
             value = email,
             onValueChange = { email = it },
             keyboardOptions = KeyboardOptions.Default.copy(
@@ -94,10 +106,11 @@ fun SignUpBox(
                 imeAction = ImeAction.Next
             ),
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            icon = Icons.Default.Email
         )
 
         EditTextField(
-            label = "Password",
+            label = stringResource(R.string.password_label),
             value = password,
             onValueChange = { password = it },
             keyboardOptions = KeyboardOptions.Default.copy(
@@ -105,11 +118,12 @@ fun SignUpBox(
                 imeAction = ImeAction.Next
             ),
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-            icon = Icons.Default.Lock
+            icon = Icons.Default.Lock,
+            isPasswordField = true
         )
 
         EditTextField(
-            label = "Confirmar Password",
+            label = stringResource(R.string.confirm_password_label),
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
             keyboardOptions = KeyboardOptions.Default.copy(
@@ -117,7 +131,8 @@ fun SignUpBox(
                 imeAction = ImeAction.Done
             ),
             modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp),
-            icon = Icons.Default.Lock
+            icon = Icons.Default.Lock,
+            isPasswordField = true
         )
 
         Row(
@@ -129,19 +144,22 @@ fun SignUpBox(
                     onRegisterClick(name, email, password, confirmPassword)
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Green,
-                    contentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Registrarse")
+                Text(stringResource(R.string.signup_button))
             }
 
             OutlinedButton(
                 onClick = { onBackClick() },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
             ) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancel))
             }
         }
     }

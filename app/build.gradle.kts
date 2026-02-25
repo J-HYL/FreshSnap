@@ -56,6 +56,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.runtime)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -88,7 +90,7 @@ dependencies {
     implementation(libs.logging.interceptor)
 
 
-
+    implementation(libs.androidx.compose.material.icons.extended)
 
     // ROOM (BASE DE DATOS)
     implementation(libs.androidx.room.runtime)
@@ -101,6 +103,14 @@ dependencies {
 
     // HILT + NAVIGATION
     implementation(libs.androidx.hilt.navigation.compose)
+
+    //HILT + WORKMANAGER
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+
+    //KTS
+    ksp(libs.androidx.hilt.compiler)
+
 
     //El conjunto de CameraX
     implementation(libs.bundles.camerax)
@@ -125,6 +135,12 @@ dependencies {
 
     // firebase
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)      // Para Login
-    implementation(libs.firebase.firestore) // Base de datos en la nube
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+
+    implementation(libs.kotlinx.coroutines.play.services)
+
+    implementation(libs.androidx.datastore.preferences)
+
+    implementation(libs.androidx.core.splashscreen)
 }

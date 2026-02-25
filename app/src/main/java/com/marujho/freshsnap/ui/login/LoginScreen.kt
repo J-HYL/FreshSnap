@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,7 +25,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.marujho.freshsnap.R
+import com.marujho.freshsnap.SignUpBox
 import com.marujho.freshsnap.ui.theme.FreshSnapTheme
 import com.marujho.freshsnap.ui.theme.Green
 import com.marujho.freshsnap.ui.theme.Grey
@@ -46,7 +51,7 @@ fun LoginScreen(
                     }
                 },
                 onError = { mensajeError ->
-                    Toast.makeText(context, "Error: $mensajeError", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.error_prefix, mensajeError), Toast.LENGTH_SHORT).show()
                 }
             )
         },
@@ -65,16 +70,19 @@ fun LoginBox(
     var emailInput by remember { mutableStateOf("") }
     var passwordInput by remember { mutableStateOf("") }
 
-    Column(modifier = modifier
-        .background(Grey)
-        .padding(16.dp),
-        verticalArrangement = Arrangement.Center
+    Column(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.background)
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         IconText()
         Spacer(modifier = Modifier.height(24.dp))
 
         EditTextField(
-            label = "Email",
+            label = stringResource(R.string.email_label),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
@@ -83,11 +91,12 @@ fun LoginBox(
             onValueChange = { emailInput = it },
             modifier = Modifier
                 .padding(bottom = 16.dp)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            icon = Icons.Default.Email
         )
 
         EditTextField(
-            label = "Password",
+            label = stringResource(R.string.password_label),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done
@@ -96,7 +105,8 @@ fun LoginBox(
             onValueChange = { passwordInput = it },
             modifier = Modifier
                 .padding(bottom = 32.dp)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            isPasswordField = true,
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -109,18 +119,21 @@ fun LoginBox(
                     onLoginClick(emailInput, passwordInput)
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Green,
-                    contentColor = White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Iniciar Sesión")
+                Text(stringResource(R.string.login_button))
             }
             OutlinedButton(
                 onClick = { onSignUpClick() },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
             ) {
-                Text("Crear Cuenta")
+                Text(stringResource(R.string.create_account_button))
             }
         }
     }
@@ -138,12 +151,14 @@ fun IconText(modifier: Modifier = Modifier) {
         Icon(
             painter = painterResource(R.drawable.ic_freshsnap_logo),
             contentDescription = null,
-            modifier = Modifier.size(64.dp)
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = stringResource(R.string.app_name),
-            style = MaterialTheme.typography.displayMedium
+            style = MaterialTheme.typography.displayMedium,
+            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
@@ -155,8 +170,12 @@ fun EditTextField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions,
-    icon: ImageVector? = null
+    icon: ImageVector? = null,
+    isPasswordField : Boolean = false,
 ) {
+    var isPasswordVisible by remember { mutableStateOf(false) }
+
+
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -164,17 +183,49 @@ fun EditTextField(
         leadingIcon = {
             Icon(
                 imageVector = icon ?: Icons.Default.Lock,
-                contentDescription = null
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
             )
         },
+        trailingIcon = if (isPasswordField) {
+            {
+                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                    Icon(
+                        painter = painterResource(
+                            id = if (isPasswordVisible) R.drawable.ic_visibility else R.drawable.ic_visibility_off
+                        ),
+                        contentDescription = if (isPasswordVisible) stringResource(R.string.hide_password) else stringResource(R.string.show_password),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        } else null,
+        visualTransformation = if (isPasswordField && !isPasswordVisible) PasswordVisualTransformation() else VisualTransformation.None,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = White,
-            unfocusedContainerColor = White,
-            disabledContainerColor = White,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            disabledContainerColor = MaterialTheme.colorScheme.surface,
+
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
         shape = RoundedCornerShape(24.dp),
         label = { Text(label) },
         singleLine = true,
         keyboardOptions = keyboardOptions
     )
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun SignUpPreview() {
+    FreshSnapTheme {
+        LoginBox(onLoginClick = {_, _ -> }, onSignUpClick = {})
+    }
 }
