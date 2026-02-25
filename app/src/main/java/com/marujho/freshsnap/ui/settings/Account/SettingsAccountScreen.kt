@@ -226,6 +226,28 @@ fun SettingsAccountScreen(
                     Text(label)
                 }
             }
+
+            Spacer(Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    viewModel.saveUserData(
+                        editedName,
+                        editedAge.toIntOrNull() ?: 0,
+                        editedGender,
+                        editedLanguage
+                    )
+
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.data_saved),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.save_changes))
+            }
         }
     }
 }
