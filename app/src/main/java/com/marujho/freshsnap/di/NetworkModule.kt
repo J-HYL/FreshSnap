@@ -49,7 +49,7 @@ object NetworkModule {
     @TheMealDBRetrofit
     fun provideTheMealDBRetrofit(moshi: Moshi): Retrofit =
         Retrofit.Builder()
-            .baseUrl("https://world.openfoodfacts.org/")
+            .baseUrl("https://www.themealdb.com/api/json/v1/1/")
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
 

@@ -65,10 +65,8 @@ class DetailViewModel @Inject constructor(
                     localProduct.expirationDate?.let { millis ->
                         setExpirationDateFromMillis(millis)
                     }
-                    Log.d("SOURCE", "FIREBASE - EDITANDO EXISTENTE")
                 } else {
                     currentFirestoreId = null
-                    Log.d("SOURCE", "FIREBASE - CACHÉ PARA PRODUCTO NUEVO")
                 }
 
                 val dto = localProduct.toDto()
@@ -78,7 +76,6 @@ class DetailViewModel @Inject constructor(
 
             } else {
                 currentFirestoreId = null
-                Log.d("SOURCE", "API")
                 loadFromApi()
             }
         }

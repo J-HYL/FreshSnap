@@ -16,11 +16,13 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,16 +69,22 @@ fun BarCodeScanScreen(
         onResult = { granted -> hasCameraPermission = granted }
     )
 
-    val scannedResult by viewModel.scannedResult.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
 
-    LaunchedEffect(scannedResult) {
-        scannedResult?.let { result ->
-            if (scanType == ScanType.BARCODE) {
-                onNavigateToDetail(result)
-            } else {
-                onDateScanned(result)
+    LaunchedEffect(uiState) {
+        when (val state = uiState) {
+            is ScannerUiState.Success -> {
+                onNavigateToDetail(state.product.ean)
             }
+            is ScannerUiState.DateFound -> {
+                // Si encontró una fecha, la enviamos
+                onDateScanned(state.date)
+            }
+            is ScannerUiState.Error -> {
+                viewModel.resetScanState()
+            }
+            else -> { }
         }
     }
 
@@ -90,6 +98,7 @@ fun BarCodeScanScreen(
     if (hasCameraPermission) {
         CameraContent(
             viewModel = viewModel,
+            uiState = uiState,
             scanType = scanType,
             onBackClick = onBackClick
         )
@@ -100,6 +109,7 @@ fun BarCodeScanScreen(
 @Composable
 fun CameraContent(
     viewModel: ScannerViewModel,
+    uiState: ScannerUiState,
     scanType: ScanType,
     onBackClick: () -> Unit
 ) {
@@ -179,6 +189,53 @@ fun CameraContent(
             )
 
             ScannerOverlay()
+            //Borrar desde aqui ******************************************************************************************************************************
+
+
+            var manualBarcode by remember { mutableStateOf("") }
+
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 50.dp, start = 16.dp, end = 16.dp)
+                    .background(Color.White, shape = RoundedCornerShape(8.dp))
+                    .padding(8.dp)
+                    .zIndex(20f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                androidx.compose.material3.TextField(
+                    value = manualBarcode,
+                    onValueChange = { manualBarcode = it },
+                    placeholder = { Text("Mete un código EAN...") },
+                    modifier = Modifier.weight(1f)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                androidx.compose.material3.Button(
+                    onClick = {
+                        viewModel.processBarcode(manualBarcode)
+                    }
+                ) {
+                    Text("Simular")
+                }
+            }
+
+            //Hasta qui ******************************************************************************************************************************
+
+            if (uiState is ScannerUiState.Loading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.5f)), // Oscurecemos un poco el fondo
+                    contentAlignment = Alignment.Center
+                ) {
+                    androidx.compose.material3.CircularProgressIndicator(
+                        color = Color.White
+                    )
+                }
+            }
 
             Row(
                 modifier = Modifier

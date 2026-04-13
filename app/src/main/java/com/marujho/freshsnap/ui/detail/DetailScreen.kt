@@ -60,8 +60,16 @@ fun detailScreen(
     }
 
     when (state) {
-        is DetailUiState.Loading -> {} // Cargando
-        is DetailUiState.Error -> {} // Error
+        is DetailUiState.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+        } // Cargando
+        is DetailUiState.Error -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                Text(text = "Error: ${state.message}", color = MaterialTheme.colorScheme.error)
+            }
+        } // Error
         is DetailUiState.Success -> {
             val product = state.product
 

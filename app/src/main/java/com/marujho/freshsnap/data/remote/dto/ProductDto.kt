@@ -40,7 +40,11 @@ data class ProductDto(
 
     //Alergenos
     @Json(name = "allergens_tags")
-    val allergensTags: List<String>? = null
+    val allergensTags: List<String>? = null,
+
+    //Ingredientes
+    @Json(name = "ingredients_tags")
+    val ingredientsTags: List<String>? = null,
 )
 
 

@@ -1,22 +1,25 @@
 package com.marujho.freshsnap.ui.scanner
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.marujho.freshsnap.data.domain.usecase.ProcessScannedProductUseCase
+import com.marujho.freshsnap.data.model.UserProduct
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.util.regex.Pattern
 import javax.inject.Inject
 
 @HiltViewModel
-class ScannerViewModel @Inject constructor() : ViewModel() {
+class ScannerViewModel @Inject constructor(private val processScannedProductUseCase: ProcessScannedProductUseCase) : ViewModel() {
 
     private val _isFlashOn = MutableStateFlow(false)
     val isFlashOn: StateFlow<Boolean> = _isFlashOn.asStateFlow()
 
-    // ESTADO NUEVO: Aquí guardaremos lo que la cámara lea
-    private val _scannedResult = MutableStateFlow<String?>(null)
-    val scannedResult: StateFlow<String?> = _scannedResult.asStateFlow()
+    private val _uiState = MutableStateFlow<ScannerUiState>(ScannerUiState.Idle)
+    val uiState: StateFlow<ScannerUiState> = _uiState.asStateFlow()
 
     private var hasProcessedResult = false
 
@@ -26,24 +29,35 @@ class ScannerViewModel @Inject constructor() : ViewModel() {
 
     fun resetScanState() {
         hasProcessedResult = false
-        _scannedResult.value = null // Reseteamos también el resultado
+        _uiState.value = ScannerUiState.Idle
     }
 
-    // Ya no pasamos la lambda (onResult), solo el barcode
     fun processBarcode(barcode: String?) {
         if (barcode != null && !hasProcessedResult) {
             hasProcessedResult = true
-            _scannedResult.value = barcode // Actualizamos el estado
+
+            viewModelScope.launch {
+                _uiState.value = ScannerUiState.Loading
+
+                val result = processScannedProductUseCase(barcode)
+
+                if (result.isSuccess) {
+                    val productoGuardado = result.getOrNull()!!
+                    _uiState.value = ScannerUiState.Success(productoGuardado)
+                } else {
+                    val errorMsg = result.exceptionOrNull()?.localizedMessage ?: "Error desconocido"
+                    _uiState.value = ScannerUiState.Error(errorMsg)
+                }
+            }
         }
     }
 
-    // Ya no pasamos la lambda, solo el texto
     fun processText(text: String?) {
         if (text != null && !hasProcessedResult) {
             val dateFound = findExpirationDate(text)
             if (dateFound != null) {
                 hasProcessedResult = true
-                _scannedResult.value = dateFound // Actualizamos el estado
+                _uiState.value = ScannerUiState.DateFound(dateFound)
             }
         }
     }
@@ -70,4 +84,11 @@ class ScannerViewModel @Inject constructor() : ViewModel() {
         }
         return null
     }
+}
+sealed interface ScannerUiState {
+    object Idle : ScannerUiState
+    object Loading : ScannerUiState
+    data class Success(val product: UserProduct) : ScannerUiState
+    data class Error(val message: String) : ScannerUiState
+    data class DateFound(val date: String) : ScannerUiState
 }

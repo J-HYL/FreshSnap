@@ -44,6 +44,10 @@ data class UserProduct(
 
     @get:PropertyName("isConsumed")
     @set:PropertyName("isConsumed")
-    var isConsumed: Boolean = false
+    var isConsumed: Boolean = false,
     // forzar nombre (si no la bd lo detecta como Consumed)
+
+    //Ingredientes
+    val recipeIngredients: List<String>? = emptyList(),
+
 )
