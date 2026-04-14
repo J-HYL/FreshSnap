@@ -135,4 +135,5 @@
     <string name="empty_pantry">Your pantry is empty.\nScan a product to get started!</string>
     <string name="empty_expired">Great!\nYou have no expired products.</string>
     <string name="empty_consumed">You haven\'t consumed any products yet.</string>
+    <string name="nav_shopping">Buy</string>
 </resources>

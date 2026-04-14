@@ -135,4 +135,5 @@
     <string name="empty_pantry">Tu despensa está vacía.\n¡Escanea un producto para empezar!</string>
     <string name="empty_expired">¡Genial!\nNo tienes ningún producto caducado.</string>
     <string name="empty_consumed">Aún no has consumido ningún producto.</string>
+    <string name="nav_shopping">Comprar</string>
 </resources>
