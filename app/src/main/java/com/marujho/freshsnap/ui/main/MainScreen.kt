@@ -216,7 +216,10 @@ fun MainScreen(
                                     selectedTab = selectedTab,
                                     redDays = redDays,
                                     yellowDays = yellowDays,
-                                    onNavigateToDetail = onNavigateToDetail
+                                    onNavigateToDetail = onNavigateToDetail,
+                                    onAddToShoppingList = { nombreProducto ->
+                                        viewModel.addToShoppingList(nombreProducto)
+                                    }
                                 )
                             }
                         )
@@ -296,7 +299,8 @@ fun ProductCardItem(
     selectedTab: Int,
     redDays: Int,
     yellowDays: Int,
-    onNavigateToDetail: (String) -> Unit
+    onNavigateToDetail: (String) -> Unit,
+    onAddToShoppingList: (String) -> Unit
 
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -484,16 +488,41 @@ fun ProductCardItem(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Button(
-                        onClick = { onNavigateToDetail("${product.ean}?productId=${product.id}") },
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ),
-                        shape = RoundedCornerShape(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(stringResource(R.string.see_more_button), color = Color.White)
+                        Button(
+                            onClick = { onNavigateToDetail("${product.ean}?productId=${product.id}") },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(stringResource(R.string.see_more_button), color = Color.White)
+                        }
+
+                        Button(
+                            onClick = { onAddToShoppingList(product.name) },
+                            modifier = Modifier
+                                .size(48.dp),
+                            contentPadding = PaddingValues(0.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AddShoppingCart,
+                                contentDescription = stringResource(R.string.add_to_list_desc),
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
             }

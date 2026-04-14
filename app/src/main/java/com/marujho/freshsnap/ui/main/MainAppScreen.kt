@@ -38,6 +38,7 @@ fun MainAppScreen(
                 val items = listOf(
                     BottomNavItem.Home,
                     BottomNavItem.Scanner,
+                    BottomNavItem.Shopping,
                     BottomNavItem.Settings
                 )
 
@@ -120,6 +121,11 @@ fun MainAppScreen(
                 SettingsAllergyScreen()
             }
 
+            composable(BottomNavItem.Shopping.route) {
+                com.marujho.freshsnap.ui.shopping.ShoppingListScreen(
+                    bottomBarPadding = innerPadding.calculateBottomPadding()
+                )
+            }
         }
     }
 }

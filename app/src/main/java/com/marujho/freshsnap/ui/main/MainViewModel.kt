@@ -36,7 +36,8 @@ import com.marujho.freshsnap.worker.ExpirationWorker
 class MainViewModel @Inject constructor(
     @ApplicationContext private val context : Context,
     private val repository: ProductRepository,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val shoppingRepository: com.marujho.freshsnap.data.repository.ShoppingRepository
 ) : ViewModel() {
     private val _allProducts = MutableStateFlow<List<ProductUiModel>>(emptyList())
     private val _filteredProducts = MutableStateFlow<List<ProductUiModel>>(emptyList())
@@ -177,5 +178,11 @@ class MainViewModel @Inject constructor(
             greenScore = this.greenScore ?: "?",
             isConsumed = this.isConsumed
         )
+    }
+
+    fun addToShoppingList(productName: String) {
+        viewModelScope.launch {
+            shoppingRepository.addShoppingItem(productName)
+        }
     }
 }
