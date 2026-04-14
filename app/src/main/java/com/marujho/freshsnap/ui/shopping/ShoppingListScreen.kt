@@ -13,10 +13,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.marujho.freshsnap.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,8 +40,7 @@ fun ShoppingListScreen(
                 shape = CircleShape,
                 modifier = Modifier.padding(bottom = bottomBarPadding)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Añadir a la lista")
-            }
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_to_list_desc))            }
         }
     ) { padding ->
         Column(
@@ -51,7 +52,7 @@ fun ShoppingListScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Lista de la Compra",
+                text = stringResource(R.string.shopping_list_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -74,7 +75,7 @@ fun ShoppingListScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Tu lista de la compra está vacía",
+                        text = stringResource(R.string.shopping_list_empty),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -99,12 +100,12 @@ fun ShoppingListScreen(
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
-                title = { Text("Añadir producto") },
+                title = { Text(stringResource(R.string.add_product_title)) },
                 text = {
                     OutlinedTextField(
                         value = newItemName,
                         onValueChange = { newItemName = it },
-                        placeholder = { Text("Ej. Manzanas") },
+                        placeholder = { Text(stringResource(R.string.add_product_placeholder)) },
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp)
                     )
@@ -115,12 +116,12 @@ fun ShoppingListScreen(
                         newItemName = ""
                         showDialog = false
                     }) {
-                        Text("Añadir")
+                        Text(stringResource(R.string.add_action))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDialog = false }) {
-                        Text("Cancelar")
+                        Text(stringResource(R.string.cancel))
                     }
                 }
             )
@@ -159,7 +160,7 @@ fun ShoppingItemRow(
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Borrar",
+                    contentDescription = stringResource(R.string.delete_desc),
                     tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
                 )
             }

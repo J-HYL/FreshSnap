@@ -519,7 +519,7 @@ fun ProductCardItem(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.AddShoppingCart,
-                                contentDescription = "Añadir a la lista",
+                                contentDescription = stringResource(R.string.add_to_list_desc),
                                 tint = Color.White
                             )
                         }
