@@ -24,6 +24,7 @@ class IngredientRepository @Inject constructor(
             val processedSet = masterIngredientsList.map { it.strIngredient.lowercase() }.toSet()
 
         cacheIngredients = processedSet
+            Log.d("INGREDIENTES ", cacheIngredients.toString())
         processedSet
         } catch (e: Exception) {
             emptySet()

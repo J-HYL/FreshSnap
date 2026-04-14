@@ -30,6 +30,9 @@ class ProcessScannedProductUseCase @Inject constructor(
             if (validIngredients.contains(cleanTag)) cleanTag else null
             }?.distinct() ?: emptyList()
 
+            Log.d("INGREDIENTES_Match", matchedIng.toString())
+
+
             val userProduct = UserProduct(
                 ean = barcode,
                 name = productDto.productName ?: "Producto desconocido",
