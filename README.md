@@ -10,6 +10,8 @@
 
 <p align="center">
   <strong>Gestor inteligente de despensa y control de calidad nutricional</strong>
+  <br>
+  <a href="https://play.google.com/store/apps/details?id=com.marujho.freshsnap">Disponible en Google Play</a>
 </p>
 
 <p align="center">
@@ -17,7 +19,7 @@
   <a href="#características-principales">Características</a> •
   <a href="#galería-de-interfaz">Interfaz</a> •
   <a href="#arquitectura-y-tecnologías">Tecnologías</a> •
-  <a href="#instalación">Instalación</a>
+  <a href="#atribuciones-y-licencias">Créditos</a>
 </p>
 
 ---
@@ -145,7 +147,7 @@ El repositorio sigue una arquitectura de software basada en el patrón **Model-V
 
 ## Documentación de la Interfaz (UI/UX)
 
-La interfaz de **FreshSnap** ha sido desarrollada. de forma declarativa utilizando **Jetpack Compose** y siguiendo las guías de diseño de **Material Design 3 (MD3)**. Se ha priorizado la accesibilidad, la legibilidad y la respuesta visual inmediata para el usuario.
+La interfaz de **FreshSnap** ha sido desarrollada de forma declarativa utilizando **Jetpack Compose** y siguiendo las guías de diseño de **Material Design 3 (MD3)**. Se ha priorizado la accesibilidad, la legibilidad y la respuesta visual inmediata para el usuario.
 
 ### 1. Sistema de Diseño y Tipografía
 * **Tipografía Personalizada:** Se utiliza la familia tipográfica **Assistant** en diferentes pesos (Regular, SemiBold y Bold) para jerarquizar la información. Los títulos de secciones usan pesos fuertes para destacar, mientras que los valores nutricionales y descripciones utilizan pesos regulares para facilitar la lectura.
@@ -170,3 +172,29 @@ Los colores en FreshSnap no son solo estéticos, sino que cumplen una función i
   * Selección de alérgenos mediante `LazyVerticalGrid` y `Checkbox` para organizar eficientemente múltiples opciones en columnas.
 * **Retroalimentación Visual (Feedback):** Los alérgenos detectados en un producto escaneado cambian dinámicamente su contenedor a color de error (`errorContainer`) y muestran un icono de advertencia (`Icons.Default.Warning`) si coinciden con las intolerancias guardadas por el usuario.
 
+---
+
+## Atribuciones y Licencias
+
+### Datos y APIs Externas
+* **[Open Food Facts](https://world.openfoodfacts.org/):** Base de datos de productos alimenticios. Los datos están disponibles bajo la licencia [ODbL](https://opendatacommons.org/licenses/odbl/1-0/).
+* **[TheMealDB](https://www.themealdb.com/):** API utilizada para la consulta de información complementaria sobre ingredientes y recetas.
+
+### Librerías de Terceros
+FreshSnap utiliza software de código abierto bajo licencia **Apache 2.0**:
+* **[Retrofit](https://square.github.io/retrofit/) / [Moshi](https://github.com/square/moshi):** Red y serialización de datos por [Square](https://square.github.io/).
+* **[Coil](https://coil-kt.github.io/coil/):** Carga y gestión de imágenes optimizada para Compose.
+* **[Google ML Kit](https://developers.google.com/ml-kit):** Motor de visión artificial para Barcode y OCR.
+* **[Jetpack Libraries](https://developer.android.com/jetpack):** Componentes core de Android (Compose, Room, DataStore, WorkManager, Hilt).
+* **[Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html):** Gestión de asincronía y flujos de datos.
+
+### Recursos Visuales
+* **Iconografía:** [Material Symbols](https://fonts.google.com/icons) de Google.
+* **Tipografía:** [Assistant](https://fonts.google.com/specimen/Assistant) diseñada por Ben Nathan.
+
+---
+
+##  Licencia
+Este proyecto se distribuye bajo la **Licencia Apache 2.0**.
+
+&copy; 2026 **FreshSnap**.
