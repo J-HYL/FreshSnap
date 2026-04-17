@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.RestaurantMenu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -13,6 +14,7 @@ import com.marujho.freshsnap.R
 sealed class BottomNavItem(val route: String, @StringRes val titleResId: Int, val icon: ImageVector) {
     object Home : BottomNavItem("home_screen", R.string.nav_home, Icons.Default.Home)
     object Scanner : BottomNavItem("scanner_screen", R.string.nav_scanner, Icons.Default.CameraAlt)
+    object Recipes : BottomNavItem("recipe_screen", R.string.nav_recipes, Icons.Default.RestaurantMenu)
     object Shopping : BottomNavItem("shopping_screen", R.string.nav_shopping, Icons.Default.ShoppingCart)
     object Settings : BottomNavItem("settings_screen", R.string.nav_settings, Icons.Default.Settings)
 }

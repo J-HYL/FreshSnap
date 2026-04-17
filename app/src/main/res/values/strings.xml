@@ -144,4 +144,20 @@
     <string name="add_action">Añadir</string>
     <string name="delete_desc">Borrar</string>
     <string name="add_to_list_desc">Añadir a la lista</string>
+
+    <string name="nav_recipes">Recetas</string>
+    <string name="recipe_title">Recetas de Aprovechamiento</string>
+    <string name="recipe_loading">Buscando recetas para tus productos…</string>
+    <string name="recipe_empty_no_red">¡Todos tus productos están frescos!\nNo necesitas recetas de aprovechamiento.</string>
+    <string name="recipe_empty_no_products">Tu despensa está vacía.\nAñade productos para obtener sugerencias.</string>
+    <string name="recipe_error">Error al buscar recetas.\nRevisa tu conexión e inténtalo de nuevo.</string>
+    <string name="recipe_ingredients_owned">Ingredientes que tienes</string>
+    <string name="recipe_ingredients_missing">Te falta</string>
+    <string name="recipe_add_missing_to_list">Añadir faltantes a la lista</string>
+    <string name="recipe_regenerate">Regenerar</string>
+    <string name="recipe_source_mealdb">TheMealDB</string>
+    <string name="recipe_source_groq_filter">IA - Filtrado</string>
+    <string name="recipe_source_groq_generated">IA - Generada</string>
+    <string name="recipe_instructions">Instrucciones</string>
+    <string name="recipe_added_to_list">Ingredientes añadidos a la lista de compras</string>
 </resources>

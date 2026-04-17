@@ -144,4 +144,20 @@
     <string name="add_action">Add</string>
     <string name="delete_desc">Delete</string>
     <string name="add_to_list_desc">Add to list</string>
+
+    <string name="nav_recipes">Recipes</string>
+    <string name="recipe_title">Waste Reduction Recipes</string>
+    <string name="recipe_loading">Searching recipes for your products…</string>
+    <string name="recipe_empty_no_red">All your products are fresh!\nNo waste reduction recipes needed.</string>
+    <string name="recipe_empty_no_products">Your pantry is empty.\nAdd products to get suggestions.</string>
+    <string name="recipe_error">Error searching recipes.\nCheck your connection and try again.</string>
+    <string name="recipe_ingredients_owned">Ingredients you have</string>
+    <string name="recipe_ingredients_missing">You\'re missing</string>
+    <string name="recipe_add_missing_to_list">Add missing to shopping list</string>
+    <string name="recipe_regenerate">Regenerate</string>
+    <string name="recipe_source_mealdb">TheMealDB</string>
+    <string name="recipe_source_groq_filter">AI - Filtered</string>
+    <string name="recipe_source_groq_generated">AI - Generated</string>
+    <string name="recipe_instructions">Instructions</string>
+    <string name="recipe_added_to_list">Ingredients added to shopping list</string>
 </resources>
