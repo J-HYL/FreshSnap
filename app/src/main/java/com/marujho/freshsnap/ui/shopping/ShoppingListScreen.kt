@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.marujho.freshsnap.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,7 +27,7 @@ fun ShoppingListScreen(
     bottomBarPadding: Dp = 0.dp,
     viewModel: ShoppingViewModel = hiltViewModel()
 ) {
-    val items by viewModel.items.collectAsState()
+    val items by viewModel.items.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
     var newItemName by remember { mutableStateOf("") }
 

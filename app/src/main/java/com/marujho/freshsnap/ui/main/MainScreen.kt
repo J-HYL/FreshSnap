@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
@@ -69,16 +70,16 @@ fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
     onNavigateToDetail: (String) -> Unit
 ) {
-    val products by viewModel.products.collectAsState() // datos de prueba
-    val searchQuery by viewModel.searchQuery.collectAsState()
+    val products by viewModel.products.collectAsStateWithLifecycle() // datos de prueba
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val selectedTab = viewModel.selectedTab
     val tabs = listOf(
         stringResource(R.string.tab_pantry),
         stringResource(R.string.tab_expired),
         stringResource(R.string.tab_consumed)
     )
-    val redDays by viewModel.redDays.collectAsState()
-    val yellowDays by viewModel.yellowDays.collectAsState()
+    val redDays by viewModel.redDays.collectAsStateWithLifecycle()
+    val yellowDays by viewModel.yellowDays.collectAsStateWithLifecycle()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

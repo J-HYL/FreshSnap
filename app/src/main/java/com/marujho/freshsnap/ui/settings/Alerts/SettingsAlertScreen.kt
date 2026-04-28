@@ -13,6 +13,7 @@ import com.marujho.freshsnap.ui.theme.SoftRed
 import com.marujho.freshsnap.ui.theme.Yellow
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -21,8 +22,8 @@ fun SettingsAlertScreen(
     viewModel: SettingsAlertViewModel = viewModel()
 ) {
     val context = LocalContext.current
-    val redDays by viewModel.redDays.collectAsState()
-    val yellowDays by viewModel.yellowDays.collectAsState()
+    val redDays by viewModel.redDays.collectAsStateWithLifecycle()
+    val yellowDays by viewModel.yellowDays.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {

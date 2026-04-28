@@ -34,6 +34,7 @@ import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +46,7 @@ fun detailScreen(
     val state = viewModel.uiState
     val context = LocalContext.current
 
-    val allergyMatches by viewModel.allergyMatches.collectAsState()
+    val allergyMatches by viewModel.allergyMatches.collectAsStateWithLifecycle()
 
     fun onConfirmPressed() {
         viewModel.saveProduct(
