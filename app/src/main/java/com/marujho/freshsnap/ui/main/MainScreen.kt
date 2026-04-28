@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +45,7 @@ import com.marujho.freshsnap.ui.theme.Grey
 import com.marujho.freshsnap.R
 import com.marujho.freshsnap.ui.theme.SoftRed
 import com.marujho.freshsnap.ui.theme.Yellow
+import coil.request.ImageRequest
 
 data class ProductUiModel(
     val id: String,
@@ -354,7 +356,10 @@ fun ProductCardItem(
                         .align(Alignment.CenterVertically)
                 ) {
                     AsyncImage(
-                        model = product.imageUrl,
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(product.imageUrl)
+                            .crossfade(true)
+                            .build(),
                         contentDescription = stringResource(R.string.product_image_desc),
                         modifier = Modifier
                             .fillMaxSize()
