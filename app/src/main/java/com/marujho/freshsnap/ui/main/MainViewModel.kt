@@ -29,6 +29,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.marujho.freshsnap.R
 import com.marujho.freshsnap.data.repository.UserPreferences
 import com.marujho.freshsnap.worker.ExpirationWorker
 
@@ -158,6 +159,15 @@ class MainViewModel @Inject constructor(
         val diffInMillis = expDate - today
         val daysRemaining = TimeUnit.MILLISECONDS.toDays(diffInMillis).toInt()
 
+        val expiryTextFormatted = when {
+            daysRemaining < 0 -> context.getString(R.string.expiry_expired)
+            daysRemaining == 0 -> context.getString(R.string.expiry_today)
+            daysRemaining == 1 -> context.getString(R.string.expiry_one_day)
+            daysRemaining < 30 -> context.getString(R.string.expiry_days, daysRemaining)
+            daysRemaining < 365 -> context.getString(R.string.expiry_months, daysRemaining / 30)
+            else -> context.getString(R.string.expiry_years, daysRemaining / 365)
+        }
+
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val expDateString = dateFormat.format(Date(expDate))
         val scanDateString = dateFormat.format(Date(this.scanDate))
@@ -168,6 +178,7 @@ class MainViewModel @Inject constructor(
             brand = this.brand.ifBlank { "Sin marca" },
             imageUrl = this.imageUrl,
             expiryDays = daysRemaining,
+            expiryText = expiryTextFormatted,
             expiryDate = expDateString,
             expirationTimestamp = expDate,
             scannedDate = scanDateString,

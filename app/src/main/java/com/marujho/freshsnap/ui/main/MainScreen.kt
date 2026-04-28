@@ -55,6 +55,7 @@ data class ProductUiModel(
     val brand: String,
     val imageUrl: String?,
     val expiryDays: Int,
+    val expiryText: String,
     val expiryDate: String,
     val expirationTimestamp: Long,
     val scannedDate: String,
@@ -400,7 +401,7 @@ fun ProductCardItem(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (selectedTab == 0) {
                             Text(
-                                text = stringResource(R.string.days_remaining, product.expiryDays + 1),
+                                text = product.expiryText,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onSurface
