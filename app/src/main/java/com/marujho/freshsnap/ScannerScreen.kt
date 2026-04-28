@@ -16,11 +16,16 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +37,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
@@ -179,6 +185,43 @@ fun CameraContent(
             )
 
             ScannerOverlay()
+
+            // Input manual para escribir el EAN sin necesidad de cámara
+            if (scanType == ScanType.BARCODE) {
+                var manualBarcode by remember { mutableStateOf("") }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)
+                        .padding(top = 50.dp, start = 16.dp, end = 16.dp)
+                        .background(Color.White, shape = RoundedCornerShape(8.dp))
+                        .padding(8.dp)
+                        .zIndex(20f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextField(
+                        value = manualBarcode,
+                        onValueChange = { manualBarcode = it.filter { c -> c.isDigit() } },
+                        placeholder = { Text("Mete un código EAN...") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Button(
+                        onClick = {
+                            if (manualBarcode.isNotBlank()) {
+                                viewModel.processBarcode(manualBarcode)
+                            }
+                        }
+                    ) {
+                        Text("Simular")
+                    }
+                }
+            }
 
             Row(
                 modifier = Modifier

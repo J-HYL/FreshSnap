@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,6 +11,13 @@ plugins {
     alias(libs.plugins.hilt.android)
 
     alias(libs.plugins.google.services)
+}
+
+// Cargar local.properties manualmente (Gradle no lo hace por defecto,
+// solo lo lee internamente AGP para sdk.dir/ndk.dir).
+val localProperties = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) FileInputStream(f).use { load(it) }
 }
 
 android {
@@ -28,7 +38,7 @@ android {
         buildConfigField(
             "String",
             "GROQ_API_KEY",
-            "\"${project.findProperty("GROQ_API_KEY") ?: ""}\""
+            "\"${localProperties.getProperty("GROQ_API_KEY") ?: ""}\""
         )
     }
 

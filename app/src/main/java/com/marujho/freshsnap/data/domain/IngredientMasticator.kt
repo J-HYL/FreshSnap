@@ -3,6 +3,7 @@ package com.marujho.freshsnap.data.domain
 import com.marujho.freshsnap.data.model.IngredientClassification
 import com.marujho.freshsnap.data.model.UserProduct
 import java.security.MessageDigest
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -11,21 +12,29 @@ class IngredientMasticator @Inject constructor() {
     /**
      * Clasifica los productos del inventario por su estado de frescura.
      * Reutiliza la misma logica de MainViewModel (daysRemaining vs umbrales).
-     * Solo incluye productos no consumidos y no caducados.
+     * Solo incluye productos no consumidos. Los productos ya caducados se
+     * tratan como ROJOS (urgentes) para que tambien se sugieran recetas.
      */
     fun classify(
         products: List<UserProduct>,
         redDays: Int,
         yellowDays: Int
     ): IngredientClassification {
-        val today = System.currentTimeMillis()
+        // Normalizar a inicio del dia para que un producto que caduca HOY
+        // siga contando como valido (de lo contrario quedaria fuera por hora).
+        val today = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
         val red = mutableListOf<String>()
         val yellow = mutableListOf<String>()
         val green = mutableListOf<String>()
 
         products
             .filter { !it.isConsumed }
-            .filter { (it.expirationDate ?: today) >= today }
             .forEach { product ->
                 val expDate = product.expirationDate ?: today
                 val daysRemaining = TimeUnit.MILLISECONDS.toDays(expDate - today).toInt()

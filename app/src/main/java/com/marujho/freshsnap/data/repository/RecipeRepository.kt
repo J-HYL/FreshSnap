@@ -1,5 +1,6 @@
 package com.marujho.freshsnap.data.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.marujho.freshsnap.data.domain.IngredientMasticator
@@ -61,8 +62,10 @@ Rules: ALL R ingredients MUST appear in ingredientes_tengo. G ingredients may ap
     ): Result<List<CachedRecipe>> {
         return try {
             val classification = masticator.classify(products, redDays, yellowDays)
+            Log.d(TAG, "classify: red=${classification.redIngredients} yellow=${classification.yellowIngredients} green=${classification.greenIngredients}")
 
             if (classification.redIngredients.isEmpty()) {
+                Log.d(TAG, "No red ingredients, returning empty")
                 return Result.success(emptyList())
             }
 
@@ -71,6 +74,7 @@ Rules: ALL R ingredients MUST appear in ingredientes_tengo. G ingredients may ap
             // Capa 0: Cache Firestore
             if (!forceRefresh) {
                 val cached = getCachedRecipes(inventoryHash)
+                Log.d(TAG, "cache lookup: ${cached.size} recipes")
                 if (cached.isNotEmpty()) {
                     return Result.success(cached)
                 }
@@ -80,11 +84,15 @@ Rules: ALL R ingredients MUST appear in ingredientes_tengo. G ingredients may ap
 
             // Capa 1: TheMealDB - buscar por primer ingrediente RED
             val mainIngredient = classification.redIngredients.first()
+            Log.d(TAG, "Layer 1: searching MealDB for '$mainIngredient'")
             val mealDbResults = searchMealDb(mainIngredient)
+            Log.d(TAG, "Layer 1 result: ${mealDbResults.size} meals")
 
             if (mealDbResults.isNotEmpty()) {
                 // Capa 2: Groq Filter - elegir la mejor receta
+                Log.d(TAG, "Layer 2: filtering with Groq")
                 val filtered = filterWithGroq(mealDbResults, classification)
+                Log.d(TAG, "Layer 2 result: ${filtered?.title ?: "null"}")
                 if (filtered != null) {
                     recipes.add(
                         filtered.copy(
@@ -97,7 +105,9 @@ Rules: ALL R ingredients MUST appear in ingredientes_tengo. G ingredients may ap
 
             // Capa 3: Groq Generate - si MealDB no dio resultados o como receta adicional
             if (recipes.isEmpty()) {
+                Log.d(TAG, "Layer 3: generating with Groq")
                 val generated = generateWithGroq(classification)
+                Log.d(TAG, "Layer 3 result: ${generated?.title ?: "null"}")
                 if (generated != null) {
                     recipes.add(
                         generated.copy(
@@ -111,10 +121,17 @@ Rules: ALL R ingredients MUST appear in ingredientes_tengo. G ingredients may ap
             // Guardar en Firestore
             if (recipes.isNotEmpty()) {
                 saveCachedRecipes(recipes)
+                Result.success(recipes)
+            } else {
+                Log.e(TAG, "All layers failed: no recipes generated")
+                Result.failure(
+                    Exception(
+                        "No se pudieron generar recetas. Comprueba tu conexion y la GROQ_API_KEY."
+                    )
+                )
             }
-
-            Result.success(recipes)
         } catch (e: Exception) {
+            Log.e(TAG, "getRecipeSuggestions exception", e)
             Result.failure(e)
         }
     }
@@ -159,10 +176,12 @@ Rules: ALL R ingredients MUST appear in ingredientes_tengo. G ingredients may ap
                     val lookupResponse = mealDbApi.getMealById(summary.id ?: return@mapNotNull null)
                     lookupResponse.meals?.firstOrNull()
                 } catch (e: Exception) {
+                    Log.w(TAG, "MealDB lookup failed for id=${summary.id}", e)
                     null
                 }
             }
         } catch (e: Exception) {
+            Log.e(TAG, "MealDB search failed for '$ingredient'", e)
             emptyList()
         }
     }
@@ -197,7 +216,9 @@ Rules: ALL R ingredients MUST appear in ingredientes_tengo. G ingredients may ap
 
         return try {
             val response = groqApi.chatCompletion(request)
-            val jsonContent = response.choices.firstOrNull()?.message?.content ?: return null
+            val jsonContent = response.choices.firstOrNull()?.message?.content
+            Log.d(TAG, "Groq Filter raw content: ${jsonContent?.take(300)}")
+            if (jsonContent == null) return null
             val parsed = parseGroqRecipeResponse(jsonContent) ?: return null
 
             // Encontrar la receta original de MealDB para obtener imagen e instrucciones
@@ -216,6 +237,7 @@ Rules: ALL R ingredients MUST appear in ingredientes_tengo. G ingredients may ap
                 source = RecipeSource.GROQ_FILTERED.name
             )
         } catch (e: Exception) {
+            Log.e(TAG, "filterWithGroq exception, using MealDB fallback", e)
             // Fallback: devolver primera receta de MealDB sin filtro Groq
             meals.firstOrNull()?.let { meal ->
                 val allIngredients = meal.getIngredientsList()
@@ -254,7 +276,9 @@ Rules: ALL R ingredients MUST appear in ingredientes_tengo. G ingredients may ap
 
         return try {
             val response = groqApi.chatCompletion(request)
-            val jsonContent = response.choices.firstOrNull()?.message?.content ?: return null
+            val jsonContent = response.choices.firstOrNull()?.message?.content
+            Log.d(TAG, "Groq Generate raw content: ${jsonContent?.take(300)}")
+            if (jsonContent == null) return null
             val parsed = parseGroqRecipeResponse(jsonContent) ?: return null
 
             CachedRecipe(
@@ -269,6 +293,7 @@ Rules: ALL R ingredients MUST appear in ingredientes_tengo. G ingredients may ap
                 source = RecipeSource.GROQ_GENERATED.name
             )
         } catch (e: Exception) {
+            Log.e(TAG, "generateWithGroq exception", e)
             null
         }
     }
@@ -282,6 +307,7 @@ Rules: ALL R ingredients MUST appear in ingredientes_tengo. G ingredients may ap
             val adapter = moshi.adapter(GroqRecipeResponseDto::class.java)
             adapter.fromJson(json)
         } catch (e: Exception) {
+            Log.e(TAG, "parseGroqRecipeResponse failed: ${json.take(200)}", e)
             null
         }
     }
@@ -289,6 +315,7 @@ Rules: ALL R ingredients MUST appear in ingredientes_tengo. G ingredients may ap
     // endregion
 
     companion object {
+        private const val TAG = "RecipeRepository"
         private const val CACHE_TTL_MS = 24 * 60 * 60 * 1000L // 24 horas
         private const val MAX_MEALDB_RESULTS = 5
     }
