@@ -19,6 +19,7 @@ import com.marujho.freshsnap.R
 import android.app.LocaleManager
 import android.os.Build
 import android.os.LocaleList
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,10 +29,10 @@ fun SettingsAccountScreen(
     val context = LocalContext.current
 
     // Collectar los valores actuales del usuario
-    val name by viewModel.userName.collectAsState()
-    val age by viewModel.userAge.collectAsState()
-    val gender by viewModel.userGender.collectAsState()
-    val language by viewModel.userLanguage.collectAsState()
+    val name by viewModel.userName.collectAsStateWithLifecycle()
+    val age by viewModel.userAge.collectAsStateWithLifecycle()
+    val gender by viewModel.userGender.collectAsStateWithLifecycle()
+    val language by viewModel.userLanguage.collectAsStateWithLifecycle()
 
     var editedName by remember { mutableStateOf("") }
     var tempName by remember { mutableStateOf("") }

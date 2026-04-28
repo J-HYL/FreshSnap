@@ -144,4 +144,11 @@
     <string name="add_action">Añadir</string>
     <string name="delete_desc">Borrar</string>
     <string name="add_to_list_desc">Añadir a la lista</string>
+
+    <string name="expiry_expired">Caducado</string>
+    <string name="expiry_today">Caduca hoy</string>
+    <string name="expiry_one_day">1 día</string>
+    <string name="expiry_days">%1$d días</string>
+    <string name="expiry_months">%1$d meses</string>
+    <string name="expiry_years">%1$d años</string>
 </resources>

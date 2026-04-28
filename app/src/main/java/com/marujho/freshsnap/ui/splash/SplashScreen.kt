@@ -26,6 +26,7 @@ import com.marujho.freshsnap.ui.theme.FreshSnapTheme
 import com.marujho.freshsnap.ui.theme.LightGreen
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 
 @Composable
@@ -33,7 +34,7 @@ fun SplashScreen(
     navController: NavController,
     viewModel: SplashViewModel = hiltViewModel() // Inyectamos el ViewModel
 ) {
-    val destination by viewModel.startDestination.collectAsState()
+    val destination by viewModel.startDestination.collectAsStateWithLifecycle()
 
     LaunchedEffect(destination) {
         destination?.let { target ->
