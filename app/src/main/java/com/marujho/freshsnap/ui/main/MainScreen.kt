@@ -8,10 +8,12 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -25,6 +27,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
@@ -43,6 +47,7 @@ import com.marujho.freshsnap.ui.theme.Grey
 import com.marujho.freshsnap.R
 import com.marujho.freshsnap.ui.theme.SoftRed
 import com.marujho.freshsnap.ui.theme.Yellow
+import coil.request.ImageRequest
 
 data class ProductUiModel(
     val id: String,
@@ -50,6 +55,7 @@ data class ProductUiModel(
     val brand: String,
     val imageUrl: String?,
     val expiryDays: Int,
+    val expiryText: String,
     val expiryDate: String,
     val expirationTimestamp: Long,
     val scannedDate: String,
@@ -69,16 +75,16 @@ fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
     onNavigateToDetail: (String) -> Unit
 ) {
-    val products by viewModel.products.collectAsState() // datos de prueba
-    val searchQuery by viewModel.searchQuery.collectAsState()
+    val products by viewModel.products.collectAsStateWithLifecycle() // datos de prueba
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val selectedTab = viewModel.selectedTab
     val tabs = listOf(
         stringResource(R.string.tab_pantry),
         stringResource(R.string.tab_expired),
         stringResource(R.string.tab_consumed)
     )
-    val redDays by viewModel.redDays.collectAsState()
-    val yellowDays by viewModel.yellowDays.collectAsState()
+    val redDays by viewModel.redDays.collectAsStateWithLifecycle()
+    val yellowDays by viewModel.yellowDays.collectAsStateWithLifecycle()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -122,8 +128,9 @@ fun MainScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)
             ) {
                 tabs.forEachIndexed { index, title ->
                     CategoryButton(
@@ -353,7 +360,10 @@ fun ProductCardItem(
                         .align(Alignment.CenterVertically)
                 ) {
                     AsyncImage(
-                        model = product.imageUrl,
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(product.imageUrl)
+                            .crossfade(true)
+                            .build(),
                         contentDescription = stringResource(R.string.product_image_desc),
                         modifier = Modifier
                             .fillMaxSize()
@@ -391,7 +401,7 @@ fun ProductCardItem(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (selectedTab == 0) {
                             Text(
-                                text = stringResource(R.string.days_remaining, product.expiryDays + 1),
+                                text = product.expiryText,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onSurface

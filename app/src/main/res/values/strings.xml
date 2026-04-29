@@ -160,4 +160,11 @@
     <string name="recipe_source_groq_generated">IA - Generada</string>
     <string name="recipe_instructions">Instrucciones</string>
     <string name="recipe_added_to_list">Ingredientes añadidos a la lista de compras</string>
+
+    <string name="expiry_expired">Caducado</string>
+    <string name="expiry_today">Caduca hoy</string>
+    <string name="expiry_one_day">1 día</string>
+    <string name="expiry_days">%1$d días</string>
+    <string name="expiry_months">%1$d meses</string>
+    <string name="expiry_years">%1$d años</string>
 </resources>

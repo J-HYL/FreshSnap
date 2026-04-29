@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.marujho.freshsnap.ui.settings.Account.SettingsAccountViewModel
 
@@ -26,9 +27,9 @@ fun UserHeader(
     viewModel: SettingsAccountViewModel = viewModel()
 ) {
 
-    val name by viewModel.userName.collectAsState()
-    val age by viewModel.userAge.collectAsState()
-    val gender by viewModel.userGender.collectAsState()
+    val name by viewModel.userName.collectAsStateWithLifecycle()
+    val age by viewModel.userAge.collectAsStateWithLifecycle()
+    val gender by viewModel.userGender.collectAsStateWithLifecycle()
 
     Row(
         verticalAlignment = Alignment.CenterVertically
