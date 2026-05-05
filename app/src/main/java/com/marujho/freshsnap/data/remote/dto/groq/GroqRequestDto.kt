@@ -7,5 +7,5 @@ data class GroqRequestDto(
     val messages: List<GroqMessageDto>,
     @Json(name = "response_format") val responseFormat: GroqResponseFormatDto = GroqResponseFormatDto(),
     val temperature: Float = 0.3f,
-    @Json(name = "max_tokens") val maxTokens: Int = 500
+    @Json(name = "max_tokens") val maxTokens: Int = 2000
 )
