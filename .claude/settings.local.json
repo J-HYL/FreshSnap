@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep:*)",
+      "Bash(find /c/Users/Jjauyon/StudioProjects/FreshSnap -type f \\\\\\( -name \"*.kt\" -o -name \"*.java\" \\\\\\) -exec grep -l \"data class ProductUiModel\\\\|class ProductUiModel\" {} \\\\;)",
+      "Bash(grep -E \"\\\\.\\(kt|java\\)$\")",
+      "Bash(find /c/Users/Jjauyon/StudioProjects/FreshSnap -type f -name \"*.kt\" -exec grep -l \"expiryDays\\\\|isExpired\\\\|freshness\" {} \\\\;)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Android/Android Studio/jbr\" ./gradlew assembleDebug)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\emulator\\\\emulator.exe\" -list-avds)",
+      "PowerShell(Stop-Process -Id 22680,23392 -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 2; Get-Process | Where-Object { $_.Name -match 'qemu|emulator' } | Select-Object Name, Id; Write-Host \"Done\")",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 shell input keyevent 82)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 shell input swipe 540 1500 540 500)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 shell pm list packages)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 shell pm grant com.marujho.freshsnap android.permission.POST_NOTIFICATIONS)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 shell input keyevent KEYCODE_BACK)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 exec-out screencap -p)",
+      "PowerShell(Stop-Process -Id 10820,14432,23936,2956,12892 -Force -ErrorAction SilentlyContinue)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" kill-server *)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" start-server *)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" devices *)",
+      "Bash(./gradlew compileDebugKotlin)",
+      "Bash(export JAVA_HOME=\"C:\\\\\\\\Program Files\\\\\\\\Android\\\\\\\\Android Studio\\\\\\\\jbr\")",
+      "Bash(./gradlew installDebug)",
+      "Bash(xargs cat *)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 shell am force-stop com.marujho.freshsnap)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 shell am start -n com.marujho.freshsnap/.MainActivity)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 logcat -c)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 shell input tap 411 60)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 logcat -d --pid=3353 -v brief)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 shell input tap 226 875)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 logcat -d -v brief)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 logcat -d)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 logcat -d -s RecipeRepository:*)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 shell screencap /sdcard/check.png)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 pull /sdcard/check.png ./.screenshot-check.png)",
+      "Bash(\"C:\\\\Users\\\\Jjauyon\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s emulator-5554 shell input tap 540 2230)",
+      "Bash(./gradlew clean *)"
+    ]
+  }
+}

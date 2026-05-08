@@ -3,6 +3,7 @@ package com.marujho.freshsnap.ui.recipe
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.marujho.freshsnap.data.model.RecipeIngredient
+import com.marujho.freshsnap.data.model.ShoppingItem
 import com.marujho.freshsnap.data.repository.ProductRepository
 import com.marujho.freshsnap.data.repository.RecipeRepository
 import com.marujho.freshsnap.data.repository.ShoppingRepository
@@ -79,12 +80,11 @@ class RecipeViewModel @Inject constructor(
     fun addMissingToShoppingList(ingredients: List<RecipeIngredient>) {
         viewModelScope.launch {
             ingredients.forEach { ingredient ->
-                val itemName = if (ingredient.measure.isNotBlank()) {
-                    "${ingredient.name} (${ingredient.measure})"
-                } else {
-                    ingredient.name
-                }
-                shoppingRepository.addShoppingItem(itemName)
+                shoppingRepository.addShoppingItem(
+                    name = ingredient.name,
+                    quantity = ingredient.measure,
+                    source = ShoppingItem.SOURCE_RECIPE
+                )
             }
             _snackbarMessage.value = "added"
         }
