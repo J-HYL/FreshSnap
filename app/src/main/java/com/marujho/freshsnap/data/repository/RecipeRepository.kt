@@ -35,15 +35,26 @@ class RecipeRepository @Inject constructor(
     // region System Prompts
 
     private val filterSystemPrompt = """
-You are a recipe assistant. Given user ingredients classified by freshness (R=expiring soon, must use; G=fresh, available) and a list of MealDB recipes, pick the ONE recipe that best uses the R ingredients. Respond ONLY with valid JSON matching this schema:
+You are a strict culinary expert. Given user ingredients classified by freshness (R=expiring soon; G=fresh, available) and a list of MealDB recipes, pick the BEST recipe that uses some 'R' ingredients. 
+CRITICAL: The chosen recipe MUST make absolute culinary sense. 
+Respond ONLY with valid JSON matching this schema:
 {"recipe_id":"string","title":"string","ingredientes_tengo":[{"name":"string","measure":"string"}],"ingredientes_falta":[{"name":"string","measure":"string"}],"reason":"string"}
-Rules: R ingredients MUST appear in ingredientes_tengo. Do not invent ingredients. Be concise.
+Rules: Be concise. Do not invent ingredients that are not in the original recipe. The final text output must be in Spanish.
     """.trimIndent()
 
     private val generateSystemPrompt = """
-You are a recipe creator. Given user ingredients classified by freshness (R=expiring soon, must use; G=fresh, available), create ONE recipe that uses ALL R ingredients obligatorily. Respond ONLY with valid JSON matching this schema:
+You are a strict, Michelin-star chef. You will be given user ingredients classified by freshness (R=expiring soon, high priority; G=fresh, available). 
+Create ONE realistic, delicious recipe that makes absolute culinary sense. 
+CRITICAL RULES: 
+1. NEVER mix incompatible ingredients just to use them up. Do NOT create disgusting or weird combinations (e.g., mixing dairy with isotonic drinks, or fish with chocolate).
+2. It is STRICTLY FORBIDDEN to use all 'R' ingredients if they do not belong in the same flavor profile. If they clash, pick just ONE or TWO 'R' ingredients and build a normal, tasty dish around them. Discard the rest.
+Respond ONLY with valid JSON matching this schema:
 {"title":"string","instructions":"string","ingredientes_tengo":[{"name":"string","measure":"string"}],"ingredientes_falta":[{"name":"string","measure":"string"}],"category":"string","area":"string"}
-Rules: ALL R ingredients MUST appear in ingredientes_tengo. G ingredients may appear in ingredientes_tengo. Only list truly needed extra items in ingredientes_falta. Instructions max 500 chars. Language: Spanish.
+Formatting Rules:
+1. 'instructions' must contain clear, numbered steps.
+2. Put the R and G ingredients you decided to use in 'ingredientes_tengo'. Exclude any provided ingredients that ruin the dish.
+3. Put only strictly necessary, logical extra ingredients to make the dish work in 'ingredientes_falta'.
+4. The response language must be Spanish.
     """.trimIndent()
 
     // endregion

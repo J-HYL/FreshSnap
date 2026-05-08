@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.marujho.freshsnap.R
 
 
@@ -35,7 +36,7 @@ fun SettingsAllergyScreen(
     viewModel: SettingsAllergyViewModel = viewModel()
 ) {
     val context = LocalContext.current
-    val savedAllergies by viewModel.userAllergies.collectAsState()
+    val savedAllergies by viewModel.userAllergies.collectAsStateWithLifecycle()
 
     var selectedAllergies by remember { mutableStateOf(setOf<String>()) }
 

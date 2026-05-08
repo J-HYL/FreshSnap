@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
@@ -50,7 +51,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val settingsViewModel: SettingsViewModel = viewModel()
-            val isDarkMode by settingsViewModel.isDarkMode.collectAsState()
+            val isDarkMode by settingsViewModel.isDarkMode.collectAsStateWithLifecycle()
 
             val context = LocalContext.current
             val permissionLauncher = rememberLauncherForActivityResult(
@@ -73,7 +74,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.Companion.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val startDest by splashViewModel.startDestination.collectAsState()
+                    val startDest by splashViewModel.startDestination.collectAsStateWithLifecycle()
 
                     if (startDest != null) {
                         AppNavigation()

@@ -34,6 +34,8 @@ import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.request.ImageRequest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +47,7 @@ fun detailScreen(
     val state = viewModel.uiState
     val context = LocalContext.current
 
-    val allergyMatches by viewModel.allergyMatches.collectAsState()
+    val allergyMatches by viewModel.allergyMatches.collectAsStateWithLifecycle()
 
     fun onConfirmPressed() {
         viewModel.saveProduct(
@@ -155,11 +157,16 @@ fun detailImage(url: String, hasWarning: Boolean = false) {
             contentAlignment = androidx.compose.ui.Alignment.Center
         ) {
             AsyncImage(
-                model = url,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(url)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = stringResource(R.string.detail_image_desc),
                 placeholder = painterResource(android.R.drawable.ic_menu_gallery),
                 error = painterResource(android.R.drawable.ic_dialog_alert),
-                modifier = Modifier.size(200.dp),
+                modifier = Modifier
+                    .fillMaxWidth(0.6f)
+                    .aspectRatio(1f),
                 contentScale = ContentScale.Fit
             )
 
