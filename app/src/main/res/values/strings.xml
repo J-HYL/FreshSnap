@@ -145,10 +145,67 @@
     <string name="delete_desc">Borrar</string>
     <string name="add_to_list_desc">Añadir a la lista</string>
 
+    <string name="nav_recipes">Recetas</string>
+    <string name="recipe_title">Recetas de Aprovechamiento</string>
+    <string name="recipe_loading">Buscando recetas para tus productos…</string>
+    <string name="recipe_empty_no_red">¡Todos tus productos están frescos!\nNo necesitas recetas de aprovechamiento.</string>
+    <string name="recipe_empty_no_products">Tu despensa está vacía.\nAñade productos para obtener sugerencias.</string>
+    <string name="recipe_error">Error al buscar recetas.\nRevisa tu conexión e inténtalo de nuevo.</string>
+    <string name="recipe_ingredients_owned">Ingredientes que tienes</string>
+    <string name="recipe_ingredients_missing">Te falta</string>
+    <string name="recipe_add_missing_to_list">Añadir faltantes a la lista</string>
+    <string name="recipe_regenerate">Regenerar</string>
+    <string name="recipe_source_mealdb">TheMealDB</string>
+    <string name="recipe_source_groq_filter">IA - Filtrado</string>
+    <string name="recipe_source_groq_generated">IA - Generada</string>
+    <string name="recipe_instructions">Instrucciones</string>
+    <string name="recipe_added_to_list">Ingredientes añadidos a la lista de compras</string>
+
     <string name="expiry_expired">Caducado</string>
     <string name="expiry_today">Caduca hoy</string>
     <string name="expiry_one_day">1 día</string>
     <string name="expiry_days">%1$d días</string>
     <string name="expiry_months">%1$d meses</string>
     <string name="expiry_years">%1$d años</string>
+
+    <!-- Atribuciones y licencias -->
+    <string name="settings_about">Atribuciones y licencias</string>
+    <string name="settings_about_sub">Datos, librerías y recursos utilizados.</string>
+    <string name="about_open_link">Abrir enlace</string>
+
+    <string name="about_section_apis">Datos y APIs Externas</string>
+    <string name="about_section_libraries">Librerías de Terceros</string>
+    <string name="about_section_libraries_note">Software de código abierto bajo licencia Apache 2.0.</string>
+    <string name="about_section_resources">Recursos Visuales</string>
+    <string name="about_section_license">Licencia del Proyecto</string>
+
+    <string name="about_openfoodfacts">Open Food Facts</string>
+    <string name="about_openfoodfacts_desc">Base de datos colaborativa de productos alimenticios.</string>
+    <string name="about_themealdb">TheMealDB</string>
+    <string name="about_themealdb_desc">API de información sobre ingredientes y recetas.</string>
+
+    <string name="about_retrofit">Retrofit</string>
+    <string name="about_retrofit_desc">Cliente HTTP type-safe para Android (Square).</string>
+    <string name="about_moshi">Moshi</string>
+    <string name="about_moshi_desc">Serialización JSON moderna (Square).</string>
+    <string name="about_coil">Coil</string>
+    <string name="about_coil_desc">Carga de imágenes optimizada para Jetpack Compose.</string>
+    <string name="about_mlkit">Google ML Kit</string>
+    <string name="about_mlkit_desc">Motor de visión artificial: Barcode y OCR.</string>
+    <string name="about_jetpack">Jetpack Libraries</string>
+    <string name="about_jetpack_desc">Compose, Room, DataStore, WorkManager, Hilt.</string>
+    <string name="about_coroutines">Kotlin Coroutines</string>
+    <string name="about_coroutines_desc">Gestión de asincronía y flujos de datos.</string>
+
+    <string name="about_material_symbols">Material Symbols</string>
+    <string name="about_material_symbols_desc">Iconografía oficial de Google.</string>
+    <string name="about_assistant">Assistant</string>
+    <string name="about_assistant_desc">Tipografía diseñada por Ben Nathan.</string>
+
+    <string name="about_license_apache">Distribuido bajo la Licencia Apache 2.0</string>
+    <string name="about_copyright">© 2026 FreshSnap</string>
+
+    <string name="license_badge_apache">Apache 2.0</string>
+    <string name="license_badge_odbl">ODbL</string>
+    <string name="license_badge_ofl">OFL</string>
 </resources>

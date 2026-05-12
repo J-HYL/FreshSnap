@@ -145,10 +145,67 @@
     <string name="delete_desc">Delete</string>
     <string name="add_to_list_desc">Add to list</string>
 
+    <string name="nav_recipes">Recipes</string>
+    <string name="recipe_title">Waste Reduction Recipes</string>
+    <string name="recipe_loading">Searching recipes for your products…</string>
+    <string name="recipe_empty_no_red">All your products are fresh!\nNo waste reduction recipes needed.</string>
+    <string name="recipe_empty_no_products">Your pantry is empty.\nAdd products to get suggestions.</string>
+    <string name="recipe_error">Error searching recipes.\nCheck your connection and try again.</string>
+    <string name="recipe_ingredients_owned">Ingredients you have</string>
+    <string name="recipe_ingredients_missing">You\'re missing</string>
+    <string name="recipe_add_missing_to_list">Add missing to shopping list</string>
+    <string name="recipe_regenerate">Regenerate</string>
+    <string name="recipe_source_mealdb">TheMealDB</string>
+    <string name="recipe_source_groq_filter">AI - Filtered</string>
+    <string name="recipe_source_groq_generated">AI - Generated</string>
+    <string name="recipe_instructions">Instructions</string>
+    <string name="recipe_added_to_list">Ingredients added to shopping list</string>
+
     <string name="expiry_expired">Expired</string>
     <string name="expiry_today">Expires today</string>
     <string name="expiry_one_day">1 day</string>
     <string name="expiry_days">%1$d days</string>
     <string name="expiry_months">%1$d months</string>
     <string name="expiry_years">%1$d years</string>
+
+    <!-- Attributions and licenses -->
+    <string name="settings_about">Attributions and licenses</string>
+    <string name="settings_about_sub">Data, libraries and resources used.</string>
+    <string name="about_open_link">Open link</string>
+
+    <string name="about_section_apis">External Data &amp; APIs</string>
+    <string name="about_section_libraries">Third-party Libraries</string>
+    <string name="about_section_libraries_note">Open-source software under the Apache 2.0 license.</string>
+    <string name="about_section_resources">Visual Resources</string>
+    <string name="about_section_license">Project License</string>
+
+    <string name="about_openfoodfacts">Open Food Facts</string>
+    <string name="about_openfoodfacts_desc">Collaborative food products database.</string>
+    <string name="about_themealdb">TheMealDB</string>
+    <string name="about_themealdb_desc">API for ingredient and recipe information.</string>
+
+    <string name="about_retrofit">Retrofit</string>
+    <string name="about_retrofit_desc">Type-safe HTTP client for Android (Square).</string>
+    <string name="about_moshi">Moshi</string>
+    <string name="about_moshi_desc">Modern JSON serialization (Square).</string>
+    <string name="about_coil">Coil</string>
+    <string name="about_coil_desc">Image loading optimized for Jetpack Compose.</string>
+    <string name="about_mlkit">Google ML Kit</string>
+    <string name="about_mlkit_desc">Vision engine: Barcode and OCR.</string>
+    <string name="about_jetpack">Jetpack Libraries</string>
+    <string name="about_jetpack_desc">Compose, Room, DataStore, WorkManager, Hilt.</string>
+    <string name="about_coroutines">Kotlin Coroutines</string>
+    <string name="about_coroutines_desc">Asynchrony and data flow management.</string>
+
+    <string name="about_material_symbols">Material Symbols</string>
+    <string name="about_material_symbols_desc">Google\'s official iconography.</string>
+    <string name="about_assistant">Assistant</string>
+    <string name="about_assistant_desc">Typography designed by Ben Nathan.</string>
+
+    <string name="about_license_apache">Distributed under the Apache 2.0 License</string>
+    <string name="about_copyright">© 2026 FreshSnap</string>
+
+    <string name="license_badge_apache">Apache 2.0</string>
+    <string name="license_badge_odbl">ODbL</string>
+    <string name="license_badge_ofl">OFL</string>
 </resources>

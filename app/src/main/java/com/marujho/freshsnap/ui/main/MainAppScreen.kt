@@ -13,6 +13,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.marujho.freshsnap.ui.navigation.BottomNavItem
 import com.marujho.freshsnap.ui.scanner.BarCodeScanScreen
+import com.marujho.freshsnap.ui.recipe.RecipeScreen
+import com.marujho.freshsnap.ui.settings.About.SettingsAboutScreen
 import com.marujho.freshsnap.ui.settings.Account.SettingsAccountScreen
 import com.marujho.freshsnap.ui.settings.Alerts.SettingsAlertScreen
 import com.marujho.freshsnap.ui.settings.Allergy.SettingsAllergyScreen
@@ -38,6 +40,7 @@ fun MainAppScreen(
                 val items = listOf(
                     BottomNavItem.Home,
                     BottomNavItem.Scanner,
+                    BottomNavItem.Recipes,
                     BottomNavItem.Shopping,
                     BottomNavItem.Settings
                 )
@@ -119,6 +122,16 @@ fun MainAppScreen(
 
             composable("settings_allergy") {
                 SettingsAllergyScreen()
+            }
+
+            composable("settings_about") {
+                SettingsAboutScreen()
+            }
+
+            composable(BottomNavItem.Recipes.route) {
+                RecipeScreen(
+                    bottomBarPadding = innerPadding.calculateBottomPadding()
+                )
             }
 
             composable(BottomNavItem.Shopping.route) {
