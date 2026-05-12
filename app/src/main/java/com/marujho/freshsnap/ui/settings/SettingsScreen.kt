@@ -75,6 +75,12 @@ fun SettingsScreen(
                 onClick = { navController.navigate("settings_alert") }
             )
 
+            SettingsItem(
+                title = stringResource(R.string.settings_about),
+                subtitle = stringResource(R.string.settings_about_sub),
+                onClick = { navController.navigate("settings_about") }
+            )
+
             Spacer(Modifier.height(24.dp))
 
             Button(
