@@ -82,29 +82,39 @@ class RecipeViewModel @Inject constructor(
 
         val selected = currentState.ingredients.filter { it.isSelected }.map { it.name }
         if (selected.isEmpty()) {
-            _uiState.value = currentState.copy(errorMessage = "Por favor, selecciona al menos un ingrediente.")
+            _uiState.value =
+                currentState.copy(errorMessage = "Por favor, selecciona al menos un ingrediente.")
             return
         }
 
         val available = currentState.ingredients.filter { !it.isSelected }.map { it.name }
 
         viewModelScope.launch {
-            _uiState.value = currentState.copy(isGenerating = true, errorMessage = null, recipe = null)
+            _uiState.value =
+                currentState.copy(isGenerating = true, errorMessage = null, recipe = null)
 
-            val result = recipeRepository.generateCustomRecipe(
-                selectedIngredients = selected,
-                availableIngredients = available
-            )
-
-            if (result.isSuccess) {
-                _uiState.update {
-                    (it as RecipeUiState.Ready).copy(isGenerating = false, recipe = result.getOrThrow())
+            try {
+                val result = recipeRepository.generateCustomRecipe(selected, available)
+                if (result.isSuccess) {
+                    _uiState.update {
+                        (it as RecipeUiState.Ready).copy(
+                            isGenerating = false,
+                            recipe = result.getOrThrow()
+                        )
+                    }
+                } else {
+                    _uiState.update {
+                        (it as RecipeUiState.Ready).copy(
+                            isGenerating = false,
+                            errorMessage = result.exceptionOrNull()?.message
+                        )
+                    }
                 }
-            } else {
+            } catch (e: Exception) {
                 _uiState.update {
                     (it as RecipeUiState.Ready).copy(
                         isGenerating = false,
-                        errorMessage = result.exceptionOrNull()?.message ?: "Error al generar receta."
+                        errorMessage = "Error inesperado de conexión."
                     )
                 }
             }
@@ -124,5 +134,7 @@ class RecipeViewModel @Inject constructor(
         }
     }
 
-    fun clearSnackbar() { _snackbarMessage.value = null }
+    fun clearSnackbar() {
+        _snackbarMessage.value = null
+    }
 }
