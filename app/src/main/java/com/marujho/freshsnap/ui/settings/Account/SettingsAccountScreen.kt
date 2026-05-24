@@ -206,22 +206,6 @@ fun SettingsAccountScreen(
                         selected = editedLanguage == langCode || (editedLanguage.isEmpty() && langCode == "Sistema"),
                         onClick = {
                             editedLanguage = langCode
-
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                val localeManager = context.getSystemService(LocaleManager::class.java)
-
-                                if (langCode == "Sistema") {
-                                    localeManager.applicationLocales = LocaleList.getEmptyLocaleList()
-                                } else {
-                                    localeManager.applicationLocales = LocaleList.forLanguageTags(langCode)
-                                }
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    "El cambio de idioma manual requiere Android 13+. Cambia el idioma desde los ajustes de tu teléfono.",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
                         }
                     )
                     Text(label)
@@ -238,6 +222,22 @@ fun SettingsAccountScreen(
                         editedGender,
                         editedLanguage
                     )
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        val localeManager = context.getSystemService(LocaleManager::class.java)
+
+                        if (editedLanguage == "Sistema") {
+                            localeManager.applicationLocales = LocaleList.getEmptyLocaleList()
+                        } else {
+                            localeManager.applicationLocales = LocaleList.forLanguageTags(editedLanguage)
+                        }
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "El cambio de idioma manual requiere Android 13+. Cambia el idioma desde los ajustes de tu teléfono.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
 
                     Toast.makeText(
                         context,
