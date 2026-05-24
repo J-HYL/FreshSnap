@@ -1,8 +1,12 @@
 package com.marujho.freshsnap.ui.recipe
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -26,6 +30,7 @@ import com.marujho.freshsnap.data.model.RecipeIngredient
 import com.marujho.freshsnap.data.model.RecipeSource
 import com.marujho.freshsnap.ui.theme.Green
 import com.marujho.freshsnap.ui.theme.SoftRed
+import com.marujho.freshsnap.ui.theme.Yellow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -92,21 +97,60 @@ fun RecipeScreen(
                                     iconTint = MaterialTheme.colorScheme.outline
                                 )
                             } else {
-                                FlowRow(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                                        .padding(12.dp)
                                 ) {
-                                    state.ingredients.forEach { ingredient ->
-                                        FilterChip(
-                                            selected = ingredient.isSelected,
-                                            onClick = { viewModel.toggleIngredient(ingredient.name) },
-                                            label = { Text(ingredient.name) },
-                                            colors = FilterChipDefaults.filterChipColors(
-                                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text("Tus Ingredientes", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                        val seleccionados = state.ingredients.count { it.isSelected }
+                                        Text("$seleccionados/${state.ingredients.size} seleccionados", style = MaterialTheme.typography.bodySmall)
+                                    }
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    LazyVerticalGrid(
+                                        columns = GridCells.Adaptive(minSize = 100.dp),
+                                        modifier = Modifier.heightIn(max = 250.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        items(state.ingredients.size) { index ->
+                                            val ingredient = state.ingredients[index]
+                                            FilterChip(
+                                                selected = ingredient.isSelected,
+                                                onClick = { viewModel.toggleIngredient(ingredient.name) },
+                                                leadingIcon = {
+                                                    val dotColor = when (ingredient.status) {
+                                                        2 -> SoftRed
+                                                        1 -> Yellow
+                                                        else -> Green
+                                                    }
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(10.dp)
+                                                            .background(dotColor, CircleShape)
+                                                    )
+                                                },
+                                                label = {
+                                                    Text(
+                                                        text = ingredient.name,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
+                                                    )
+                                                },
+                                                colors = FilterChipDefaults.filterChipColors(
+                                                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                                )
                                             )
-                                        )
+                                        }
                                     }
                                 }
                             }
@@ -194,6 +238,7 @@ private fun EmptyStateContent(
 @Composable
 private fun RecipeCard(recipe: CachedRecipe, onAddMissingToList: (List<RecipeIngredient>) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
+    var itemsAdded by remember { mutableStateOf(false) }
     val ownedIngredients = recipe.toRecipeIngredients(recipe.ingredientsOwned)
     val missingIngredients = recipe.toRecipeIngredients(recipe.ingredientsMissing)
 
@@ -243,14 +288,24 @@ private fun RecipeCard(recipe: CachedRecipe, onAddMissingToList: (List<RecipeIng
                         missingIngredients.forEach { IngredientRow(it, false) }
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
-                            onClick = { onAddMissingToList(missingIngredients) },
+                            onClick = {
+                                onAddMissingToList(missingIngredients)
+                                itemsAdded = true
+                            },
+                            enabled = !itemsAdded,
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Icon(Icons.Default.ShoppingCart, contentDescription = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Añadir faltantes a la lista")
+                            if (itemsAdded) {
+                                Icon(Icons.Default.CheckCircle, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("¡Añadidos a la lista!")
+                            } else {
+                                Icon(Icons.Default.ShoppingCart, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Añadir faltantes a la lista")
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))

@@ -9,19 +9,24 @@ import com.marujho.freshsnap.data.model.ShoppingItem
 import com.marujho.freshsnap.data.repository.ProductRepository
 import com.marujho.freshsnap.data.repository.RecipeRepository
 import com.marujho.freshsnap.data.repository.ShoppingRepository
+import com.marujho.freshsnap.data.repository.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.first
 
-data class IngredientSelection(val name: String, val isSelected: Boolean = false)
-
+data class IngredientSelection(val name: String, val isSelected: Boolean = false, val status: Int = 0)
 @HiltViewModel
 class RecipeViewModel @Inject constructor(
     private val recipeRepository: RecipeRepository,
+    private val userPreferences: UserPreferences,
     private val productRepository: ProductRepository,
     private val shoppingRepository: ShoppingRepository,
     private val masticator: IngredientMasticator
@@ -45,23 +50,34 @@ class RecipeViewModel @Inject constructor(
             if (productsResult.isSuccess) {
                 val today = System.currentTimeMillis()
 
-                val uniqueIngredients = productsResult.getOrThrow()
+                val redDays = userPreferences.expiryRedDays.first()
+                val yellowDays = userPreferences.expiryYellowDays.first()
+
+                val validProducts = productsResult.getOrThrow()
                     .filter { product ->
                         val expDate = product.expirationDate ?: today
                         !product.isConsumed && expDate >= today
                     }
+
+                val classification = masticator.classify(validProducts, redDays, yellowDays)
+
+                val uniqueIngredients = validProducts
                     .map { masticator.extractIngredientName(it) }
                     .filter { it.isNotBlank() }
                     .distinct()
                     .sorted()
-                    .map { IngredientSelection(it, isSelected = false) }
+                    .map { name ->
+                        val status = when {
+                            classification.redIngredients.contains(name) -> 2
+                            classification.yellowIngredients.contains(name) -> 1
+                            else -> 0
+                        }
+                        IngredientSelection(name, isSelected = false, status = status)
+                    }
 
                 _uiState.value = RecipeUiState.Ready(ingredients = uniqueIngredients)
             } else {
-                _uiState.value = RecipeUiState.Ready(
-                    ingredients = emptyList(),
-                    errorMessage = "Error al cargar tu despensa."
-                )
+                _uiState.value = RecipeUiState.Ready(ingredients = emptyList(), errorMessage = "Error al cargar tu despensa.")
             }
         }
     }
@@ -82,29 +98,48 @@ class RecipeViewModel @Inject constructor(
 
         val selected = currentState.ingredients.filter { it.isSelected }.map { it.name }
         if (selected.isEmpty()) {
-            _uiState.value = currentState.copy(errorMessage = "Por favor, selecciona al menos un ingrediente.")
+            _uiState.value =
+                currentState.copy(errorMessage = "Por favor, selecciona al menos un ingrediente.")
             return
         }
 
         val available = currentState.ingredients.filter { !it.isSelected }.map { it.name }
 
         viewModelScope.launch {
-            _uiState.value = currentState.copy(isGenerating = true, errorMessage = null, recipe = null)
+            _uiState.value =
+                currentState.copy(isGenerating = true, errorMessage = null, recipe = null)
 
-            val result = recipeRepository.generateCustomRecipe(
-                selectedIngredients = selected,
-                availableIngredients = available
-            )
+            var lang = userPreferences.userLanguage.first()
+            if (lang == "Sistema") {
+                lang = java.util.Locale.getDefault().language
+            }
 
-            if (result.isSuccess) {
-                _uiState.update {
-                    (it as RecipeUiState.Ready).copy(isGenerating = false, recipe = result.getOrThrow())
+            try {
+                val result = recipeRepository.generateCustomRecipe(
+                    selectedIngredients = selected,
+                    availableIngredients = available,
+                    languageCode = lang
+                )
+                if (result.isSuccess) {
+                    _uiState.update {
+                        (it as RecipeUiState.Ready).copy(
+                            isGenerating = false,
+                            recipe = result.getOrThrow()
+                        )
+                    }
+                } else {
+                    _uiState.update {
+                        (it as RecipeUiState.Ready).copy(
+                            isGenerating = false,
+                            errorMessage = result.exceptionOrNull()?.message
+                        )
+                    }
                 }
-            } else {
+            } catch (e: Exception) {
                 _uiState.update {
                     (it as RecipeUiState.Ready).copy(
                         isGenerating = false,
-                        errorMessage = result.exceptionOrNull()?.message ?: "Error al generar receta."
+                        errorMessage = "Error inesperado de conexión."
                     )
                 }
             }
@@ -113,16 +148,21 @@ class RecipeViewModel @Inject constructor(
 
     fun addMissingToShoppingList(ingredients: List<RecipeIngredient>) {
         viewModelScope.launch {
-            ingredients.forEach { ingredient ->
-                shoppingRepository.addShoppingItem(
-                    name = ingredient.name,
-                    quantity = ingredient.measure,
-                    source = ShoppingItem.SOURCE_RECIPE
-                )
+            val deferreds = ingredients.map { ingredient ->
+                async {
+                    shoppingRepository.addShoppingItem(
+                        name = ingredient.name,
+                        quantity = ingredient.measure,
+                        source = ShoppingItem.SOURCE_RECIPE
+                    )
+                }
             }
+            deferreds.awaitAll()
             _snackbarMessage.value = "Ingredientes añadidos a la lista de la compra"
         }
     }
 
-    fun clearSnackbar() { _snackbarMessage.value = null }
+    fun clearSnackbar() {
+        _snackbarMessage.value = null
+    }
 }

@@ -55,31 +55,33 @@ class DetailViewModel @Inject constructor(
         viewModelScope.launch {
             uiState = DetailUiState.Loading
 
-            val firebaseResult = productRepository.getProductByEan(barcode)
-            val localProduct = firebaseResult.getOrNull()
+            try {
+                val firebaseResult = productRepository.getProductByEan(barcode)
+                val localProduct = firebaseResult.getOrNull()
 
-            if (localProduct != null) {
-
-                if (passedProductId != null && passedProductId == localProduct.id) {
-                    currentFirestoreId = localProduct.id
-                    localProduct.expirationDate?.let { millis ->
-                        setExpirationDateFromMillis(millis)
+                if (localProduct != null) {
+                    if (passedProductId != null && passedProductId == localProduct.id) {
+                        currentFirestoreId = localProduct.id
+                        localProduct.expirationDate?.let { millis ->
+                            setExpirationDateFromMillis(millis)
+                        }
+                        Log.d("SOURCE", "FIREBASE - EDITANDO EXISTENTE")
+                    } else {
+                        currentFirestoreId = null
+                        Log.d("SOURCE", "FIREBASE - CACHÉ PARA PRODUCTO NUEVO")
                     }
-                    Log.d("SOURCE", "FIREBASE - EDITANDO EXISTENTE")
+
+                    val dto = localProduct.toDto()
+                    uiState = DetailUiState.Success(dto)
+
+                    checkAllergens(dto)
                 } else {
                     currentFirestoreId = null
-                    Log.d("SOURCE", "FIREBASE - CACHÉ PARA PRODUCTO NUEVO")
+                    Log.d("SOURCE", "API")
+                    loadFromApi()
                 }
-
-                val dto = localProduct.toDto()
-                uiState = DetailUiState.Success(dto)
-
-                checkAllergens(dto)
-
-            } else {
-                currentFirestoreId = null
-                Log.d("SOURCE", "API")
-                loadFromApi()
+            } catch (e: Exception) {
+                uiState = DetailUiState.Error("Error inesperado al cargar el producto.")
             }
         }
     }
@@ -103,15 +105,19 @@ class DetailViewModel @Inject constructor(
 
     private fun checkAllergens(product: ProductDto) {
         viewModelScope.launch {
+            try {
+                val userAllergies = userPreferences.userAllergies.first()
+                val productAllergens = product.allergensTags ?: emptyList()
 
-            val userAllergies = userPreferences.userAllergies.first()
-            val productAllergens = product.allergensTags ?: emptyList()
+                val matches = productAllergens.filter { tag ->
+                    userAllergies.contains(tag)
+                }
 
-            val matches = productAllergens.filter { tag ->
-                userAllergies.contains(tag)
+                _allergyMatches.value = matches
+            } catch (e: Exception) {
+                _allergyMatches.value = emptyList()
+                Log.e("DetailViewModel", "Error al leer alergias", e)
             }
-
-            _allergyMatches.value = matches
         }
     }
 
@@ -164,11 +170,15 @@ class DetailViewModel @Inject constructor(
             )
 
             viewModelScope.launch {
-                val result = productRepository.saveProduct(userProduct)
-                if (result.isSuccess) {
-                    onSuccess()
-                } else {
-                    onError(result.exceptionOrNull()?.message ?: "Error al guardar")
+                try {
+                    val result = productRepository.saveProduct(userProduct)
+                    if (result.isSuccess) {
+                        onSuccess()
+                    } else {
+                        onError(result.exceptionOrNull()?.message ?: "Error al guardar")
+                    }
+                } catch (e: Exception) {
+                    onError("Error inesperado al guardar: ${e.localizedMessage}")
                 }
             }
         }

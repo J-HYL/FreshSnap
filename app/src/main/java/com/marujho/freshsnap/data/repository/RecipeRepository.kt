@@ -99,8 +99,25 @@ Formatting Rules:
 
     suspend fun generateCustomRecipe(
         selectedIngredients: List<String>,
-        availableIngredients: List<String>
+        availableIngredients: List<String>,
+        languageCode: String
     ): Result<CachedRecipe> {
+        val isEnglish = languageCode.lowercase().startsWith("en")
+
+        val languageRule = if (isEnglish) {
+            """
+            7. LANGUAGE / IDIOMA (CRITICAL)
+            - YOU MUST WRITE THE ENTIRE RESPONSE IN ENGLISH.
+            - All recipe titles, instructions, and ingredients MUST be translated to English.
+            - DO NOT output any Spanish text in the final JSON values.
+            """.trimIndent()
+        } else {
+            """
+            7. IDIOMA
+            - Toda la respuesta debe estar en ESPAÑOL.
+            """.trimIndent()
+        }
+
         val systemPrompt = """
             Eres un chef profesional con múltiples estrellas Michelin, experto en creatividad culinaria, seguridad alimentaria y equilibrio de sabores.
 
@@ -169,8 +186,7 @@ Formatting Rules:
             - Incluye tiempos aproximados si es relevante.
             - NO hagas explicaciones innecesarias fuera de la receta.
             
-            7. IDIOMA
-            - Toda la respuesta debe estar en ESPAÑOL.
+            $languageRule
             
             8. FORMATO DE RESPUESTA
             - Responde EXCLUSIVAMENTE con JSON válido.
@@ -207,10 +223,16 @@ Formatting Rules:
             - La receta debe maximizar sabor, coherencia y simplicidad inteligente.
         """.trimIndent()
 
+        val userPrompt = if (isEnglish) {
+            "Generate the recipe strictly following the rules. Write EVERYTHING in English."
+        } else {
+            "Genera la receta siguiendo estrictamente las reglas."
+        }
+
         val request = GroqRequestDto(
             messages = listOf(
                 GroqMessageDto(role = "system", content = systemPrompt),
-                GroqMessageDto(role = "user", content = "Genera la receta siguiendo estrictamente las reglas.")
+                GroqMessageDto(role = "user", content = userPrompt)
             ),
             temperature = 0.2f,
             maxTokens = 1000
