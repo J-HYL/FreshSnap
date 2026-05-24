@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -29,6 +30,7 @@ import com.marujho.freshsnap.data.model.RecipeIngredient
 import com.marujho.freshsnap.data.model.RecipeSource
 import com.marujho.freshsnap.ui.theme.Green
 import com.marujho.freshsnap.ui.theme.SoftRed
+import com.marujho.freshsnap.ui.theme.Yellow
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -124,6 +126,18 @@ fun RecipeScreen(
                                             FilterChip(
                                                 selected = ingredient.isSelected,
                                                 onClick = { viewModel.toggleIngredient(ingredient.name) },
+                                                leadingIcon = {
+                                                    val dotColor = when (ingredient.status) {
+                                                        2 -> SoftRed
+                                                        1 -> Yellow
+                                                        else -> Green
+                                                    }
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(10.dp)
+                                                            .background(dotColor, CircleShape)
+                                                    )
+                                                },
                                                 label = {
                                                     Text(
                                                         text = ingredient.name,
@@ -224,6 +238,7 @@ private fun EmptyStateContent(
 @Composable
 private fun RecipeCard(recipe: CachedRecipe, onAddMissingToList: (List<RecipeIngredient>) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
+    var itemsAdded by remember { mutableStateOf(false) }
     val ownedIngredients = recipe.toRecipeIngredients(recipe.ingredientsOwned)
     val missingIngredients = recipe.toRecipeIngredients(recipe.ingredientsMissing)
 
@@ -273,14 +288,24 @@ private fun RecipeCard(recipe: CachedRecipe, onAddMissingToList: (List<RecipeIng
                         missingIngredients.forEach { IngredientRow(it, false) }
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
-                            onClick = { onAddMissingToList(missingIngredients) },
+                            onClick = {
+                                onAddMissingToList(missingIngredients)
+                                itemsAdded = true
+                            },
+                            enabled = !itemsAdded,
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Icon(Icons.Default.ShoppingCart, contentDescription = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Añadir faltantes a la lista")
+                            if (itemsAdded) {
+                                Icon(Icons.Default.CheckCircle, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("¡Añadidos a la lista!")
+                            } else {
+                                Icon(Icons.Default.ShoppingCart, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Añadir faltantes a la lista")
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))

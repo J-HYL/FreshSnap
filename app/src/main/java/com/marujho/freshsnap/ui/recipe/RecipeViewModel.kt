@@ -18,9 +18,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.first
 
-data class IngredientSelection(val name: String, val isSelected: Boolean = false)
-
+data class IngredientSelection(val name: String, val isSelected: Boolean = false, val status: Int = 0)
 @HiltViewModel
 class RecipeViewModel @Inject constructor(
     private val recipeRepository: RecipeRepository,
@@ -48,23 +50,34 @@ class RecipeViewModel @Inject constructor(
             if (productsResult.isSuccess) {
                 val today = System.currentTimeMillis()
 
-                val uniqueIngredients = productsResult.getOrThrow()
+                val redDays = userPreferences.expiryRedDays.first()
+                val yellowDays = userPreferences.expiryYellowDays.first()
+
+                val validProducts = productsResult.getOrThrow()
                     .filter { product ->
                         val expDate = product.expirationDate ?: today
                         !product.isConsumed && expDate >= today
                     }
+
+                val classification = masticator.classify(validProducts, redDays, yellowDays)
+
+                val uniqueIngredients = validProducts
                     .map { masticator.extractIngredientName(it) }
                     .filter { it.isNotBlank() }
                     .distinct()
                     .sorted()
-                    .map { IngredientSelection(it, isSelected = false) }
+                    .map { name ->
+                        val status = when {
+                            classification.redIngredients.contains(name) -> 2
+                            classification.yellowIngredients.contains(name) -> 1
+                            else -> 0
+                        }
+                        IngredientSelection(name, isSelected = false, status = status)
+                    }
 
                 _uiState.value = RecipeUiState.Ready(ingredients = uniqueIngredients)
             } else {
-                _uiState.value = RecipeUiState.Ready(
-                    ingredients = emptyList(),
-                    errorMessage = "Error al cargar tu despensa."
-                )
+                _uiState.value = RecipeUiState.Ready(ingredients = emptyList(), errorMessage = "Error al cargar tu despensa.")
             }
         }
     }
@@ -135,13 +148,16 @@ class RecipeViewModel @Inject constructor(
 
     fun addMissingToShoppingList(ingredients: List<RecipeIngredient>) {
         viewModelScope.launch {
-            ingredients.forEach { ingredient ->
-                shoppingRepository.addShoppingItem(
-                    name = ingredient.name,
-                    quantity = ingredient.measure,
-                    source = ShoppingItem.SOURCE_RECIPE
-                )
+            val deferreds = ingredients.map { ingredient ->
+                async {
+                    shoppingRepository.addShoppingItem(
+                        name = ingredient.name,
+                        quantity = ingredient.measure,
+                        source = ShoppingItem.SOURCE_RECIPE
+                    )
+                }
             }
+            deferreds.awaitAll()
             _snackbarMessage.value = "Ingredientes añadidos a la lista de la compra"
         }
     }
