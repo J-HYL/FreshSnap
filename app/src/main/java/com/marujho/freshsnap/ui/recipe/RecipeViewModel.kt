@@ -2,77 +2,111 @@ package com.marujho.freshsnap.ui.recipe
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.marujho.freshsnap.data.domain.IngredientMasticator
+import com.marujho.freshsnap.data.model.CachedRecipe
 import com.marujho.freshsnap.data.model.RecipeIngredient
 import com.marujho.freshsnap.data.model.ShoppingItem
 import com.marujho.freshsnap.data.repository.ProductRepository
 import com.marujho.freshsnap.data.repository.RecipeRepository
 import com.marujho.freshsnap.data.repository.ShoppingRepository
-import com.marujho.freshsnap.data.repository.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+data class IngredientSelection(val name: String, val isSelected: Boolean = false)
 
 @HiltViewModel
 class RecipeViewModel @Inject constructor(
     private val recipeRepository: RecipeRepository,
     private val productRepository: ProductRepository,
     private val shoppingRepository: ShoppingRepository,
-    private val userPreferences: UserPreferences
+    private val masticator: IngredientMasticator
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<RecipeUiState>(RecipeUiState.Loading)
+    private val _uiState = MutableStateFlow<RecipeUiState>(RecipeUiState.LoadingInventory)
     val uiState: StateFlow<RecipeUiState> = _uiState.asStateFlow()
 
     private val _snackbarMessage = MutableStateFlow<String?>(null)
     val snackbarMessage: StateFlow<String?> = _snackbarMessage.asStateFlow()
 
     init {
-        loadRecipes()
+        loadInventory()
     }
 
-    fun loadRecipes(forceRefresh: Boolean = false) {
+    private fun loadInventory() {
         viewModelScope.launch {
-            _uiState.value = RecipeUiState.Loading
-
+            _uiState.value = RecipeUiState.LoadingInventory
             val productsResult = productRepository.getAllProducts()
-            if (productsResult.isFailure) {
-                _uiState.value = RecipeUiState.Error(
-                    productsResult.exceptionOrNull()?.message ?: "Error desconocido"
+
+            if (productsResult.isSuccess) {
+                val today = System.currentTimeMillis()
+
+                val uniqueIngredients = productsResult.getOrThrow()
+                    .filter { product ->
+                        val expDate = product.expirationDate ?: today
+                        !product.isConsumed && expDate >= today
+                    }
+                    .map { masticator.extractIngredientName(it) }
+                    .filter { it.isNotBlank() }
+                    .distinct()
+                    .sorted()
+                    .map { IngredientSelection(it, isSelected = false) }
+
+                _uiState.value = RecipeUiState.Ready(ingredients = uniqueIngredients)
+            } else {
+                _uiState.value = RecipeUiState.Ready(
+                    ingredients = emptyList(),
+                    errorMessage = "Error al cargar tu despensa."
                 )
-                return@launch
             }
+        }
+    }
 
-            val products = productsResult.getOrThrow()
-            if (products.isEmpty()) {
-                _uiState.value = RecipeUiState.EmptyNoProducts
-                return@launch
+    fun toggleIngredient(name: String) {
+        val currentState = _uiState.value
+        if (currentState is RecipeUiState.Ready) {
+            val updatedList = currentState.ingredients.map {
+                if (it.name == name) it.copy(isSelected = !it.isSelected) else it
             }
+            _uiState.value = currentState.copy(ingredients = updatedList, errorMessage = null)
+        }
+    }
 
-            val redDays = userPreferences.expiryRedDays.first()
-            val yellowDays = userPreferences.expiryYellowDays.first()
+    fun generateRecipe() {
+        val currentState = _uiState.value
+        if (currentState !is RecipeUiState.Ready) return
 
-            val result = recipeRepository.getRecipeSuggestions(
-                products = products,
-                redDays = redDays,
-                yellowDays = yellowDays,
-                forceRefresh = forceRefresh
+        val selected = currentState.ingredients.filter { it.isSelected }.map { it.name }
+        if (selected.isEmpty()) {
+            _uiState.value = currentState.copy(errorMessage = "Por favor, selecciona al menos un ingrediente.")
+            return
+        }
+
+        val available = currentState.ingredients.filter { !it.isSelected }.map { it.name }
+
+        viewModelScope.launch {
+            _uiState.value = currentState.copy(isGenerating = true, errorMessage = null, recipe = null)
+
+            val result = recipeRepository.generateCustomRecipe(
+                selectedIngredients = selected,
+                availableIngredients = available
             )
 
             if (result.isSuccess) {
-                val recipes = result.getOrThrow()
-                _uiState.value = if (recipes.isEmpty()) {
-                    RecipeUiState.EmptyNoRed
-                } else {
-                    RecipeUiState.Success(recipes)
+                _uiState.update {
+                    (it as RecipeUiState.Ready).copy(isGenerating = false, recipe = result.getOrThrow())
                 }
             } else {
-                _uiState.value = RecipeUiState.Error(
-                    result.exceptionOrNull()?.message ?: "Error al buscar recetas"
-                )
+                _uiState.update {
+                    (it as RecipeUiState.Ready).copy(
+                        isGenerating = false,
+                        errorMessage = result.exceptionOrNull()?.message ?: "Error al generar receta."
+                    )
+                }
             }
         }
     }
@@ -86,11 +120,9 @@ class RecipeViewModel @Inject constructor(
                     source = ShoppingItem.SOURCE_RECIPE
                 )
             }
-            _snackbarMessage.value = "added"
+            _snackbarMessage.value = "Ingredientes añadidos a la lista de la compra"
         }
     }
 
-    fun clearSnackbar() {
-        _snackbarMessage.value = null
-    }
+    fun clearSnackbar() { _snackbarMessage.value = null }
 }

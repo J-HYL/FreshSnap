@@ -65,104 +65,6 @@ Formatting Rules:
      * 2. TheMealDB + Groq Filter
      * 3. Groq Generate (si MealDB no tiene resultados)
      */
-    suspend fun getRecipeSuggestions(
-        products: List<UserProduct>,
-        redDays: Int,
-        yellowDays: Int,
-        forceRefresh: Boolean = false
-    ): Result<List<CachedRecipe>> {
-        return try {
-            val classification = masticator.classify(products, redDays, yellowDays)
-            Log.d(TAG, "classify: red=${classification.redIngredients} yellow=${classification.yellowIngredients} green=${classification.greenIngredients}")
-
-            if (classification.redIngredients.isEmpty()) {
-                Log.d(TAG, "No red ingredients, returning empty")
-                return Result.success(emptyList())
-            }
-
-            val inventoryHash = masticator.computeInventoryHash(classification)
-
-            // Capa 0: Cache Firestore
-            if (!forceRefresh) {
-                val cached = getCachedRecipes(inventoryHash)
-                Log.d(TAG, "cache lookup: ${cached.size} recipes")
-                if (cached.isNotEmpty()) {
-                    return Result.success(cached)
-                }
-            }
-
-            val recipes = mutableListOf<CachedRecipe>()
-
-            // Capa 1: TheMealDB - buscar por primer ingrediente RED
-            val mainIngredient = classification.redIngredients.first()
-            Log.d(TAG, "Layer 1: searching MealDB for '$mainIngredient'")
-            val mealDbResults = searchMealDb(mainIngredient)
-            Log.d(TAG, "Layer 1 result: ${mealDbResults.size} meals")
-
-            if (mealDbResults.isNotEmpty()) {
-                // Capa 2: Groq Filter - elegir la mejor receta
-                Log.d(TAG, "Layer 2: filtering with Groq")
-                val filtered = filterWithGroq(mealDbResults, classification)
-                Log.d(TAG, "Layer 2 result: ${filtered?.title ?: "null"}")
-                if (filtered != null) {
-                    recipes.add(
-                        filtered.copy(
-                            inventoryHash = inventoryHash,
-                            generatedAt = System.currentTimeMillis()
-                        )
-                    )
-                }
-            }
-
-            // Capa 3: Groq Generate - si MealDB no dio resultados o como receta adicional
-            if (recipes.isEmpty()) {
-                Log.d(TAG, "Layer 3: generating with Groq")
-                val generated = generateWithGroq(classification)
-                Log.d(TAG, "Layer 3 result: ${generated?.title ?: "null"}")
-                if (generated != null) {
-                    recipes.add(
-                        generated.copy(
-                            inventoryHash = inventoryHash,
-                            generatedAt = System.currentTimeMillis()
-                        )
-                    )
-                }
-            }
-
-            // Guardar en Firestore
-            if (recipes.isNotEmpty()) {
-                saveCachedRecipes(recipes)
-                Result.success(recipes)
-            } else {
-                Log.e(TAG, "All layers failed: no recipes generated")
-                Result.failure(
-                    Exception(
-                        "No se pudieron generar recetas. Comprueba tu conexion y la GROQ_API_KEY."
-                    )
-                )
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "getRecipeSuggestions exception", e)
-            Result.failure(e)
-        }
-    }
-
-    // region Capa 0: Cache Firestore
-
-    private suspend fun getCachedRecipes(inventoryHash: String): List<CachedRecipe> {
-        val collection = getCachedRecipesCollection() ?: return emptyList()
-        val cutoff = System.currentTimeMillis() - CACHE_TTL_MS
-
-        val snapshot = collection
-            .whereEqualTo("inventoryHash", inventoryHash)
-            .whereGreaterThan("generatedAt", cutoff)
-            .get()
-            .await()
-
-        return snapshot.documents.mapNotNull { doc ->
-            doc.toObject(CachedRecipe::class.java)?.copy(id = doc.id)
-        }
-    }
 
     private suspend fun saveCachedRecipes(recipes: List<CachedRecipe>) {
         val collection = getCachedRecipesCollection() ?: return
@@ -176,142 +78,6 @@ Formatting Rules:
 
     // region Capa 1: TheMealDB
 
-    private suspend fun searchMealDb(ingredient: String): List<MealDetailDto> {
-        return try {
-            val filterResponse = mealDbApi.searchByIngredient(ingredient)
-            val meals = filterResponse.meals ?: return emptyList()
-
-            // Obtener detalles de los primeros 5 resultados (limitar llamadas)
-            meals.take(MAX_MEALDB_RESULTS).mapNotNull { summary ->
-                try {
-                    val lookupResponse = mealDbApi.getMealById(summary.id ?: return@mapNotNull null)
-                    lookupResponse.meals?.firstOrNull()
-                } catch (e: Exception) {
-                    Log.w(TAG, "MealDB lookup failed for id=${summary.id}", e)
-                    null
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "MealDB search failed for '$ingredient'", e)
-            emptyList()
-        }
-    }
-
-    // endregion
-
-    // region Capa 2: Groq Filter
-
-    private suspend fun filterWithGroq(
-        meals: List<MealDetailDto>,
-        classification: IngredientClassification
-    ): CachedRecipe? {
-        val compactIngredients = masticator.toCompactString(classification)
-
-        // Construir resumen de recetas para Groq
-        val mealsDescription = meals.joinToString("\n") { meal ->
-            val ingredients = meal.getIngredientsList()
-                .joinToString(",") { it.first }
-            "[${meal.id}] ${meal.name}: $ingredients"
-        }
-
-        val userMessage = "Ingredients: $compactIngredients\nRecipes:\n$mealsDescription"
-
-        val request = GroqRequestDto(
-            messages = listOf(
-                GroqMessageDto(role = "system", content = filterSystemPrompt),
-                GroqMessageDto(role = "user", content = userMessage)
-            ),
-            temperature = 0.3f,
-            maxTokens = 500
-        )
-
-        return try {
-            val response = groqApi.chatCompletion(request)
-            val jsonContent = response.choices.firstOrNull()?.message?.content
-            Log.d(TAG, "Groq Filter raw content: ${jsonContent?.take(300)}")
-            if (jsonContent == null) return null
-            val parsed = parseGroqRecipeResponse(jsonContent) ?: return null
-
-            // Encontrar la receta original de MealDB para obtener imagen e instrucciones
-            val originalMeal = meals.find { it.id == parsed.recipeId }
-
-            CachedRecipe(
-                title = parsed.title.ifBlank { originalMeal?.name ?: "Receta" },
-                imageUrl = originalMeal?.thumbnailUrl,
-                instructions = originalMeal?.instructions ?: "",
-                ingredientsOwned = CachedRecipe.fromIngredients(
-                    parsed.ingredientesTengo.map { RecipeIngredient(it.name, it.measure) }
-                ),
-                ingredientsMissing = CachedRecipe.fromIngredients(
-                    parsed.ingredientesFalta.map { RecipeIngredient(it.name, it.measure) }
-                ),
-                source = RecipeSource.GROQ_FILTERED.name
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "filterWithGroq exception, using MealDB fallback", e)
-            // Fallback: devolver primera receta de MealDB sin filtro Groq
-            meals.firstOrNull()?.let { meal ->
-                val allIngredients = meal.getIngredientsList()
-                CachedRecipe(
-                    title = meal.name ?: "Receta",
-                    imageUrl = meal.thumbnailUrl,
-                    instructions = meal.instructions ?: "",
-                    ingredientsOwned = CachedRecipe.fromIngredients(
-                        allIngredients.map { RecipeIngredient(it.first, it.second) }
-                    ),
-                    ingredientsMissing = emptyList(),
-                    source = RecipeSource.MEALDB.name
-                )
-            }
-        }
-    }
-
-    // endregion
-
-    // region Capa 3: Groq Generate
-
-    private suspend fun generateWithGroq(
-        classification: IngredientClassification
-    ): CachedRecipe? {
-        val compactIngredients = masticator.toCompactString(classification)
-        val userMessage = "Ingredients: $compactIngredients"
-
-        val request = GroqRequestDto(
-            messages = listOf(
-                GroqMessageDto(role = "system", content = generateSystemPrompt),
-                GroqMessageDto(role = "user", content = userMessage)
-            ),
-            temperature = 0.7f,
-            maxTokens = 800
-        )
-
-        return try {
-            val response = groqApi.chatCompletion(request)
-            val jsonContent = response.choices.firstOrNull()?.message?.content
-            Log.d(TAG, "Groq Generate raw content: ${jsonContent?.take(300)}")
-            if (jsonContent == null) return null
-            val parsed = parseGroqRecipeResponse(jsonContent) ?: return null
-
-            CachedRecipe(
-                title = parsed.title,
-                instructions = parsed.instructions ?: "",
-                ingredientsOwned = CachedRecipe.fromIngredients(
-                    parsed.ingredientesTengo.map { RecipeIngredient(it.name, it.measure) }
-                ),
-                ingredientsMissing = CachedRecipe.fromIngredients(
-                    parsed.ingredientesFalta.map { RecipeIngredient(it.name, it.measure) }
-                ),
-                source = RecipeSource.GROQ_GENERATED.name
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "generateWithGroq exception", e)
-            null
-        }
-    }
-
-    // endregion
-
-    // region JSON Parsing
 
     private fun parseGroqRecipeResponse(json: String): GroqRecipeResponseDto? {
         return try {
@@ -329,5 +95,155 @@ Formatting Rules:
         private const val TAG = "RecipeRepository"
         private const val CACHE_TTL_MS = 24 * 60 * 60 * 1000L // 24 horas
         private const val MAX_MEALDB_RESULTS = 5
+    }
+
+    suspend fun generateCustomRecipe(
+        selectedIngredients: List<String>,
+        availableIngredients: List<String>
+    ): Result<CachedRecipe> {
+        val systemPrompt = """
+            Eres un chef profesional con múltiples estrellas Michelin, experto en creatividad culinaria, seguridad alimentaria y equilibrio de sabores.
+
+            OBJETIVO:
+            Crear una receta deliciosa, coherente y realista utilizando OBLIGATORIAMENTE los ingredientes principales proporcionados por el usuario.
+            
+            INGREDIENTES PRINCIPALES OBLIGATORIOS:
+            ${selectedIngredients.joinToString(", ")}
+            
+            INGREDIENTES DISPONIBLES OPCIONALES:
+            ${if (availableIngredients.isEmpty()) "Ninguno" else availableIngredients.joinToString(", ")}
+            
+            REGLAS ABSOLUTAS (OBLIGATORIAS):
+            
+            1. PRIORIDAD TOTAL A LOS INGREDIENTES PRINCIPALES
+            - La receta DEBE construirse alrededor de los ingredientes obligatorios.
+            - Todos los ingredientes principales deben utilizarse de forma lógica y relevante dentro del plato.
+            
+            2. USO INTELIGENTE DE LOS INGREDIENTES OPCIONALES
+            - Los ingredientes opcionales NO son obligatorios.
+            - Usa SOLO 0, 1, 2 o 3 ingredientes opcionales si realmente mejoran la receta.
+            - Si no combinan de forma natural con los ingredientes principales, IGNÓRALOS completamente.
+            - NO intentes gastar toda la despensa.
+            - NO fuerces combinaciones absurdas o incoherentes.
+            
+            3. VALIDACIÓN CULINARIA Y SEGURIDAD
+            - Evalúa si la combinación de ingredientes principales es:
+              - culinariamente coherente,
+              - segura para el consumo,
+              - técnicamente viable.
+            - Si la receta es desagradable, tóxica, peligrosa o prácticamente imposible de cocinar:
+              - devuelve "is_possible": false
+              - explica claramente el motivo en "message"
+              - deja el resto de campos vacíos o con valores mínimos válidos.
+            
+            4. RECETA REALISTA Y APETECIBLE
+            - La receta debe sonar profesional, sabrosa y plausible.
+            - Evita recetas genéricas o sin personalidad.
+            - Piensa como un chef Michelin:
+              - equilibrio de sabores,
+              - texturas,
+              - técnicas correctas,
+              - presentación atractiva.
+            - Prioriza recetas que una persona realmente querría cocinar y comer.
+            
+            5. GESTIÓN DE INGREDIENTES
+            - "ingredientes_tengo":
+              - incluye TODOS los ingredientes obligatorios,
+              - incluye SOLO los ingredientes opcionales que realmente uses.
+            - "ingredientes_falta":
+              - añade ingredientes básicos necesarios:
+                - sal,
+                - aceite,
+                - pimienta,
+                - especias,
+                - mantequilla,
+                - ajo,
+                - cebolla, etc.
+              - añade también ingredientes extra lógicos y mínimos necesarios para completar bien el plato.
+            - Cada ingrediente debe incluir:
+              - "name"
+              - "measure"
+            
+            6. INSTRUCCIONES
+            - Explica la preparación paso a paso de forma clara y profesional.
+            - Incluye tiempos aproximados si es relevante.
+            - NO hagas explicaciones innecesarias fuera de la receta.
+            
+            7. IDIOMA
+            - Toda la respuesta debe estar en ESPAÑOL.
+            
+            8. FORMATO DE RESPUESTA
+            - Responde EXCLUSIVAMENTE con JSON válido.
+            - NO uses markdown.
+            - NO añadas texto fuera del JSON.
+            - NO añadas comentarios.
+            
+            ESQUEMA JSON OBLIGATORIO:
+            {
+              "is_possible": boolean,
+              "message": "string",
+              "title": "string",
+              "instructions": "string",
+              "ingredientes_tengo": [
+                {
+                  "name": "string",
+                  "measure": "string"
+                }
+              ],
+              "ingredientes_falta": [
+                {
+                  "name": "string",
+                  "measure": "string"
+                }
+              ]
+            }
+            
+            REGLAS EXTRA DE CALIDAD:
+            - NO inventes técnicas imposibles.
+            - NO añadas ingredientes opcionales porque sí.
+            - NO repitas ingredientes innecesariamente.
+            - NO generes recetas infantiles o absurdas.
+            - Si existe una receta clásica o conocida que encaje con los ingredientes, priorízala.
+            - La receta debe maximizar sabor, coherencia y simplicidad inteligente.
+        """.trimIndent()
+
+        val request = GroqRequestDto(
+            messages = listOf(
+                GroqMessageDto(role = "system", content = systemPrompt),
+                GroqMessageDto(role = "user", content = "Genera la receta siguiendo estrictamente las reglas.")
+            ),
+            temperature = 0.2f,
+            maxTokens = 1000
+        )
+
+        return try {
+            val response = groqApi.chatCompletion(request)
+            val jsonContent = response.choices.firstOrNull()?.message?.content ?: throw Exception("Respuesta vacía de la IA")
+
+            val parsed = parseGroqRecipeResponse(jsonContent) ?: throw Exception("Error al procesar el formato de la receta")
+
+            if (parsed.isPossible == false) {
+                return Result.failure(Exception(parsed.message ?: "Combinación de ingredientes inviable."))
+            }
+
+            val recipe = CachedRecipe(
+                title = parsed.title ?: "Receta Sorpresa",
+                instructions = parsed.instructions ?: "",
+                ingredientsOwned = CachedRecipe.fromIngredients(
+                    parsed.ingredientesTengo?.map { RecipeIngredient(it.name, it.measure) } ?: emptyList()
+                ),
+                ingredientsMissing = CachedRecipe.fromIngredients(
+                    parsed.ingredientesFalta?.map { RecipeIngredient(it.name, it.measure) } ?: emptyList()
+                ),
+                source = RecipeSource.GROQ_GENERATED.name,
+                generatedAt = System.currentTimeMillis()
+            )
+
+            saveCachedRecipes(listOf(recipe))
+
+            Result.success(recipe)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }
