@@ -21,9 +21,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -191,36 +195,58 @@ fun CameraContent(
             // Input manual para escribir el EAN sin necesidad de cámara
             if (scanType == ScanType.BARCODE) {
                 var manualBarcode by remember { mutableStateOf("") }
+                var isManualExpanded by remember { mutableStateOf(false) }
 
-                Row(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.TopCenter)
+                        .align(Alignment.TopEnd)
                         .padding(top = 50.dp, start = 16.dp, end = 16.dp)
-                        .background(Color.White, shape = RoundedCornerShape(8.dp))
-                        .padding(8.dp)
-                        .zIndex(20f),
-                    verticalAlignment = Alignment.CenterVertically
+                        .zIndex(20f)
                 ) {
-                    TextField(
-                        value = manualBarcode,
-                        onValueChange = { manualBarcode = it.filter { c -> c.isDigit() } },
-                        placeholder = { Text("Mete un código EAN...") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Button(
-                        onClick = {
-                            if (manualBarcode.isNotBlank()) {
-                                viewModel.processBarcode(manualBarcode)
+                    if (!isManualExpanded) {
+                        androidx.compose.material3.FloatingActionButton(
+                            onClick = { isManualExpanded = true },
+                            modifier = Modifier.align(Alignment.TopEnd),
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            contentColor = MaterialTheme.colorScheme.primary,
+                            shape = CircleShape
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = "Introducir EAN manual")
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
+                                .padding(horizontal = 12.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            TextField(
+                                value = manualBarcode,
+                                onValueChange = { manualBarcode = it.filter { c -> c.isDigit() } },
+                                placeholder = { Text("Escribir EAN manual...") },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                colors = androidx.compose.material3.TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(
+                                onClick = {
+                                    if (manualBarcode.isNotBlank()) viewModel.processBarcode(manualBarcode)
+                                }
+                            ) {
+                                Icon(Icons.Default.Search, "Buscar", tint = MaterialTheme.colorScheme.primary)
+                            }
+                            IconButton(onClick = { isManualExpanded = false }) {
+                                Icon(Icons.Default.Close, "Cerrar")
                             }
                         }
-                    ) {
-                        Text("Simular")
                     }
                 }
             }
