@@ -16,7 +16,7 @@ import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
 import com.marujho.freshsnap.data.model.ScanType
 import com.marujho.freshsnap.ui.detail.DetailViewModel
-import com.marujho.freshsnap.ui.detail.detailScreen
+import com.marujho.freshsnap.ui.detail.DetailScreen
 import com.marujho.freshsnap.ui.login.LoginScreen
 import com.marujho.freshsnap.ui.main.MainAppScreen
 import com.marujho.freshsnap.ui.scanner.BarCodeScanScreen
@@ -109,7 +109,7 @@ fun AppNavigation() {
                 }
             }
 
-            detailScreen(
+            DetailScreen(
                 viewModel = viewModel,
                 onNavigateMain = {
                     navController.navigate("main_screen") {

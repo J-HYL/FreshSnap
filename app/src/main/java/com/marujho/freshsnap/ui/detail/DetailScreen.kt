@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -26,8 +25,6 @@ import com.marujho.freshsnap.data.remote.dto.ProductDto
 import com.marujho.freshsnap.ui.theme.Green
 import com.marujho.freshsnap.ui.theme.SoftRed
 import com.marujho.freshsnap.ui.theme.Yellow
-import java.text.SimpleDateFormat
-import java.util.Locale
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
@@ -39,7 +36,7 @@ import coil.request.ImageRequest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun detailScreen(
+fun DetailScreen(
     viewModel: DetailViewModel,
     onNavigateMain: () -> Unit,
     onNavigationToScanDate: () -> Unit = {}
@@ -74,7 +71,7 @@ fun detailScreen(
             Scaffold(
                 containerColor = MaterialTheme.colorScheme.background,
                 bottomBar = {
-                    detailBottomBar(
+                    DetailBottomBar(
                         onCancel = { onNavigateMain() },
                         onConfirm = { onConfirmPressed() },
                         onDate = { showSelectDialog = true }
@@ -88,14 +85,14 @@ fun detailScreen(
                     contentPadding = PaddingValues(8.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    item { detailImage(product.imageUrl ?: "", hasWarning = allergyMatches.isNotEmpty()) }
+                    item { DetailImage(product.imageUrl ?: "", hasWarning = allergyMatches.isNotEmpty()) }
                     if (viewModel.expirationDate != null) {
                         item { Text(stringResource(R.string.expiry_date_value, viewModel.expirationDate ?: "")) }
                     }
-                    item { detailGeneralInformation(product = product) }
-                    item { detailHealth(product = product) }
-                    item { detailNutriments(product = product) }
-                    item { detailAllergies(product.allergensTags, allergyMatches) }
+                    item { DetailGeneralInformation(product = product) }
+                    item { DetailHealth(product = product) }
+                    item { DetailNutriments(product = product) }
+                    item { DetailAllergies(product.allergensTags, allergyMatches) }
                 }
             }
 
@@ -144,7 +141,7 @@ fun detailScreen(
 
 
 @Composable
-fun detailImage(url: String, hasWarning: Boolean = false) {
+fun DetailImage(url: String, hasWarning: Boolean = false) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -186,7 +183,7 @@ fun detailImage(url: String, hasWarning: Boolean = false) {
 }
 
 @Composable
-fun detectNullText(
+fun DetectNullText(
     label: String,
     text: String?,
     padd: Int,
@@ -203,7 +200,7 @@ fun detectNullText(
 }
 
 @Composable
-fun detailGeneralInformation(product: ProductDto) {
+fun DetailGeneralInformation(product: ProductDto) {
     val paddingMod = 4
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -216,19 +213,19 @@ fun detailGeneralInformation(product: ProductDto) {
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
-            detectNullText(stringResource(R.string.general_name), product.productName, paddingMod)
-            detectNullText(stringResource(R.string.general_scan_date), "", paddingMod)
-            detectNullText(stringResource(R.string.general_quantity), product.quantity, paddingMod)
-            detectNullText(stringResource(R.string.general_denomination), product.categories, paddingMod)
-            detectNullText(stringResource(R.string.general_packaging), product.packaging, paddingMod)
-            detectNullText(stringResource(R.string.general_store), product.brands, paddingMod)
-            detectNullText(stringResource(R.string.general_countries), product.countries, paddingMod)
+            DetectNullText(stringResource(R.string.general_name), product.productName, paddingMod)
+            DetectNullText(stringResource(R.string.general_scan_date), "", paddingMod)
+            DetectNullText(stringResource(R.string.general_quantity), product.quantity, paddingMod)
+            DetectNullText(stringResource(R.string.general_denomination), product.categories, paddingMod)
+            DetectNullText(stringResource(R.string.general_packaging), product.packaging, paddingMod)
+            DetectNullText(stringResource(R.string.general_store), product.brands, paddingMod)
+            DetectNullText(stringResource(R.string.general_countries), product.countries, paddingMod)
         }
     }
 }
 
 @Composable
-fun detailHealth(product: ProductDto) {
+fun DetailHealth(product: ProductDto) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -251,10 +248,10 @@ fun detailHealth(product: ProductDto) {
                     contentScale = ContentScale.Fit
                 )
             }
-            detailNutrimentsLevels("Grasas", product.nutrimentsLevels?.fat)
-            detailNutrimentsLevels("Grasas saturadas", product.nutrimentsLevels?.saturatedFat)
-            detailNutrimentsLevels("Azucares", product.nutrimentsLevels?.sugars)
-            detailNutrimentsLevels("Sal", product.nutrimentsLevels?.salt)
+            DetailNutrimentsLevels("Grasas", product.nutrimentsLevels?.fat)
+            DetailNutrimentsLevels("Grasas saturadas", product.nutrimentsLevels?.saturatedFat)
+            DetailNutrimentsLevels("Azucares", product.nutrimentsLevels?.sugars)
+            DetailNutrimentsLevels("Sal", product.nutrimentsLevels?.salt)
         }
     }
 }
@@ -271,7 +268,7 @@ fun getNutriScoreResource(nutriScore: String?): Int? {
 }
 
 @Composable
-fun detailNutrimentsLevels(label: String, level: NutrientLevel?) {
+fun DetailNutrimentsLevels(label: String, level: NutrientLevel?) {
     if (level != null) {
         val (color, textPrefix) = when (level) {
             NutrientLevel.LOW -> Pair(Green, stringResource(R.string.low_in))
@@ -295,7 +292,7 @@ fun detailNutrimentsLevels(label: String, level: NutrientLevel?) {
 }
 
 @Composable
-fun detailNutriments(product: ProductDto) {
+fun DetailNutriments(product: ProductDto) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -307,21 +304,21 @@ fun detailNutriments(product: ProductDto) {
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
-            detailRowNutriments(stringResource(R.string.nutriment_energy), product.nutriments?.energyKcal100g, "Kcal")
-            detailRowNutriments(stringResource(R.string.nutriment_fats), product.nutriments?.fat100g, "g")
-            detailRowNutriments(stringResource(R.string.nutriment_sat_fats), product.nutriments?.saturatedFat100g, "g")
-            detailRowNutriments(stringResource(R.string.nutriment_carbs), product.nutriments?.carbohydrates100g, "g")
-            detailRowNutriments(stringResource(R.string.nutriment_sugars), product.nutriments?.sugars100g, "g")
-            detailRowNutriments(stringResource(R.string.nutriment_proteins), product.nutriments?.proteins100g, "g")
-            detailRowNutriments(stringResource(R.string.nutriment_salt), product.nutriments?.salt100g, "g")
-            detailRowNutriments(stringResource(R.string.nutriment_sodium), product.nutriments?.sodium100g, "g")
-            detailRowNutriments(stringResource(R.string.nutriment_fiber), product.nutriments?.fiber100g, "g")
+            DetailRowNutriments(stringResource(R.string.nutriment_energy), product.nutriments?.energyKcal100g, "Kcal")
+            DetailRowNutriments(stringResource(R.string.nutriment_fats), product.nutriments?.fat100g, "g")
+            DetailRowNutriments(stringResource(R.string.nutriment_sat_fats), product.nutriments?.saturatedFat100g, "g")
+            DetailRowNutriments(stringResource(R.string.nutriment_carbs), product.nutriments?.carbohydrates100g, "g")
+            DetailRowNutriments(stringResource(R.string.nutriment_sugars), product.nutriments?.sugars100g, "g")
+            DetailRowNutriments(stringResource(R.string.nutriment_proteins), product.nutriments?.proteins100g, "g")
+            DetailRowNutriments(stringResource(R.string.nutriment_salt), product.nutriments?.salt100g, "g")
+            DetailRowNutriments(stringResource(R.string.nutriment_sodium), product.nutriments?.sodium100g, "g")
+            DetailRowNutriments(stringResource(R.string.nutriment_fiber), product.nutriments?.fiber100g, "g")
         }
     }
 }
 
 @Composable
-fun detailRowNutriments(label: String, data: Double?, unit: String) {
+fun DetailRowNutriments(label: String, data: Double?, unit: String) {
     if (data != null) {
         Row(
             modifier = Modifier
@@ -347,7 +344,7 @@ fun detailRowNutriments(label: String, data: Double?, unit: String) {
 }
 
 @Composable
-fun detailBottomBar(
+fun DetailBottomBar(
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
     onDate: () -> Unit
@@ -390,7 +387,7 @@ fun detailBottomBar(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun detailAllergies(allergensTags: List<String>?, allergyMatches: List<String>) {
+fun DetailAllergies(allergensTags: List<String>?, allergyMatches: List<String>) {
     if (!allergensTags.isNullOrEmpty()) {
         Card(
             modifier = Modifier.fillMaxWidth(),
