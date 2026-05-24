@@ -9,10 +9,12 @@ import com.marujho.freshsnap.data.model.ShoppingItem
 import com.marujho.freshsnap.data.repository.ProductRepository
 import com.marujho.freshsnap.data.repository.RecipeRepository
 import com.marujho.freshsnap.data.repository.ShoppingRepository
+import com.marujho.freshsnap.data.repository.UserPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,6 +24,7 @@ data class IngredientSelection(val name: String, val isSelected: Boolean = false
 @HiltViewModel
 class RecipeViewModel @Inject constructor(
     private val recipeRepository: RecipeRepository,
+    private val userPreferences: UserPreferences,
     private val productRepository: ProductRepository,
     private val shoppingRepository: ShoppingRepository,
     private val masticator: IngredientMasticator
@@ -93,8 +96,17 @@ class RecipeViewModel @Inject constructor(
             _uiState.value =
                 currentState.copy(isGenerating = true, errorMessage = null, recipe = null)
 
+            var lang = userPreferences.userLanguage.first()
+            if (lang == "Sistema") {
+                lang = java.util.Locale.getDefault().language
+            }
+
             try {
-                val result = recipeRepository.generateCustomRecipe(selected, available)
+                val result = recipeRepository.generateCustomRecipe(
+                    selectedIngredients = selected,
+                    availableIngredients = available,
+                    languageCode = lang
+                )
                 if (result.isSuccess) {
                     _uiState.update {
                         (it as RecipeUiState.Ready).copy(
