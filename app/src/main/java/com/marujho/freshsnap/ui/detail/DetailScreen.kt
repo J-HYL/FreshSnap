@@ -170,7 +170,7 @@ fun DetailImage(url: String, hasWarning: Boolean = false) {
             if (hasWarning) {
                 Icon(
                     imageVector = Icons.Default.Warning,
-                    contentDescription = "Alerta de alergia",
+                    contentDescription = stringResource(R.string.alerta_de_alergia),
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier
                         .align(androidx.compose.ui.Alignment.TopEnd)
@@ -248,10 +248,10 @@ fun DetailHealth(product: ProductDto) {
                     contentScale = ContentScale.Fit
                 )
             }
-            DetailNutrimentsLevels("Grasas", product.nutrimentsLevels?.fat)
-            DetailNutrimentsLevels("Grasas saturadas", product.nutrimentsLevels?.saturatedFat)
-            DetailNutrimentsLevels("Azucares", product.nutrimentsLevels?.sugars)
-            DetailNutrimentsLevels("Sal", product.nutrimentsLevels?.salt)
+            DetailNutrimentsLevels(stringResource(R.string.grasas), product.nutrimentsLevels?.fat)
+            DetailNutrimentsLevels(stringResource(R.string.grasas_saturadas), product.nutrimentsLevels?.saturatedFat)
+            DetailNutrimentsLevels(stringResource(R.string.azucares), product.nutrimentsLevels?.sugars)
+            DetailNutrimentsLevels(stringResource(R.string.sal), product.nutrimentsLevels?.salt)
         }
     }
 }
@@ -405,7 +405,7 @@ fun DetailAllergies(allergensTags: List<String>?, allergyMatches: List<String>) 
                         Spacer(Modifier.width(8.dp))
                         Icon(
                             imageVector = Icons.Default.Warning,
-                            contentDescription = "Peligro de alergia",
+                            contentDescription = stringResource(R.string.peligro_de_alergia),
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(24.dp)
                         )

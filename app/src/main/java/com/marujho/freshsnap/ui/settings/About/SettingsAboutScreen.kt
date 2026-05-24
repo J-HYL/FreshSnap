@@ -158,7 +158,7 @@ fun SettingsAboutScreen() {
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = "Creadores",
+                text = stringResource(R.string.creadores),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -328,7 +328,9 @@ private fun ProjectLicenseCard(onOpenUrl: () -> Unit) {
 private fun CreatorCard(name: String, githubUsername: String, onOpenUrl: (String) -> Unit) {
     Card(
         onClick = { onOpenUrl("https://github.com/$githubUsername") },
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -340,7 +342,9 @@ private fun CreatorCard(name: String, githubUsername: String, onOpenUrl: (String
             AsyncImage(
                 model = "https://github.com/$githubUsername.png",
                 contentDescription = "Foto de $name",
-                modifier = Modifier.size(48.dp).clip(CircleShape),
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape),
                 contentScale = ContentScale.Crop
             )
             Spacer(Modifier.width(16.dp))

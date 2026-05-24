@@ -1,6 +1,7 @@
 package com.marujho.freshsnap.ui.shopping
 
 import androidx.compose.ui.graphics.Color
+import com.marujho.freshsnap.R
 import com.marujho.freshsnap.data.model.ShoppingCategory
 
 /**
@@ -35,18 +36,18 @@ val ShoppingCategory.emoji: String
         ShoppingCategory.OTHER -> "📦"
     }
 
-val ShoppingCategory.displayName: String
+val ShoppingCategory.displayName: Int
     get() = when (this) {
-        ShoppingCategory.DAIRY -> "Lácteos"
-        ShoppingCategory.VEGETABLES -> "Verduras"
-        ShoppingCategory.FRUITS -> "Frutas"
-        ShoppingCategory.MEAT -> "Carne y pescado"
-        ShoppingCategory.BAKERY -> "Panadería"
-        ShoppingCategory.PANTRY -> "Despensa"
-        ShoppingCategory.DRINKS -> "Bebidas"
-        ShoppingCategory.FROZEN -> "Congelados"
-        ShoppingCategory.CLEANING -> "Limpieza"
-        ShoppingCategory.OTHER -> "Otros"
+        ShoppingCategory.DAIRY -> R.string.category_dairy
+        ShoppingCategory.VEGETABLES -> R.string.category_vegetables
+        ShoppingCategory.FRUITS -> R.string.category_fruits
+        ShoppingCategory.MEAT -> R.string.category_meat
+        ShoppingCategory.BAKERY -> R.string.category_bakery
+        ShoppingCategory.PANTRY -> R.string.category_pantry
+        ShoppingCategory.DRINKS -> R.string.category_drinks
+        ShoppingCategory.FROZEN -> R.string.category_frozen
+        ShoppingCategory.CLEANING -> R.string.category_cleaning
+        ShoppingCategory.OTHER -> R.string.category_other
     }
 
 /** Orden fijo para mostrar las categorias en la lista (lacteos primero, otros al final). */

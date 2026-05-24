@@ -69,13 +69,11 @@ fun AppNavigation() {
             BarCodeScanScreen(
                 scanType = currentScanType,
                 onNavigateToDetail = { barcode ->
-                    Log.d("AppNavigation", "Navegando a detalle con código: $barcode")
                     navController.navigate("detail_screen/$barcode") {
                         popUpTo("scanner_screen?type={type}") { inclusive = true }
                     }
                 },
                 onDateScanned = { date ->
-                    Log.d("AppNavigation", "Fecha escaneada: $date")
                     navController.previousBackStackEntry
                         ?.savedStateHandle
                         ?.set("scanned_date", date)

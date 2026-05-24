@@ -51,11 +51,9 @@ class ExpirationWorker @AssistedInject constructor(
             calendar.set(Calendar.MILLISECOND, 0)
 
             val now = calendar.timeInMillis
-            Log.d("EXPIRATIONWORKER",products.toString())
             products.forEach{product ->
                 product.expirationDate?.let{expDate ->
                     val diffInMillis = expDate - now
-                    Log.d("EXPIRATIONWORKER",diffInMillis.toString())
                     val daysRemaining = TimeUnit.MILLISECONDS.toDays(diffInMillis)
                     if(daysRemaining in 0..daysToNotify.toLong()){
                         productsAboutToExpire.add(product.name)

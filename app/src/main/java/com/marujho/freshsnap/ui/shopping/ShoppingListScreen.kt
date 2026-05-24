@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.marujho.freshsnap.R
 import com.marujho.freshsnap.data.model.ShoppingCategory
 import com.marujho.freshsnap.data.model.ShoppingItem
 
@@ -57,7 +59,7 @@ fun ShoppingListScreen(
         val msg = snackbarMessage
         if (msg != null && msg.startsWith("cleared:")) {
             val count = msg.removePrefix("cleared:").toIntOrNull() ?: 0
-            snackbarHostState.showSnackbar("$count items eliminados")
+            snackbarHostState.showSnackbar(context.getString(R.string.items_eliminados, count))
             viewModel.clearSnackbar()
         }
     }
@@ -82,22 +84,23 @@ fun ShoppingListScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.padding(bottom = bottomBarPadding)
             ) {
-                if (stats.pending > 0) {
-                    ExtendedFloatingActionButton(
-                        onClick = { viewModel.setShoppingMode(true) },
-                        icon = { Icon(Icons.Default.PlayArrow, null) },
-                        text = { Text("Empezar compra") },
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onTertiary
-                    )
-                }
+
                 FloatingActionButton(
                     onClick = { showAddDialog = true },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
                     shape = CircleShape
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Añadir")
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_button_desc))
+                }
+                if (stats.pending > 0) {
+                    ExtendedFloatingActionButton(
+                        onClick = { viewModel.setShoppingMode(true) },
+                        icon = { Icon(Icons.Default.PlayArrow, null) },
+                        text = { Text(stringResource(R.string.empezar_compra)) },
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary
+                    )
                 }
             }
         }
@@ -117,7 +120,7 @@ fun ShoppingListScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Lista de la compra",
+                    text = stringResource(R.string.lista_de_la_compra),
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -126,7 +129,7 @@ fun ShoppingListScreen(
                         IconButton(onClick = { shareList(context, items) }) {
                             Icon(
                                 Icons.Default.Share,
-                                contentDescription = "Compartir",
+                                contentDescription = stringResource(R.string.compartir),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -135,7 +138,7 @@ fun ShoppingListScreen(
                         IconButton(onClick = { showClearConfirm = true }) {
                             Icon(
                                 Icons.Default.CleaningServices,
-                                contentDescription = "Limpiar comprados",
+                                contentDescription = stringResource(R.string.limpiar_comprados),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -180,16 +183,16 @@ fun ShoppingListScreen(
         AlertDialog(
             onDismissRequest = { showClearConfirm = false },
             icon = { Icon(Icons.Default.CleaningServices, null) },
-            title = { Text("Limpiar comprados") },
-            text = { Text("Se eliminarán ${stats.checked} items marcados como comprados. Esta acción no se puede deshacer.") },
+            title = { Text(stringResource(R.string.limpiar_comprados)) },
+            text = { Text(stringResource(R.string.se_eliminaran_items_marcados, stats.checked)) },
             confirmButton = {
                 Button(onClick = {
                     viewModel.clearCheckedItems()
                     showClearConfirm = false
-                }) { Text("Limpiar") }
+                }) { Text(stringResource(R.string.limpiar)) }
             },
             dismissButton = {
-                TextButton(onClick = { showClearConfirm = false }) { Text("Cancelar") }
+                TextButton(onClick = { showClearConfirm = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -210,15 +213,15 @@ private fun StatsCard(stats: ShoppingStats) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                StatNumber(value = stats.total, label = "Total")
+                StatNumber(value = stats.total, label = stringResource(R.string.total))
                 StatNumber(
                     value = stats.pending,
-                    label = "Pendientes",
+                    label = stringResource(R.string.pendientes),
                     color = MaterialTheme.colorScheme.primary
                 )
                 StatNumber(
                     value = stats.checked,
-                    label = "Comprados",
+                    label = stringResource(R.string.comprados),
                     color = MaterialTheme.colorScheme.tertiary
                 )
             }
@@ -234,7 +237,7 @@ private fun StatsCard(stats: ShoppingStats) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "${(stats.progress * 100).toInt()}% completado",
+                text = stringResource(R.string.completado, (stats.progress * 100).toInt()),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -336,7 +339,7 @@ private fun CategoryHeader(category: ShoppingCategory, count: Int) {
         }
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = category.displayName,
+            text = stringResource(category.displayName),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             color = category.color
@@ -367,7 +370,7 @@ private fun CheckedHeader(count: Int) {
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "Comprados ·  $count",
+            text = stringResource(R.string.comprados_count, count),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.tertiary
@@ -500,7 +503,7 @@ private fun ShoppingItemCard(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "De receta",
+                            text = stringResource(R.string.de_receta),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.secondary
                         )
@@ -510,7 +513,7 @@ private fun ShoppingItemCard(
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Eliminar",
+                    contentDescription = stringResource(R.string.delete_desc),
                     tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
                 )
             }
@@ -534,14 +537,14 @@ private fun AddItemDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Icon(Icons.Default.ShoppingCart, null) },
-        title = { Text("Añadir producto") },
+        title = { Text(stringResource(R.string.add_product_button)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Producto") },
-                    placeholder = { Text("Ej. Leche entera") },
+                    label = { Text(stringResource(R.string.producto)) },
+                    placeholder = { Text(stringResource(R.string.ej_leche_entera)) },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -550,8 +553,8 @@ private fun AddItemDialog(
                 OutlinedTextField(
                     value = quantity,
                     onValueChange = { quantity = it },
-                    label = { Text("Cantidad (opcional)") },
-                    placeholder = { Text("Ej. 1L, 200g, 2 unidades") },
+                    label = { Text(stringResource(R.string.cantidad_opcional)) },
+                    placeholder = { Text(stringResource(R.string.ej_1l_200g_2_unidades)) },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -562,10 +565,10 @@ private fun AddItemDialog(
             Button(
                 onClick = { onConfirm(name, quantity) },
                 enabled = name.isNotBlank()
-            ) { Text("Añadir") }
+            ) { Text(stringResource(R.string.add_product_button)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         }
     )
 }
@@ -591,14 +594,14 @@ private fun EmptyState() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Tu lista está vacía",
+            text = stringResource(R.string.shopping_list_empty_message),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "Pulsa + para añadir productos o usa las recetas para añadir ingredientes que faltan.",
+            text = stringResource(R.string.empty_list_description),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -633,16 +636,20 @@ private fun ShoppingModeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = onExit) {
-                        Icon(Icons.Default.Close, contentDescription = "Salir")
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.salir))
                     }
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "🛒 Modo compra",
+                            text = stringResource(R.string.modo_compra),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "${stats.checked}/${stats.total} comprados",
+                            text = stringResource(
+                                R.string.comprados_items,
+                                stats.checked,
+                                stats.total
+                            ),
                             style = MaterialTheme.typography.labelMedium
                         )
                     }
@@ -661,19 +668,19 @@ private fun ShoppingModeScreen(
                 Text(text = "🎉", fontSize = 80.sp)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "¡Compra completada!",
+                    text = stringResource(R.string.compra_completada),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Has comprado todos los items de tu lista.",
+                    text = stringResource(R.string.has_comprado_todos_los_items_de_tu_lista),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-                Button(onClick = onExit) { Text("Salir") }
+                Button(onClick = onExit) { Text(stringResource(R.string.salir)) }
             }
         } else {
             LazyColumn(
@@ -735,7 +742,7 @@ private fun BigShoppingItem(item: ShoppingItem, onTap: () -> Unit) {
             ) {
                 Icon(
                     Icons.Default.Check,
-                    contentDescription = "Marcar comprado",
+                    contentDescription = stringResource(R.string.marcar_comprado),
                     tint = MaterialTheme.colorScheme.tertiary
                 )
             }
@@ -752,14 +759,14 @@ private fun shareList(context: android.content.Context, items: List<ShoppingItem
     val checked = items.filter { it.isChecked }
 
     val text = buildString {
-        appendLine("🛒 Lista de la compra (FreshSnap)")
+        appendLine(context.getString(R.string.lista_de_la_compra_freshsnap))
         appendLine()
 
         // Agrupar pendientes por categoria
         SHOPPING_CATEGORY_ORDER.forEach { category ->
             val list = pending.filter { ShoppingCategory.fromName(it.category) == category }
             if (list.isNotEmpty()) {
-                appendLine("${category.emoji} ${category.displayName}")
+                appendLine("${category.emoji} ${context.getString(category.displayName)}")
                 list.forEach { item ->
                     val qty = if (item.quantity.isNotBlank()) " (${item.quantity})" else ""
                     appendLine("  □ ${item.name}$qty")
@@ -769,7 +776,7 @@ private fun shareList(context: android.content.Context, items: List<ShoppingItem
         }
 
         if (checked.isNotEmpty()) {
-            appendLine("✓ Ya comprado")
+            appendLine(context.getString(R.string.ya_comprado))
             checked.forEach { item ->
                 val qty = if (item.quantity.isNotBlank()) " (${item.quantity})" else ""
                 appendLine("  ✓ ${item.name}$qty")
@@ -782,7 +789,8 @@ private fun shareList(context: android.content.Context, items: List<ShoppingItem
         putExtra(Intent.EXTRA_TEXT, text)
         type = "text/plain"
     }
-    context.startActivity(Intent.createChooser(sendIntent, "Compartir lista"))
+    context.startActivity(Intent.createChooser(sendIntent,
+        context.getString(R.string.compartir_lista)))
 }
 
 // endregion
