@@ -65,10 +65,8 @@ class DetailViewModel @Inject constructor(
                         localProduct.expirationDate?.let { millis ->
                             setExpirationDateFromMillis(millis)
                         }
-                        Log.d("SOURCE", "FIREBASE - EDITANDO EXISTENTE")
                     } else {
                         currentFirestoreId = null
-                        Log.d("SOURCE", "FIREBASE - CACHÉ PARA PRODUCTO NUEVO")
                     }
 
                     val dto = localProduct.toDto()
@@ -77,7 +75,6 @@ class DetailViewModel @Inject constructor(
                     checkAllergens(dto)
                 } else {
                     currentFirestoreId = null
-                    Log.d("SOURCE", "API")
                     loadFromApi()
                 }
             } catch (e: Exception) {
@@ -116,7 +113,6 @@ class DetailViewModel @Inject constructor(
                 _allergyMatches.value = matches
             } catch (e: Exception) {
                 _allergyMatches.value = emptyList()
-                Log.e("DetailViewModel", "Error al leer alergias", e)
             }
         }
     }

@@ -14,8 +14,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -23,11 +21,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
 import com.marujho.freshsnap.R
 import com.marujho.freshsnap.data.model.CachedRecipe
 import com.marujho.freshsnap.data.model.RecipeIngredient
-import com.marujho.freshsnap.data.model.RecipeSource
 import com.marujho.freshsnap.ui.theme.Green
 import com.marujho.freshsnap.ui.theme.SoftRed
 import com.marujho.freshsnap.ui.theme.Yellow
@@ -68,7 +64,7 @@ fun RecipeScreen(
             )
 
             Text(
-                text = "Selecciona qué ingredientes quieres usar hoy.",
+                text = stringResource(R.string.selecciona_ingredientes_receta),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -93,14 +89,17 @@ fun RecipeScreen(
                             if (state.ingredients.isEmpty()) {
                                 EmptyStateContent(
                                     icon = Icons.Default.Kitchen,
-                                    message = "Tu despensa está vacía. Añade productos para generar recetas.",
+                                    message = stringResource(R.string.mensaje_despensa_vacia),
                                     iconTint = MaterialTheme.colorScheme.outline
                                 )
                             } else {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                                        .background(
+                                            MaterialTheme.colorScheme.surface,
+                                            RoundedCornerShape(16.dp)
+                                        )
                                         .padding(12.dp)
                                 ) {
                                     Row(
@@ -108,9 +107,14 @@ fun RecipeScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text("Tus Ingredientes", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                        Text(stringResource(R.string.tus_ingredientes), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                                         val seleccionados = state.ingredients.count { it.isSelected }
-                                        Text("$seleccionados/${state.ingredients.size} seleccionados", style = MaterialTheme.typography.bodySmall)
+                                        Text(
+                                            stringResource(
+                                                R.string.seleccionados,
+                                                seleccionados,
+                                                state.ingredients.size
+                                            ), style = MaterialTheme.typography.bodySmall)
                                     }
 
                                     Spacer(modifier = Modifier.height(12.dp))
@@ -161,7 +165,9 @@ fun RecipeScreen(
                             item {
                                 Button(
                                     onClick = { viewModel.generateRecipe() },
-                                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(50.dp),
                                     enabled = !state.isGenerating && state.ingredients.any { it.isSelected },
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                     shape = RoundedCornerShape(12.dp)
@@ -169,11 +175,11 @@ fun RecipeScreen(
                                     if (state.isGenerating) {
                                         CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
                                         Spacer(modifier = Modifier.width(8.dp))
-                                        Text("Pensando receta...")
+                                        Text(stringResource(R.string.pensando_receta))
                                     } else {
                                         Icon(Icons.Default.AutoAwesome, contentDescription = null)
                                         Spacer(modifier = Modifier.width(8.dp))
-                                        Text("Generar Receta con IA")
+                                        Text(stringResource(R.string.generar_receta_con_ia))
                                     }
                                 }
                             }
@@ -225,7 +231,9 @@ private fun EmptyStateContent(
     iconTint: androidx.compose.ui.graphics.Color
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(32.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(64.dp), tint = iconTint)
@@ -258,12 +266,12 @@ private fun RecipeCard(recipe: CachedRecipe, onAddMissingToList: (List<RecipeIng
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Green, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "${ownedIngredients.size} tienes", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = stringResource(R.string.tienes, ownedIngredients.size), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     if (missingIngredients.isNotEmpty()) {
                         Spacer(modifier = Modifier.width(12.dp))
                         Icon(Icons.Default.ShoppingCart, contentDescription = null, tint = SoftRed, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "${missingIngredients.size} faltan", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = stringResource(R.string.faltan, missingIngredients.size), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -273,18 +281,18 @@ private fun RecipeCard(recipe: CachedRecipe, onAddMissingToList: (List<RecipeIng
                     HorizontalDivider()
                     Spacer(modifier = Modifier.height(12.dp))
                     if (recipe.instructions.isNotBlank()) {
-                        Text(text = "Instrucciones", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                        Text(text = stringResource(R.string.instrucciones), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(text = recipe.instructions, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(modifier = Modifier.height(12.dp))
                     }
                     if (ownedIngredients.isNotEmpty()) {
-                        Text(text = "En tu despensa", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Green)
+                        Text(text = stringResource(R.string.en_tu_despensa), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Green)
                         ownedIngredients.forEach { IngredientRow(it, true) }
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                     if (missingIngredients.isNotEmpty()) {
-                        Text(text = "Te falta comprar", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = SoftRed)
+                        Text(text = stringResource(R.string.te_falta_comprar), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = SoftRed)
                         missingIngredients.forEach { IngredientRow(it, false) }
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
@@ -300,11 +308,11 @@ private fun RecipeCard(recipe: CachedRecipe, onAddMissingToList: (List<RecipeIng
                             if (itemsAdded) {
                                 Icon(Icons.Default.CheckCircle, contentDescription = null)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("¡Añadidos a la lista!")
+                                Text(stringResource(R.string.added_to_list_toast))
                             } else {
                                 Icon(Icons.Default.ShoppingCart, contentDescription = null)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Añadir faltantes a la lista")
+                                Text(stringResource(R.string.recipe_add_missing_to_list))
                             }
                         }
                     }
@@ -317,7 +325,9 @@ private fun RecipeCard(recipe: CachedRecipe, onAddMissingToList: (List<RecipeIng
 
 @Composable
 private fun IngredientRow(ingredient: RecipeIngredient, checked: Boolean) {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
         Checkbox(checked = checked, onCheckedChange = null, modifier = Modifier.size(24.dp), colors = CheckboxDefaults.colors(checkedColor = Green, uncheckedColor = SoftRed))
         Spacer(modifier = Modifier.width(8.dp))
         Text(text = ingredient.name, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))

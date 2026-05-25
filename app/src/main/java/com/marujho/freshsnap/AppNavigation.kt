@@ -16,7 +16,7 @@ import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
 import com.marujho.freshsnap.data.model.ScanType
 import com.marujho.freshsnap.ui.detail.DetailViewModel
-import com.marujho.freshsnap.ui.detail.detailScreen
+import com.marujho.freshsnap.ui.detail.DetailScreen
 import com.marujho.freshsnap.ui.login.LoginScreen
 import com.marujho.freshsnap.ui.main.MainAppScreen
 import com.marujho.freshsnap.ui.scanner.BarCodeScanScreen
@@ -69,13 +69,11 @@ fun AppNavigation() {
             BarCodeScanScreen(
                 scanType = currentScanType,
                 onNavigateToDetail = { barcode ->
-                    Log.d("AppNavigation", "Navegando a detalle con código: $barcode")
                     navController.navigate("detail_screen/$barcode") {
                         popUpTo("scanner_screen?type={type}") { inclusive = true }
                     }
                 },
                 onDateScanned = { date ->
-                    Log.d("AppNavigation", "Fecha escaneada: $date")
                     navController.previousBackStackEntry
                         ?.savedStateHandle
                         ?.set("scanned_date", date)
@@ -109,7 +107,7 @@ fun AppNavigation() {
                 }
             }
 
-            detailScreen(
+            DetailScreen(
                 viewModel = viewModel,
                 onNavigateMain = {
                     navController.navigate("main_screen") {

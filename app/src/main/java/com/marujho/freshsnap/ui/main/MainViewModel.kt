@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
@@ -46,7 +47,7 @@ class MainViewModel @Inject constructor(
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
     val products: StateFlow<List<ProductUiModel>> = _filteredProducts.asStateFlow()
 
-    var selectedTab by mutableStateOf(0)
+    var selectedTab by mutableIntStateOf(0)
         private set
 
     private val _redDays = MutableStateFlow(2)
