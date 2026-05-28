@@ -1,5 +1,6 @@
 package com.marujho.freshsnap.data.repository
 
+import retrofit2.HttpException
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -32,39 +33,6 @@ class RecipeRepository @Inject constructor(
         db.collection("users").document(uid).collection("cached_recipes")
     }
 
-    // region System Prompts
-
-    private val filterSystemPrompt = """
-You are a strict culinary expert. Given user ingredients classified by freshness (R=expiring soon; G=fresh, available) and a list of MealDB recipes, pick the BEST recipe that uses some 'R' ingredients. 
-CRITICAL: The chosen recipe MUST make absolute culinary sense. 
-Respond ONLY with valid JSON matching this schema:
-{"recipe_id":"string","title":"string","ingredientes_tengo":[{"name":"string","measure":"string"}],"ingredientes_falta":[{"name":"string","measure":"string"}],"reason":"string"}
-Rules: Be concise. Do not invent ingredients that are not in the original recipe. The final text output must be in Spanish.
-    """.trimIndent()
-
-    private val generateSystemPrompt = """
-You are a strict, Michelin-star chef. You will be given user ingredients classified by freshness (R=expiring soon, high priority; G=fresh, available). 
-Create ONE realistic, delicious recipe that makes absolute culinary sense. 
-CRITICAL RULES: 
-1. NEVER mix incompatible ingredients just to use them up. Do NOT create disgusting or weird combinations (e.g., mixing dairy with isotonic drinks, or fish with chocolate).
-2. It is STRICTLY FORBIDDEN to use all 'R' ingredients if they do not belong in the same flavor profile. If they clash, pick just ONE or TWO 'R' ingredients and build a normal, tasty dish around them. Discard the rest.
-Respond ONLY with valid JSON matching this schema:
-{"title":"string","instructions":"string","ingredientes_tengo":[{"name":"string","measure":"string"}],"ingredientes_falta":[{"name":"string","measure":"string"}],"category":"string","area":"string"}
-Formatting Rules:
-1. 'instructions' must contain clear, numbered steps.
-2. Put the R and G ingredients you decided to use in 'ingredientes_tengo'. Exclude any provided ingredients that ruin the dish.
-3. Put only strictly necessary, logical extra ingredients to make the dish work in 'ingredientes_falta'.
-4. The response language must be Spanish.
-    """.trimIndent()
-
-    // endregion
-
-    /**
-     * Punto de entrada principal. Orquesta las 3 capas:
-     * 1. Cache Firestore (si inventoryHash coincide y < 24h)
-     * 2. TheMealDB + Groq Filter
-     * 3. Groq Generate (si MealDB no tiene resultados)
-     */
 
     private suspend fun saveCachedRecipes(recipes: List<CachedRecipe>) {
         val collection = getCachedRecipesCollection() ?: return
@@ -73,11 +41,6 @@ Formatting Rules:
             docRef.set(recipe.copy(id = docRef.id)).await()
         }
     }
-
-    // endregion
-
-    // region Capa 1: TheMealDB
-
 
     private fun parseGroqRecipeResponse(json: String): GroqRecipeResponseDto? {
         return try {
@@ -119,82 +82,80 @@ Formatting Rules:
         }
 
         val systemPrompt = """
-            Eres un chef profesional con múltiples estrellas Michelin, experto en creatividad culinaria, seguridad alimentaria y equilibrio de sabores.
-
-            OBJETIVO:
-            Crear una receta deliciosa, coherente y realista utilizando OBLIGATORIAMENTE los ingredientes principales proporcionados por el usuario.
+            You are a professional chef very strict with logical ingredient combinations, an expert in classic recipes, food safety, and flavor balance.
+        
+            OBJECTIVE:
+            Create a coherent and realistic recipe MANDATORILY using the main ingredients provided by the user.
             
-            INGREDIENTES PRINCIPALES OBLIGATORIOS:
+            MANDATORY MAIN INGREDIENTS:
             ${selectedIngredients.joinToString(", ")}
             
-            INGREDIENTES DISPONIBLES OPCIONALES:
-            ${if (availableIngredients.isEmpty()) "Ninguno" else availableIngredients.joinToString(", ")}
+            AVAILABLE OPTIONAL INGREDIENTS:
+            ${if (availableIngredients.isEmpty()) "None" else availableIngredients.joinToString(", ")}
             
-            REGLAS ABSOLUTAS (OBLIGATORIAS):
+            ABSOLUTE RULES (MANDATORY):
             
-            1. PRIORIDAD TOTAL A LOS INGREDIENTES PRINCIPALES
-            - La receta DEBE construirse alrededor de los ingredientes obligatorios.
-            - Todos los ingredientes principales deben utilizarse de forma lógica y relevante dentro del plato.
+            1. TOTAL PRIORITY TO MAIN INGREDIENTS
+            - The recipe MUST be built around the mandatory ingredients.
+            - All main ingredients must be used logically.
             
-            2. USO INTELIGENTE DE LOS INGREDIENTES OPCIONALES
-            - Los ingredientes opcionales NO son obligatorios.
-            - Usa SOLO 0, 1, 2 o 3 ingredientes opcionales si realmente mejoran la receta.
-            - Si no combinan de forma natural con los ingredientes principales, IGNÓRALOS completamente.
-            - NO intentes gastar toda la despensa.
-            - NO fuerces combinaciones absurdas o incoherentes.
+            2. SMART USE OF OPTIONAL INGREDIENTS
+            - Optional ingredients are NOT mandatory.
+            - Use ONLY 0, 1, or 2 optional ingredients if they truly improve the recipe.
+            - If they do not combine naturally with the main ingredients, IGNORE THEM completely.
+            - DO NOT try to use up the whole pantry.
+            - DO NOT force absurd or incoherent combinations.
             
-            3. VALIDACIÓN CULINARIA Y SEGURIDAD
-            - Evalúa si la combinación de ingredientes principales es:
-              - culinariamente coherente,
-              - segura para el consumo,
-              - técnicamente viable.
-            - Si la receta es desagradable, tóxica, peligrosa o prácticamente imposible de cocinar:
-              - devuelve "is_possible": false
-              - explica claramente el motivo en "message"
-              - deja el resto de campos vacíos o con valores mínimos válidos.
+            3. CULINARY VALIDATION AND SAFETY
+            - Evaluate if the combination of main ingredients is:
+              - culinarily coherent,
+              - safe for consumption,
+              - technically viable.
+              - does not include combinations of sweet and savory or similar things that might be unpleasant to some
+            - If the recipe is unpleasant, toxic, dangerous, or practically impossible to cook:
+              - return "is_possible": false
+              - clearly explain the reason in "message"
+              - leave the rest of the fields empty or with minimum valid values.
             
-            4. RECETA REALISTA Y APETECIBLE
-            - La receta debe sonar profesional, sabrosa y plausible.
-            - Evita recetas genéricas o sin personalidad.
-            - Piensa como un chef Michelin:
-              - equilibrio de sabores,
-              - texturas,
-              - técnicas correctas,
-              - presentación atractiva.
-            - Prioriza recetas que una persona realmente querría cocinar y comer.
+            4. REALISTIC AND APPETIZING RECIPE
+            - The recipe must sound professional, coherent, and plausible.
+            - Think like a strict chef:
+              - flavor balance,
+              - textures,
+              - correct techniques,
+              - classic and coherent combinations
+              - do not be creative with the recipes, limit yourself to things that everyone likes
+            - Prioritize recipes that a person would actually want to cook and eat.
             
-            5. GESTIÓN DE INGREDIENTES
+            5. INGREDIENT MANAGEMENT
             - "ingredientes_tengo":
-              - incluye TODOS los ingredientes obligatorios,
-              - incluye SOLO los ingredientes opcionales que realmente uses.
+              - include ALL mandatory ingredients,
+              - include ONLY the optional ingredients you actually use.
             - "ingredientes_falta":
-              - añade ingredientes básicos necesarios:
-                - sal,
-                - aceite,
-                - pimienta,
-                - especias,
-                - mantequilla,
-                - ajo,
-                - cebolla, etc.
-              - añade también ingredientes extra lógicos y mínimos necesarios para completar bien el plato.
-            - Cada ingrediente debe incluir:
+              - add necessary basic ingredients:
+                - salt,
+                - oil,
+                - butter,
+                - spices, etc.
+              - also add logical extra ingredients to properly complete the dish.
+            - Each ingredient must include:
               - "name"
               - "measure"
             
-            6. INSTRUCCIONES
-            - Explica la preparación paso a paso de forma clara y profesional.
-            - Incluye tiempos aproximados si es relevante.
-            - NO hagas explicaciones innecesarias fuera de la receta.
+            6. INSTRUCTIONS
+            - Explain the step-by-step preparation clearly and professionally.
+            - Include approximate times if relevant.
+            - DO NOT make unnecessary explanations outside the recipe.
             
             $languageRule
             
-            8. FORMATO DE RESPUESTA
-            - Responde EXCLUSIVAMENTE con JSON válido.
-            - NO uses markdown.
-            - NO añadas texto fuera del JSON.
-            - NO añadas comentarios.
+            8. RESPONSE FORMAT
+            - Respond EXCLUSIVELY with valid JSON.
+            - DO NOT use markdown.
+            - DO NOT add text outside the JSON.
+            - DO NOT add comments.
             
-            ESQUEMA JSON OBLIGATORIO:
+            MANDATORY JSON SCHEMA:
             {
               "is_possible": boolean,
               "message": "string",
@@ -214,19 +175,19 @@ Formatting Rules:
               ]
             }
             
-            REGLAS EXTRA DE CALIDAD:
-            - NO inventes técnicas imposibles.
-            - NO añadas ingredientes opcionales porque sí.
-            - NO repitas ingredientes innecesariamente.
-            - NO generes recetas infantiles o absurdas.
-            - Si existe una receta clásica o conocida que encaje con los ingredientes, priorízala.
-            - La receta debe maximizar sabor, coherencia y simplicidad inteligente.
+            EXTRA QUALITY RULES:
+            - DO NOT invent impossible techniques.
+            - DO NOT add optional ingredients just for the sake of it.
+            - DO NOT repeat ingredients unnecessarily.
+            - DO NOT generate absurd recipes.
+            - If there is a classic or known recipe that fits with the ingredients, prioritize it.
+            - The recipe must maximize flavor, coherence, and smart simplicity.
         """.trimIndent()
 
         val userPrompt = if (isEnglish) {
-            "Generate the recipe strictly following the rules. Write EVERYTHING in English."
+            "Generate the recipe strictly following the rules."
         } else {
-            "Genera la receta siguiendo estrictamente las reglas."
+            "Genera la receta siguiendo estrictamente las reglas. Escribe TODO en español."
         }
 
         val request = GroqRequestDto(
@@ -242,6 +203,7 @@ Formatting Rules:
             val response = groqApi.chatCompletion(request)
             val jsonContent = response.choices.firstOrNull()?.message?.content ?: throw Exception("Respuesta vacía de la IA")
 
+            // Parseo y guardado
             val parsed = parseGroqRecipeResponse(jsonContent) ?: throw Exception("Error al procesar el formato de la receta")
 
             if (parsed.isPossible == false) {
@@ -262,10 +224,20 @@ Formatting Rules:
             )
 
             saveCachedRecipes(listOf(recipe))
-
             Result.success(recipe)
+
+        } catch (e: HttpException) {
+            val errorMsg = when (e.code()) {
+                429 -> "Servidor saturado (Límite de peticiones alcanzado). Por favor, espera un minuto y vuelve a intentarlo."
+                404 -> "Servicio de Inteligencia Artificial no encontrado temporalmente."
+                401, 403 -> "Error de autenticación con el servidor de la IA."
+                in 500..599 -> "Los servidores de la IA están experimentando problemas. Inténtalo más tarde."
+                else -> "Error de conexión con la IA (Código: ${e.code()})."
+            }
+            Result.failure(Exception(errorMsg))
+
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception(e.message ?: "Error inesperado de red."))
         }
     }
 }

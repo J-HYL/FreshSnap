@@ -267,4 +267,7 @@
     <string name="category_cleaning">Limpieza</string>
     <string name="category_other">Otros</string>
     <string name="creadores">Creadores</string>
+
+    <string name="disclaimer_title">Aviso sobre la IA y consejos</string>
+    <string name="disclaimer_text">Aviso Legal: Las recetas son generadas por Inteligencia Artificial y pueden contener errores. Los desarrolladores no se hacen responsables de las mismas; queda a tu propio criterio su elaboración y consumo.\n\nConsejo: Procura seleccionar combinaciones lógicas de ingredientes para ayudar a la IA y obtener mejores resultados.</string>
 </resources>
