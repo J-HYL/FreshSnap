@@ -2,6 +2,7 @@ package com.marujho.freshsnap.ui.recipe
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -37,6 +38,7 @@ fun RecipeScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarMessage by viewModel.snackbarMessage.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    var showDisclaimer by remember { mutableStateOf(false) }
 
     LaunchedEffect(snackbarMessage) {
         if (snackbarMessage != null) {
@@ -160,7 +162,7 @@ fun RecipeScreen(
                             }
                         }
 
-                        // otón de Generar
+                        // Botón de Generar
                         if (state.ingredients.isNotEmpty()) {
                             item {
                                 Button(
@@ -180,6 +182,51 @@ fun RecipeScreen(
                                         Icon(Icons.Default.AutoAwesome, contentDescription = null)
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text(stringResource(R.string.generar_receta_con_ia))
+                                    }
+                                }
+                            }
+
+                            item {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 8.dp)
+                                        .background(
+                                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .clickable { showDisclaimer = !showDisclaimer }
+                                        .padding(12.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Info,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text = stringResource(R.string.disclaimer_title),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Spacer(Modifier.weight(1f))
+                                        Icon(
+                                            imageVector = if (showDisclaimer) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+
+                                    AnimatedVisibility(visible = showDisclaimer) {
+                                        Text(
+                                            text = stringResource(R.string.disclaimer_text),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f),
+                                            textAlign = TextAlign.Start,
+                                            modifier = Modifier.padding(top = 12.dp)
+                                        )
                                     }
                                 }
                             }
